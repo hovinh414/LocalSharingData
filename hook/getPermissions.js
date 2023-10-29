@@ -1,19 +1,7 @@
-import {
-  initialize,
-  startDiscoveringPeers,
-  subscribeOnConnectionInfoUpdates,
-  subscribeOnThisDeviceChanged,
-  subscribeOnPeersUpdates,
-  cancelConnect,
-  createGroup,
-  removeGroup,
-  getAvailablePeers,
-  getConnectionInfo,
-  getGroupInfo,
-} from 'react-native-wifi-p2p';
+import {initialize} from 'react-native-wifi-p2p';
 import {PermissionsAndroid} from 'react-native';
 
-export const getPermissions = async () => {
+export const GetPermissions = async () => {
   try {
     const permissions = [
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -28,9 +16,9 @@ export const getPermissions = async () => {
 
     if (
       (granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
-        PermissionsAndroid.RESULTS.GRANTED ||
+        PermissionsAndroid.RESULTS.GRANTED &&
         granted[PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION] ===
-          PermissionsAndroid.RESULTS.GRANTED) &&
+          PermissionsAndroid.RESULTS.GRANTED) ||
       granted[PermissionsAndroid.PERMISSIONS.NEARBY_WIFI_DEVICES] ===
         PermissionsAndroid.RESULTS.GRANTED
     ) {
@@ -45,49 +33,4 @@ export const getPermissions = async () => {
     console.error(e);
   }
 };
-
-const handleNewInfo = info => {
-  // console.log('OnConnectionInfoUpdated', info);
-};
-
-const handleNewPeers = ({devices}) => {
-  // console.log('OnPeersUpdated', devices);
-  //   setDevices(devices);
-};
-
-const handleThisDeviceChanged = groupInfo => {
-  // console.log('THIS_DEVICE_CHANGED_ACTION', groupInfo);
-};
-
-export const initWifiP2P = async ({
-  subscriptionOnPeersUpdates,
-  subscriptionOnConnectionInfoUpdates,
-  subscriptionOnThisDeviceChanged,
-}) => {
-  subscriptionOnPeersUpdates = subscribeOnPeersUpdates(handleNewPeers);
-  subscriptionOnConnectionInfoUpdates =
-    subscribeOnConnectionInfoUpdates(handleNewInfo);
-  subscriptionOnThisDeviceChanged = subscribeOnThisDeviceChanged(
-    handleThisDeviceChanged,
-  );
-};
-
-export const startGetPeers = async () => {
-  try {
-    await startDiscoveringPeers();
-  } catch (err) {
-    console.error(err, 'at startDiscovering');
-  }
-};
-
-export const cleanUpWifiP2P = (
-  subscriptionOnPeersUpdates,
-  subscriptionOnConnectionInfoUpdates,
-  subscriptionOnThisDeviceChanged,
-) => {
-  subscriptionOnPeersUpdates.remove();
-  subscriptionOnConnectionInfoUpdates.remove();
-  subscriptionOnThisDeviceChanged.remove();
-};
-
 // Thêm các hàm khác liên quan đến WiFi P2P ở đây

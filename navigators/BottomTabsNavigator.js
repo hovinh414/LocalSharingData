@@ -4,6 +4,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BottomFabBar} from 'rn-wave-bottom-bar';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Home from '../src/screens/home/Home';
+import Chat from '../src/screens/chat/Chat';
 import ChatDetail from '../src/screens/chat/ChatDetail';
 import Settings from '../src/screens/settings/Settings';
 import {COLORS, SHADOWS, SIZES} from '../constants';
@@ -68,8 +69,8 @@ function BottomTabs() {
         options={{tabBarIcon: HomeTabIcon}}
       />
       <Bottom.Screen
-        name="ChatDetail"
-        component={ChatDetail}
+        name="Chat"
+        component={Chat}
         options={{tabBarIcon: ChatTabIcon}}
       />
       <Bottom.Screen

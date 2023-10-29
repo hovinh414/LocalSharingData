@@ -21,7 +21,8 @@ import {
 } from 'react-native-vector-icons';
 import {LogBox} from 'react-native';
 
-const ChatDetail = ({navigation}) => {
+const ChatDetail = ({navigation, route}) => {
+  const {item} = route.params;
   const [message, setMessage] = useState('');
   const [photo, setPhoto] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -43,9 +44,9 @@ const ChatDetail = ({navigation}) => {
             style={{width: 25, height: 25, marginRight: 8}}
           />
         </TouchableOpacity>
-        <Image source={images.hieu} style={styles.avatarDetail} />
+        <Image source={item.img} style={styles.avatarDetail} />
         <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 10}}>
-          Chó Hiếu
+          {item.name}
         </Text>
       </View>
 

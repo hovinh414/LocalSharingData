@@ -2,9 +2,9 @@ import React from 'react';
 import {Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import {images} from '../../constants';
 
-const DeviceCard = ({device}) => {
+const DeviceCard = ({device, onPress}) => {
   return (
-    <TouchableOpacity style={styles.deviceCard}>
+    <TouchableOpacity style={styles.deviceCard} onPress={onPress}>
       <Image source={images.phone} style={styles.phoneIcon} />
       <Text style={styles.deviceName}>{device.deviceName}</Text>
     </TouchableOpacity>

@@ -1,14 +1,15 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {Text, View, SafeAreaView} from 'react-native';
 import React from 'react';
+import styles from './settings.style';
 
 const Settings = () => {
   return (
-    <View>
-      <Text>Settings</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Settings</Text>
+      </View>
+    </SafeAreaView>
   );
 };
 
 export default Settings;
-
-const styles = StyleSheet.create({});

@@ -16,10 +16,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-  chatList: {
-    flex: 1,
-    // padding: 16,
-  },
 });
 
 export default styles;
