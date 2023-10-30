@@ -12,6 +12,13 @@ import {
 } from 'react-native';
 import {COLORS} from '../../../constants';
 import {images} from '../../../constants';
+import {
+  connect,
+  createGroup,
+  receiveMessage,
+  sendMessage,
+  getConnectionInfo,
+} from 'react-native-wifi-p2p';
 import {styles} from './chatDetail.style';
 import {
   MaterialIcons,
@@ -21,8 +28,12 @@ import {
 } from 'react-native-vector-icons';
 import {LogBox} from 'react-native';
 
+var net = require('react-native-tcp');
 const ChatDetail = ({navigation, route}) => {
-  const {item} = route.params;
+  const item = route.params;
+  console.log(route);
+  const {isOwner} = route.params;
+  console.log(isOwner);
   const [message, setMessage] = useState('');
   const [photo, setPhoto] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -44,9 +55,12 @@ const ChatDetail = ({navigation, route}) => {
             style={{width: 25, height: 25, marginRight: 8}}
           />
         </TouchableOpacity>
-        <Image source={item.img} style={styles.avatarDetail} />
+        <Image
+          source={item.img ? item.img : images.profile}
+          style={styles.avatarDetail}
+        />
         <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 10}}>
-          {item.name}
+          {item.deviceName}
         </Text>
       </View>
 

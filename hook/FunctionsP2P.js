@@ -4,6 +4,7 @@ import {
   subscribeOnConnectionInfoUpdates,
   subscribeOnThisDeviceChanged,
   subscribeOnPeersUpdates,
+  connect,
   cancelConnect,
   createGroup,
   removeGroup,
@@ -19,18 +20,26 @@ import {
 } from '../src/redux/reducers';
 import {useSelector, useDispatch} from 'react-redux';
 
-const HandleNewPeers = ({devices}) => {
-  const dispatch = useDispatch();
+const HandleNewPeers = ({devices}, dispatch) => {
   // Cập nhật trạng thái Redux thông qua dispatch
-  dispatch(setDevices(devices));
+  dispatch(setDevices(devices.devices));
 };
 
-const HandleThisDeviceChanged = groupInfo => {
+const HandleThisDeviceChanged = (groupInfo, dispatch) => {
   // console.log('THIS_DEVICE_CHANGED_ACTION', groupInfo);
 };
 
-const HandleNewInfo = info => {
+const HandleNewInfo = (info, dispatch) => {
   // console.log('OnConnectionInfoUpdated', info);
+};
+
+export const onConnect = (navigation, device) => {
+  console.log('Connect to: ', device.deviceAddress);
+  connect(device.deviceAddress)
+    .then(() => console.log('Successfully connected'))
+    .catch(err => console.error('Something gone wrong. Details: ', err));
+  const itemWithIsOwner = {...device, isOwner: false};
+  navigation.navigate('Chat Detail', itemWithIsOwner);
 };
 
 export const onCancelConnect = () => {
@@ -90,12 +99,19 @@ export const onGetGroupInfo = () => {
 };
 
 export const InitWifiP2P = async dispatch => {
-  const subscriptionOnPeersUpdates = subscribeOnPeersUpdates(HandleNewPeers);
+  const subscriptionOnPeersUpdates = subscribeOnPeersUpdates(devices => {
+    HandleNewPeers({devices}, dispatch);
+  });
   const subscriptionOnThisDeviceChanged = subscribeOnThisDeviceChanged(
-    HandleThisDeviceChanged,
+    groupInfo => {
+      HandleThisDeviceChanged(groupInfo, dispatch);
+    },
   );
-  const subscriptionOnConnectionInfoUpdates =
-    subscribeOnConnectionInfoUpdates(HandleNewInfo);
+  const subscriptionOnConnectionInfoUpdates = subscribeOnConnectionInfoUpdates(
+    info => {
+      HandleNewInfo(info, dispatch);
+    },
+  );
 
   try {
     dispatch(updatePeersSubscription(subscriptionOnPeersUpdates));
@@ -103,16 +119,11 @@ export const InitWifiP2P = async dispatch => {
     dispatch(
       updateConnectionInfoSubscription(subscriptionOnConnectionInfoUpdates),
     );
+
+    const status = await startDiscoveringPeers();
+    console.log('startDiscoveringPeers status: ', status);
   } catch (error) {
     console.log(error, 'at initWifiP2P');
-  }
-};
-
-export const startGetPeers = async () => {
-  try {
-    await startDiscoveringPeers();
-  } catch (error) {
-    console.error(error, 'at startDiscovering');
   }
 };
 

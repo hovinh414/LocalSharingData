@@ -14,28 +14,11 @@ import DeviceCard from '../../../common/DeviceCard';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {images} from '../../../../constants';
 import {useSelector} from 'react-redux';
+import {onConnect} from '../../../../hook/FunctionsP2P';
 
 export default function FindDevices({navigation}) {
   const devices = useSelector(state => state.P2P.devices);
-  const [datas, setDatas] = useState([
-    // {
-    //   deviceName: 'Samsung Galaxy A13'
-    // },
-    // {
-    //   deviceName: 'Samsung Galaxy A23'
-    // },
-    // {
-    //   deviceName: 'Samsung Galaxy A33'
-    // },
-  ]);
-
-  const connectToDevice = device => {
-    console.log('Connect to: ', device.deviceAddress);
-    navigation.navigate('Chat Detail', {
-      isOwner: false,
-      deviceAddress: device.deviceAddress,
-    });
-  };
+  console.log(devices);
 
   return (
     <View style={{flex: 1, backgroundColor: '#fff'}}>
@@ -59,7 +42,7 @@ export default function FindDevices({navigation}) {
                   <DeviceCard
                     key={index}
                     device={data}
-                    onPress={() => connectToDevice(data)}
+                    onPress={() => onConnect(navigation, data)}
                   />
                 );
               })}

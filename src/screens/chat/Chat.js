@@ -6,10 +6,15 @@ import ChatCard from '../../common/ChatCard';
 
 const Chat = ({navigation}) => {
   const list = [
-    {img: images.hieu, name: 'Hieu', message: 'Hello there!', available: true},
     {
-      img: images.file,
-      name: 'Vinh',
+      img: images.hieu,
+      deviceName: 'Hieu',
+      message: 'Hello there!',
+      available: true,
+    },
+    {
+      img: images.profile,
+      deviceName: 'Vinh',
       message: 'Hi, how are you?',
       available: false,
     },

@@ -4,17 +4,19 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {COLORS, FONT, SIZES} from '../../constants';
 
 const ChatCard = ({navigation, item}) => {
-  console.log(item);
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={() => navigation.navigate('Chat Detail', {item})}>
+      onPress={() => {
+        const itemWithIsOwner = {...item, isOwner: true};
+        navigation.navigate('Chat Detail', itemWithIsOwner);
+      }}>
       <View style={styles.imgContainer}>
         <Image source={item.img} resizeMode="cover" style={styles.img} />
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.nameContainer}>
-          <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.name}>{item.deviceName}</Text>
           <AntDesign
             name={item.available ? 'checkcircleo' : 'minuscircleo'}
             size={SIZES.medium}

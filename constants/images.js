@@ -15,6 +15,7 @@ import image from '../assets/images/image.png';
 import attach from '../assets/images/attach-file.png';
 import hieu from '../assets/images/Hieu.jpg';
 import left from '../assets/images/left.png';
+import profile from '../assets/images/profile.png';
 export default {
   file,
   remove,
@@ -32,5 +33,6 @@ export default {
   camera,
   send,
   hieu,
-  left
+  left,
+  profile,
 };

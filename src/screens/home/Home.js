@@ -7,7 +7,7 @@ import Welcome from './welcome/Welcome';
 import {GetPermissions} from '../../../hook/GetPermissions';
 import {InitWifiP2P} from '../../../hook/FunctionsP2P';
 
-const Home = () => {
+const Home = ({navigation}) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -24,9 +24,8 @@ const Home = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Welcome />
-        <FindDevices />
+        <FindDevices navigation={navigation} />
       </ScrollView>
-      {/* <FindDevices /> */}
     </SafeAreaView>
   );
 };
