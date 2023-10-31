@@ -1,5 +1,5 @@
-import {StyleSheet} from 'react-native';
-import {COLORS, SHADOWS} from '../../../constants';
+import { StyleSheet } from 'react-native';
+import { COLORS, SHADOWS } from '../../../constants';
 
 export const styles = StyleSheet.create({
   container: {
@@ -26,6 +26,7 @@ export const styles = StyleSheet.create({
     borderColor: '#ccc',
     flexDirection: 'column',
     marginBottom: 20,
+    // backgroundColor: 'red'
   },
   myMessage: {
     backgroundColor: COLORS.primary,
@@ -141,4 +142,36 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 5,
   },
+
+  bottomSheet: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 12,
+    },
+    shadowOpacity: 0.58,
+    shadowRadius: 16.00,
+
+    elevation: 24,
+    zIndex: 999,
+    // backgroundColor: 'red'
+  },
+
+  bottomSheetItemContainer: {
+    height: '100%',
+  },
+
+  bottomSheetItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // justifyContent: 'center',
+    height: '50%',
+    paddingHorizontal: '5%'
+  },
+
+  btnText: {
+    marginLeft: '4%',
+    fontSize: 15,
+    fontWeight: '500'
+  }
 });
