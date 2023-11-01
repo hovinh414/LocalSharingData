@@ -173,5 +173,10 @@ export const styles = StyleSheet.create({
     marginLeft: '4%',
     fontSize: 15,
     fontWeight: '500'
+  },
+
+  imageList: {
+    paddingVertical: 10,
+    paddingHorizontal: 10
   }
 });

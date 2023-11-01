@@ -7,19 +7,9 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Image,
-  ScrollView,
-  SafeAreaView,
-  Modal
 } from 'react-native';
 import { COLORS } from '../../../constants';
 import { images } from '../../../constants';
-import {
-  connect,
-  createGroup,
-  receiveMessage,
-  sendMessage,
-  getConnectionInfo,
-} from 'react-native-wifi-p2p';
 import { styles } from './chatDetail.style';
 import {
   MaterialIcons,
@@ -32,24 +22,39 @@ import Feather from 'react-native-vector-icons/Feather'
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
+  BottomSheetBackdrop,
+  BottomSheetFlatList 
 } from '@gorhom/bottom-sheet';
 import DocumentPicker from 'react-native-document-picker';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { GetStoragePermissions } from '../../../hook/GetPermissions';
+import LibraryImageCard from '../../common/LibraryImageCard';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeAllSelectedImages } from '../../redux/reducers';
+import CustomButton from '../../common/CustomButton';
 
 var net = require('react-native-tcp');
 const ChatDetail = ({ navigation, route }) => {
   const item = route.params;
-  console.log(route);
+  // console.log(route);
   const { isOwner } = route.params;
-  console.log(isOwner);
+  // console.log(isOwner);
   const [message, setMessage] = useState('');
   const [photo, setPhoto] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [selectedImages, setSelectedImage] = useState([]);
-  const [showModal, setShowModal] = useState(false)
+  // const [selectedImages, setSelectedImage] = useState([]);
   const [recentPhotos, setRecentPhotos] = useState([]);
+
+  const cameraBottomSheetModalRef = useRef(null)
+  const imageBottomSheetModalRef = useRef(null)
+
+  const cameraSnapPoints = useMemo(() => ['15%', '15%'], []);
+  const imageSnapPoints = useMemo(() => ['80%', '80%',], [])
+
+  const dispatch = useDispatch()
+  const {selectedImages} = useSelector(state => state.P2P)
+  // console.log(selectedImages)
 
   const getRecentPhotos = async () => {
     const check = await GetStoragePermissions()
@@ -59,7 +64,7 @@ const ChatDetail = ({ navigation, route }) => {
         first: 20,
         assetType: 'Photos'
       }).then( r => {
-        console.log(r.edges)
+        setRecentPhotos(r.edges)
       })
       .catch(err => {
         console.log(err)
@@ -67,27 +72,8 @@ const ChatDetail = ({ navigation, route }) => {
     }
   }
 
-  // useEffect(() => {
-  //   getRecentPhotos()
-  // }, [])
-
-  // console.log("recent photos:", recentPhotos)
-
-  const bottomSheetModalRef = useRef(null);
-
-  // variables
-  const snapPoints = useMemo(() => ['10%', '15%'], []);
-
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index) => {
-    console.log('handleSheetChanges', index);
-  }, []);
-
   const takePhoto = () => {
-    bottomSheetModalRef.current?.close();
+    cameraBottomSheetModalRef.current?.close();
     try {
       ImagePicker.openCamera({ mediaType: 'photo' }).then((result) => {
         console.log(result)
@@ -97,8 +83,9 @@ const ChatDetail = ({ navigation, route }) => {
       console.log(err)
     }
   };
+
   const recordVideo = () => {
-    bottomSheetModalRef.current?.close();
+    cameraBottomSheetModalRef.current?.close();
     try {
       ImagePicker.openCamera({ mediaType: 'video' }).then((result) => {
         console.log(result)
@@ -108,6 +95,31 @@ const ChatDetail = ({ navigation, route }) => {
       console.log(err)
     }
   };
+
+  const handleShowCameraBottomSheet = () => {
+    cameraBottomSheetModalRef.current?.present();
+  }
+
+  const renderBackdrop = useCallback(
+    (props) => <BottomSheetBackdrop {...props} onPress={() => {
+      dispatch(removeAllSelectedImages())
+
+      imageBottomSheetModalRef.current?.close()
+    }}/>,
+    []
+  );
+  
+  
+
+  const handleShowImageBottomSheet = () => {
+    dispatch(removeAllSelectedImages())
+
+    getRecentPhotos()
+
+    imageBottomSheetModalRef.current?.present();
+  }
+
+
   const handleSendMessage = () => { };
   const handleImageSelection = async () => { };
   function removeItems(item) { }
@@ -129,6 +141,10 @@ const ChatDetail = ({ navigation, route }) => {
       }
     }
   };
+
+  const handleSendImages = () => {
+    console.log("Sent: ", selectedImages)
+  }
 
 
   return (
@@ -173,7 +189,7 @@ const ChatDetail = ({ navigation, route }) => {
 
         <View style={styles.viewIcon}>
           <View style={styles.viewListImage}>
-            <FlatList
+            {/* <FlatList
               data={[...selectedImages, ...photo]} /// chỗ này show list ảnh
               horizontal={true}
               renderItem={({ item, index }) => (
@@ -186,7 +202,7 @@ const ChatDetail = ({ navigation, route }) => {
                   </TouchableOpacity>
                 </View>
               )}
-            />
+            /> */}
 
             <FlatList
               data={selectedFiles}
@@ -222,7 +238,7 @@ const ChatDetail = ({ navigation, route }) => {
               style={{
                 marginLeft: 10,
               }}
-              onPress={handlePresentModalPress}>
+              onPress={handleShowCameraBottomSheet}>
               <Image
                 source={images.camera}
                 size={25}
@@ -251,7 +267,7 @@ const ChatDetail = ({ navigation, route }) => {
                   style={{
                     flexDirection: 'row',
                   }}>
-                  <TouchableOpacity onPress={getRecentPhotos}>
+                  <TouchableOpacity onPress={handleShowImageBottomSheet}>
                     <Image
                       source={images.image}
                       size={25}
@@ -272,11 +288,12 @@ const ChatDetail = ({ navigation, route }) => {
         </View>
 
         <BottomSheetModal
-          ref={bottomSheetModalRef}
-          index={1} 
-          snapPoints={snapPoints}
-          onChange={handleSheetChanges}
+          ref={cameraBottomSheetModalRef}
+          index={1}
+          snapPoints={cameraSnapPoints}
+          // onChange={handleSheetChanges}
           style={styles.bottomSheet}
+          backdropComponent={renderBackdrop}
         >
           <View style={styles.bottomSheetItemContainer}>
             <TouchableOpacity style={styles.bottomSheetItem} onPress={takePhoto}>
@@ -290,7 +307,27 @@ const ChatDetail = ({ navigation, route }) => {
           </View>
         </BottomSheetModal>
 
-      
+        <BottomSheetModal
+          ref={imageBottomSheetModalRef}
+          index={1}
+          snapPoints={imageSnapPoints}
+          style={styles.bottomSheet}
+          backdropComponent={renderBackdrop}
+        >
+          <CustomButton title='Send' onPress={handleSendImages}/>
+
+          <BottomSheetFlatList
+            data={recentPhotos}
+            scrollEnabled={true}
+            numColumns={4}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.imageList}
+          renderItem={({item, index}) => {
+              return <LibraryImageCard key={index} image={item}/>
+              
+            }}
+          />
+        </BottomSheetModal>
       </KeyboardAvoidingView>
     </BottomSheetModalProvider>
   );
