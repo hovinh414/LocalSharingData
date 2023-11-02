@@ -18,7 +18,7 @@ import {onConnect} from '../../../../hook/FunctionsP2P';
 
 export default function FindDevices({navigation}) {
   const devices = useSelector(state => state.P2P.devices);
-  console.log(devices);
+  console.log('Devices: ', devices);
 
   return (
     <View style={{flex: 1, backgroundColor: '#fff'}}>

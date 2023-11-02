@@ -1,5 +1,5 @@
-import { initialize } from 'react-native-wifi-p2p';
-import { PermissionsAndroid, Platform } from 'react-native';
+import {initialize} from 'react-native-wifi-p2p';
+import {PermissionsAndroid, Platform} from 'react-native';
 
 export const GetPermissions = async () => {
   try {
@@ -18,9 +18,9 @@ export const GetPermissions = async () => {
       (granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
         PermissionsAndroid.RESULTS.GRANTED &&
         granted[PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION] ===
-        PermissionsAndroid.RESULTS.GRANTED) ||
+          PermissionsAndroid.RESULTS.GRANTED) ||
       granted[PermissionsAndroid.PERMISSIONS.NEARBY_WIFI_DEVICES] ===
-      PermissionsAndroid.RESULTS.GRANTED
+        PermissionsAndroid.RESULTS.GRANTED
     ) {
       console.log('You can use Wi-Fi P2P Mode');
       await initialize();
@@ -38,34 +38,39 @@ export const GetPermissions = async () => {
 export const GetStoragePermissions = async () => {
   try {
     if (Platform.Version >= 33) {
-      const permissions = [PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES, PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO]
+      const permissions = [
+        PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+        PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+      ];
 
-      const granted = await PermissionsAndroid.requestMultiple(permissions)
+      const granted = await PermissionsAndroid.requestMultiple(permissions);
 
-      if (granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES] === PermissionsAndroid.RESULTS.GRANTED
-        && granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO] === PermissionsAndroid.RESULTS.GRANTED) {
-        return true
+      if (
+        granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES] ===
+          PermissionsAndroid.RESULTS.GRANTED &&
+        granted[PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO] ===
+          PermissionsAndroid.RESULTS.GRANTED
+      ) {
+        return true;
+      } else {
+        console.log(
+          'Permission denied: READ_MEDIA_IMAGES & READ_MEDIA_VIDEO will not work',
+        );
+        return false;
       }
-      else {
-        console.log('Permission denied: READ_MEDIA_IMAGES & READ_MEDIA_VIDEO will not work');
-        return false
-      }
-    }
-    else {
-      const permissions = PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+    } else {
+      const permissions = PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
 
-      const granted = await PermissionsAndroid.request(permissions)
+      const granted = await PermissionsAndroid.request(permissions);
 
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        return true
-      }
-      else {
+        return true;
+      } else {
         console.log('Permission denied: READ_EXTERNAL_STORAGE will not work');
-        return false
+        return false;
       }
     }
+  } catch (err) {
+    console.log(err);
   }
-  catch (err) {
-    console.log(err)
-  }
-}
+};

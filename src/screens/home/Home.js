@@ -5,7 +5,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import FindDevices from './findDevices/FindDevices';
 import Welcome from './welcome/Welcome';
 import {GetPermissions} from '../../../hook/GetPermissions';
-import {InitWifiP2P} from '../../../hook/FunctionsP2P';
+import {cleanUpWifiP2P, initWifiP2P} from '../../../hook/FunctionsP2P';
 
 const Home = ({navigation}) => {
   const dispatch = useDispatch();
@@ -14,10 +14,15 @@ const Home = ({navigation}) => {
     async function constructor() {
       const check = await GetPermissions();
       if (check) {
-        await InitWifiP2P(dispatch);
+        await initWifiP2P(dispatch);
       }
     }
     constructor();
+
+    // Hàm này sẽ được gọi khi component unmount
+    return () => {
+      cleanUpWifiP2P(dispatch);
+    };
   }, [dispatch]);
 
   return (

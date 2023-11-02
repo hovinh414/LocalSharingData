@@ -18,18 +18,17 @@ import {
   updateConnectionInfoSubscription,
   updateThisDeviceSubscription,
 } from '../src/redux/reducers';
-import {useSelector, useDispatch} from 'react-redux';
 
-const HandleNewPeers = ({devices}, dispatch) => {
+const handleNewPeers = ({devices}, dispatch) => {
   // Cập nhật trạng thái Redux thông qua dispatch
   dispatch(setDevices(devices.devices));
 };
 
-const HandleThisDeviceChanged = (groupInfo, dispatch) => {
+const handleThisDeviceChanged = (groupInfo, dispatch) => {
   // console.log('THIS_DEVICE_CHANGED_ACTION', groupInfo);
 };
 
-const HandleNewInfo = (info, dispatch) => {
+const handleNewInfo = (info, dispatch) => {
   // console.log('OnConnectionInfoUpdated', info);
 };
 
@@ -98,18 +97,18 @@ export const onGetGroupInfo = () => {
   getGroupInfo().then(info => console.log('getGroupInfo', info));
 };
 
-export const InitWifiP2P = async dispatch => {
+export const initWifiP2P = async dispatch => {
   const subscriptionOnPeersUpdates = subscribeOnPeersUpdates(devices => {
-    HandleNewPeers({devices}, dispatch);
+    handleNewPeers({devices}, dispatch);
   });
   const subscriptionOnThisDeviceChanged = subscribeOnThisDeviceChanged(
     groupInfo => {
-      HandleThisDeviceChanged(groupInfo, dispatch);
+      handleThisDeviceChanged(groupInfo, dispatch);
     },
   );
   const subscriptionOnConnectionInfoUpdates = subscribeOnConnectionInfoUpdates(
     info => {
-      HandleNewInfo(info, dispatch);
+      handleNewInfo(info, dispatch);
     },
   );
 
@@ -127,12 +126,14 @@ export const InitWifiP2P = async dispatch => {
   }
 };
 
-export const cleanUpWifiP2P = (
-  subscriptionOnPeersUpdates,
-  subscriptionOnConnectionInfoUpdates,
-  subscriptionOnThisDeviceChanged,
-) => {
-  subscriptionOnPeersUpdates.remove();
-  subscriptionOnConnectionInfoUpdates.remove();
-  subscriptionOnThisDeviceChanged.remove();
+export const cleanUpWifiP2P = dispatch => {
+  if (dispatch.subscriptionOnPeersUpdates) {
+    dispatch.subscriptionOnPeersUpdates.remove();
+  }
+  if (dispatch.subscriptionOnConnectionInfoUpdates) {
+    dispatch.subscriptionOnConnectionInfoUpdates.remove();
+  }
+  if (dispatch.subscriptionOnThisDeviceChanged) {
+    dispatch.subscriptionOnThisDeviceChanged.remove();
+  }
 };

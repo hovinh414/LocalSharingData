@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { COLORS, SHADOWS } from '../../../constants';
+import {StyleSheet} from 'react-native';
+import {COLORS, SHADOWS} from '../../../constants';
 
 export const styles = StyleSheet.create({
   container: {
@@ -144,13 +144,13 @@ export const styles = StyleSheet.create({
   },
 
   bottomSheet: {
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 12,
     },
     shadowOpacity: 0.58,
-    shadowRadius: 16.00,
+    shadowRadius: 16.0,
 
     elevation: 24,
     zIndex: 999,
@@ -166,12 +166,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     // justifyContent: 'center',
     height: '50%',
-    paddingHorizontal: '5%'
+    paddingHorizontal: '5%',
   },
 
   btnText: {
     marginLeft: '4%',
     fontSize: 15,
-    fontWeight: '500'
-  }
+    fontWeight: '500',
+  },
 });
