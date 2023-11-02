@@ -174,4 +174,9 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
   },
+
+  imageList: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+  },
 });

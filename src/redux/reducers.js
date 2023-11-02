@@ -5,6 +5,7 @@ const initialState = {
   subscriptionOnPeersUpdates: {},
   subscriptionOnConnectionInfoUpdates: {},
   subscriptionOnThisDeviceChanged: {},
+  selectedImages: []
 };
 
 const p2pSlice = createSlice({
@@ -23,14 +24,33 @@ const p2pSlice = createSlice({
     updateThisDeviceSubscription: (state, action) => {
       state.subscriptionOnThisDeviceChanged = action.payload;
     },
+    selectedImagesList: (state, action) => {
+      const check = state.selectedImages.find(image => image.node.timestamp === action.payload.node.timestamp)
+        // const check = state.selectedImages.find(image => image.node.timestamp === action.payload.node.timestamp)
+        
+        if (check) {
+        state.selectedImages = state.selectedImages.filter(image => image.node.timestamp !== action.payload.node.timestamp)
+      }
+      else {
+        state.selectedImages.push(action.payload)
+      }
+
+      // console.log(state.selectedImages)
+    },
+    removeAllSelectedImages: (state) => {
+      state.selectedImages = []
+    }
   },
 });
+
 
 export const {
   setDevices,
   updatePeersSubscription,
   updateConnectionInfoSubscription,
   updateThisDeviceSubscription,
+  selectedImagesList,
+  removeAllSelectedImages
 } = p2pSlice.actions;
 
 export default p2pSlice.reducer;

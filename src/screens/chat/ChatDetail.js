@@ -34,10 +34,19 @@ import {
   onRemoveGroup,
 } from '../../../hook/FunctionsP2P';
 import ImagePicker from 'react-native-image-crop-picker';
-import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+  BottomSheetBackdrop,
+  BottomSheetFlatList,
+} from '@gorhom/bottom-sheet';
 import DocumentPicker from 'react-native-document-picker';
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import {GetStoragePermissions} from '../../../hook/GetPermissions';
+import LibraryImageCard from '../../common/LibraryImageCard';
+import {useDispatch, useSelector} from 'react-redux';
+import {removeAllSelectedImages} from '../../redux/reducers';
+import CustomButton from '../../common/CustomButton';
 
 const PORT = 6000;
 const IP = '192.168.49.1';
@@ -234,6 +243,18 @@ const ChatDetail = ({navigation, route}) => {
     };
   }, []);
 
+  const [recentPhotos, setRecentPhotos] = useState([]);
+
+  const cameraBottomSheetModalRef = useRef(null);
+  const imageBottomSheetModalRef = useRef(null);
+
+  const cameraSnapPoints = useMemo(() => ['15%', '15%'], []);
+  const imageSnapPoints = useMemo(() => ['80%', '80%'], []);
+
+  const dispatch = useDispatch();
+  const {selectedImages} = useSelector(state => state.P2P);
+  // console.log(selectedImages)
+
   const getRecentPhotos = async () => {
     const check = await GetStoragePermissions();
 
@@ -252,7 +273,7 @@ const ChatDetail = ({navigation, route}) => {
   };
 
   const takePhoto = () => {
-    bottomSheetModalRef.current?.close();
+    cameraBottomSheetModalRef.current?.close();
     try {
       ImagePicker.openCamera({mediaType: 'photo'}).then(result => {
         console.log(result);
@@ -263,7 +284,7 @@ const ChatDetail = ({navigation, route}) => {
   };
 
   const recordVideo = () => {
-    bottomSheetModalRef.current?.close();
+    cameraBottomSheetModalRef.current?.close();
     try {
       ImagePicker.openCamera({mediaType: 'video'}).then(result => {
         console.log(result);
@@ -273,11 +294,37 @@ const ChatDetail = ({navigation, route}) => {
     }
   };
 
-  const handleSendMessage = () => {};
+  // const handleSendMessage = () => {};
 
-  const handleImageSelection = async () => {};
+  // const handleImageSelection = async () => {};
 
-  function removeItems(item) {}
+  // function removeItems(item) {}
+
+  const handleShowCameraBottomSheet = () => {
+    cameraBottomSheetModalRef.current?.present();
+  };
+
+  const renderBackdrop = useCallback(
+    props => (
+      <BottomSheetBackdrop
+        {...props}
+        onPress={() => {
+          dispatch(removeAllSelectedImages());
+
+          imageBottomSheetModalRef.current?.close();
+        }}
+      />
+    ),
+    [],
+  );
+
+  const handleShowImageBottomSheet = () => {
+    dispatch(removeAllSelectedImages());
+
+    getRecentPhotos();
+
+    imageBottomSheetModalRef.current?.present();
+  };
 
   const pickDocument = async () => {
     try {
@@ -297,193 +344,213 @@ const ChatDetail = ({navigation, route}) => {
     }
   };
 
-  return (
-    <GiftedChat
-      messages={messages}
-      onSend={message => onSendMessage(message)}
-      user={{
-        _id: 2,
-      }}
-    />
-  );
+  const handleSendImages = () => {
+    console.log('Sent: ', selectedImages);
+  };
 
   // return (
-  //   <BottomSheetModalProvider>
-  //     <KeyboardAvoidingView style={styles.container} enabled>
-  //       <View style={styles.header}>
-  //         <TouchableOpacity onPress={() => navigation.goBack()}>
-  //           <Image
-  //             source={images.left}
-  //             size={25}
-  //             style={{width: 25, height: 25, marginRight: 8}}
-  //           />
-  //         </TouchableOpacity>
-  //         <Image
-  //           source={item.img ? item.img : images.profile}
-  //           style={styles.avatarDetail}
-  //         />
-  //         <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 10}}>
-  //           {item.deviceName}
-  //         </Text>
-  //       </View>
+  //   <GiftedChat
+  //     messages={messages}
+  //     onSend={message => onSendMessage(message)}
+  //     user={{
+  //       _id: 2,
+  //     }}
+  //   />)
 
-  //       <FlatList
-  //         data={messages}
-  //         keyExtractor={(item, index) => index.toString()}
-  //         renderItem={({item}) => (
-  //           <View
-  //             style={
-  //               item.sender === 'me' ? styles.myMessage : styles.theirMessage
-  //             }>
-  //             <Text
-  //               style={
-  //                 item.sender === 'me'
-  //                   ? styles.messageMyText
-  //                   : styles.messageTheirText
-  //               }>
-  //               {item.text}
-  //             </Text>
-  //           </View>
-  //         )}
-  //       />
+  return (
+    <BottomSheetModalProvider>
+      <KeyboardAvoidingView style={styles.container} enabled>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={images.left}
+              size={25}
+              style={{width: 25, height: 25, marginRight: 8}}
+            />
+          </TouchableOpacity>
+          <Image
+            source={item.img ? item.img : images.profile}
+            style={styles.avatarDetail}
+          />
+          <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 10}}>
+            {item.deviceName}
+          </Text>
+        </View>
 
-  //       <View style={styles.viewIcon}>
-  //         <View style={styles.viewListImage}>
-  //           <FlatList
-  //             data={[...selectedImages, ...photo]} /// chỗ này show list ảnh
-  //             horizontal={true}
-  //             renderItem={({item, index}) => (
-  //               <View style={styles.viewImage} key={index}>
-  //                 <Image source={{uri: item.uri}} style={styles.image} />
-  //                 <TouchableOpacity
-  //                   onPress={() => removeItems(item)}
-  //                   style={styles.btnRemoveImage}>
-  //                   <MaterialIcons
-  //                     name="delete"
-  //                     size={20}
-  //                     color={COLORS.black}
-  //                   />
-  //                 </TouchableOpacity>
-  //               </View>
-  //             )}
-  //           />
+        <FlatList
+          data={messages}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item}) => (
+            <View
+              style={
+                item.sender === 'me' ? styles.myMessage : styles.theirMessage
+              }>
+              <Text
+                style={
+                  item.sender === 'me'
+                    ? styles.messageMyText
+                    : styles.messageTheirText
+                }>
+                {item.text}
+              </Text>
+            </View>
+          )}
+        />
 
-  //           <FlatList
-  //             data={selectedFiles}
-  //             horizontal={true}
-  //             renderItem={({item, index}) => (
-  //               <TouchableOpacity style={styles.viewFile} key={index}>
-  //                 <View style={styles.file}>
-  //                   {item.mimeType === 'video/mp4' ? (
-  //                     <Image source={images.video} style={styles.fileIcon} />
-  //                   ) : item.mimeType === 'image/jpeg' ? (
-  //                     <Image source={{uri: item.uri}} style={styles.fileIcon} />
-  //                   ) : (
-  //                     <Image source={images.file} style={styles.fileIcon} />
-  //                   )}
-  //                   <Text style={styles.fileName}>{item.name}</Text>
-  //                 </View>
-  //                 <TouchableOpacity
-  //                   onPress={() => removeItems(item)}
-  //                   style={styles.btnRemoveFile}>
-  //                   <MaterialIcons
-  //                     name="delete"
-  //                     size={15}
-  //                     color={COLORS.black}
-  //                   />
-  //                 </TouchableOpacity>
-  //               </TouchableOpacity>
-  //             )}
-  //           />
-  //         </View>
-  //         <View
-  //           style={{
-  //             flexDirection: 'row',
-  //             alignItems: 'center',
-  //             marginBottom: 15,
-  //           }}>
-  //           <TouchableOpacity
-  //             style={{
-  //               marginLeft: 10,
-  //             }}
-  //             onPress={handlePresentModalPress}>
-  //             <Image
-  //               source={images.camera}
-  //               size={25}
-  //               style={{
-  //                 width: 25,
-  //                 height: 25,
-  //                 marginRight: 8,
-  //                 marginBottom: 55,
-  //               }}
-  //             />
-  //           </TouchableOpacity>
+        <View style={styles.viewIcon}>
+          <View style={styles.viewListImage}>
+            {/* <FlatList
+              data={[...selectedImages, ...photo]} /// chỗ này show list ảnh
+              horizontal={true}
+              renderItem={({ item, index }) => (
+                <View style={styles.viewImage} key={index}>
+                  <Image source={{ uri: item.uri }} style={styles.image} />
+                  <TouchableOpacity
+                    onPress={() => removeItems(item)}
+                    style={styles.btnRemoveImage}>
+                    <MaterialIcons name="delete" size={20} color={COLORS.black} />
+                  </TouchableOpacity>
+                </View>
+              )}
+            /> */}
 
-  //           <View style={styles.inputContainer}>
-  //             <TextInput
-  //               style={styles.input}
-  //               placeholder="Nhập nội dung tin nhắn"
-  //               value={message}
-  //               onChangeText={text => setMessage(text)}
-  //             />
+            <FlatList
+              data={selectedFiles}
+              horizontal={true}
+              renderItem={({item, index}) => (
+                <TouchableOpacity style={styles.viewFile} key={index}>
+                  <View style={styles.file}>
+                    {item.mimeType === 'video/mp4' ? (
+                      <Image source={images.video} style={styles.fileIcon} />
+                    ) : item.mimeType === 'image/jpeg' ? (
+                      <Image source={{uri: item.uri}} style={styles.fileIcon} />
+                    ) : (
+                      <Image source={images.file} style={styles.fileIcon} />
+                    )}
+                    <Text style={styles.fileName}>{item.name}</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => removeItems(item)}
+                    style={styles.btnRemoveFile}>
+                    <MaterialIcons
+                      name="delete"
+                      size={15}
+                      color={COLORS.black}
+                    />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 15,
+            }}>
+            <TouchableOpacity
+              style={{
+                marginLeft: 10,
+              }}
+              onPress={handleShowCameraBottomSheet}>
+              <Image
+                source={images.camera}
+                size={25}
+                style={{
+                  width: 25,
+                  height: 25,
+                  marginRight: 8,
+                  marginBottom: 55,
+                }}
+              />
+            </TouchableOpacity>
 
-  //             {message ? (
-  //               <TouchableOpacity onPress={handleSendMessage}>
-  //                 <Image
-  //                   source={images.send}
-  //                   size={25}
-  //                   style={{width: 25, height: 25, marginRight: 8}}
-  //                 />
-  //               </TouchableOpacity>
-  //             ) : (
-  //               <View
-  //                 style={{
-  //                   flexDirection: 'row',
-  //                 }}>
-  //                 <TouchableOpacity onPress={getRecentPhotos}>
-  //                   <Image
-  //                     source={images.image}
-  //                     size={25}
-  //                     style={{width: 25, height: 25, marginRight: 8}}
-  //                   />
-  //                 </TouchableOpacity>
-  //                 <TouchableOpacity onPress={pickDocument}>
-  //                   <Image
-  //                     source={images.attach}
-  //                     size={25}
-  //                     style={{width: 25, height: 25, marginRight: 8}}
-  //                   />
-  //                 </TouchableOpacity>
-  //               </View>
-  //             )}
-  //           </View>
-  //         </View>
-  //       </View>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Nhập nội dung tin nhắn"
+                value={message}
+                onChangeText={text => setMessage(text)}
+              />
 
-  //       <BottomSheetModal
-  //         ref={bottomSheetModalRef}
-  //         index={1}
-  //         snapPoints={snapPoints}
-  //         onChange={handleSheetChanges}
-  //         style={styles.bottomSheet}>
-  //         <View style={styles.bottomSheetItemContainer}>
-  //           <TouchableOpacity
-  //             style={styles.bottomSheetItem}
-  //             onPress={takePhoto}>
-  //             <Feather name="image" size={30} color={COLORS.primary} />
-  //             <Text style={styles.btnText}>Take Photo</Text>
-  //           </TouchableOpacity>
-  //           <TouchableOpacity
-  //             style={styles.bottomSheetItem}
-  //             onPress={recordVideo}>
-  //             <Feather name="video" size={30} color={COLORS.primary} />
-  //             <Text style={styles.btnText}>Record Video</Text>
-  //           </TouchableOpacity>
-  //         </View>
-  //       </BottomSheetModal>
-  //     </KeyboardAvoidingView>
-  //   </BottomSheetModalProvider>
-  // );
+              {message ? (
+                <TouchableOpacity onPress={handleSendMessage}>
+                  <Image
+                    source={images.send}
+                    size={25}
+                    style={{width: 25, height: 25, marginRight: 8}}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                  }}>
+                  <TouchableOpacity onPress={handleShowImageBottomSheet}>
+                    <Image
+                      source={images.image}
+                      size={25}
+                      style={{width: 25, height: 25, marginRight: 8}}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={pickDocument}>
+                    <Image
+                      source={images.attach}
+                      size={25}
+                      style={{width: 25, height: 25, marginRight: 8}}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+
+        <BottomSheetModal
+          ref={cameraBottomSheetModalRef}
+          index={1}
+          snapPoints={cameraSnapPoints}
+          // onChange={handleSheetChanges}
+          style={styles.bottomSheet}
+          backdropComponent={renderBackdrop}>
+          <View style={styles.bottomSheetItemContainer}>
+            <TouchableOpacity
+              style={styles.bottomSheetItem}
+              onPress={takePhoto}>
+              <Feather name="image" size={30} color={COLORS.primary} />
+              <Text style={styles.btnText}>Take Photo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.bottomSheetItem}
+              onPress={recordVideo}>
+              <Feather name="video" size={30} color={COLORS.primary} />
+              <Text style={styles.btnText}>Record Video</Text>
+            </TouchableOpacity>
+          </View>
+        </BottomSheetModal>
+
+        <BottomSheetModal
+          ref={imageBottomSheetModalRef}
+          index={1}
+          snapPoints={imageSnapPoints}
+          style={styles.bottomSheet}
+          backdropComponent={renderBackdrop}>
+          <CustomButton title="Send" onPress={handleSendImages} />
+
+          <BottomSheetFlatList
+            data={recentPhotos}
+            scrollEnabled={true}
+            numColumns={4}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.imageList}
+            renderItem={({item, index}) => {
+              return <LibraryImageCard key={index} image={item} />;
+            }}
+          />
+        </BottomSheetModal>
+      </KeyboardAvoidingView>
+    </BottomSheetModalProvider>
+  );
 };
 
 export default ChatDetail;
