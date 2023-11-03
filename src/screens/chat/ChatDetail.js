@@ -20,7 +20,7 @@ import {
   sendMessage,
   getConnectionInfo,
 } from 'react-native-wifi-p2p';
-import {styles} from './chatDetail.style';
+import styles from './chatDetail.style';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import {LogBox} from 'react-native';
@@ -54,74 +54,11 @@ const SERVER_IP = '127.0.0.1';
 const IPIDK = '25.226.115.47';
 
 const ChatDetail = ({navigation, route}) => {
+  // Server variables
   const item = route.params;
   const {isOwner} = route.params;
   const receiveInterval = useRef(null);
   const connectionInterval = useRef(null);
-
-  // const [message, setMessage] = useState('');
-  // const [photo, setPhoto] = useState([]);
-  // const [selectedFiles, setSelectedFiles] = useState([]);
-  const [messages, setMessages] = useState([
-    {
-      _id: Math.random(1000).toString(),
-      text: 'alo',
-      createAt: new Date(),
-      user: {
-        _id: 2,
-      },
-    },
-  ]);
-  // const [selectedImages, setSelectedImage] = useState([]);
-
-  const bottomSheetModalRef = useRef(null);
-
-  // variables
-  const snapPoints = useMemo(() => ['10%', '15%'], []);
-
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback(index => {
-    console.log('handleSheetChanges', index);
-  }, []);
-
-  const onReceiveMessage = () => {
-    receiveMessage()
-      .then(message => {
-        const msg = [
-          {
-            _id: Math.random(1000).toString(),
-            text: message,
-            createAt: new Date(),
-            user: {
-              _id: 2,
-            },
-          },
-        ];
-        setMessages(previousMessages =>
-          GiftedChat.append(previousMessages, msg),
-        );
-      })
-      .catch(err => console.log('[FATAL] Unable to receive messages'));
-  };
-
-  const onSendMessage = useCallback((message = []) => {
-    if (false) {
-      // SERVER [TODO]
-      // server.current.socket.write(message)
-    } else {
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, message),
-      );
-      sendMessage(message[0].text)
-        .then(metaInfo =>
-          console.log('[INFO] Send client message successfully', metaInfo),
-        )
-        .catch(err => console.log('[FATAL] Unable to send client message'));
-    }
-  }, []);
 
   useEffect(() => {
     const unsubcribe = NetInfo.addEventListener(state => {
@@ -136,7 +73,7 @@ const ChatDetail = ({navigation, route}) => {
 
     connectionInterval.current = setInterval(() => {
       onGetConnectionInfo();
-    }, 300);
+    }, 10000);
 
     if (isOwner) {
       // SERVER SIDE
@@ -243,67 +180,98 @@ const ChatDetail = ({navigation, route}) => {
     };
   }, []);
 
-  const [recentPhotos, setRecentPhotos] = useState([]);
+  // Messages, images, files variables
+  const dispatch = useDispatch();
+  const messageRef = useRef('');
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([
+    {
+      _id: Math.random(1000).toString(),
+      text: 'alo',
+      createAt: new Date(),
+      user: {
+        _id: 1,
+      },
+    },
+  ]);
+  const selectedImages = useSelector(state => state.P2P.selectedImages);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
+  const onReceiveMessage = () => {
+    receiveMessage()
+      .then(text => {
+        const msg = [
+          {
+            _id: Math.random(1000).toString(),
+            text: text,
+            createAt: new Date(),
+            user: {
+              _id: 1,
+            },
+          },
+        ];
+        setMessages(previousMessages =>
+          GiftedChat.append(previousMessages, msg),
+        );
+      })
+      .catch(err => console.log('[FATAL] Unable to receive messages'));
+  };
+  const onSendMessage = useCallback((text = []) => {
+    console.log;
+    // Kiểm tra xem nội dung tin nhắn có được điền hay không
+    if (text) {
+      // Tạo một đối tượng tin nhắn
+      const newMessage = {
+        _id: Math.random().toString(),
+        text: text,
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+        },
+      };
+
+      // Thêm tin nhắn mới vào danh sách tin nhắn
+      setMessages(previousMessages =>
+        GiftedChat.append(previousMessages, [newMessage]),
+      );
+
+      // Xóa nội dung tin nhắn sau khi gửi
+      setMessage('');
+      messageRef.current.clear();
+
+      // Gửi tin nhắn đến đối tượng khác (thực hiện tùy theo logic của ứng dụng của bạn)
+      sendMessage(newMessage.text)
+        .then(metaInfo =>
+          console.log('[INFO] Send client message successfully', metaInfo),
+        )
+        .catch(err => console.log('[FATAL] Unable to send client message'));
+    }
+  }, []);
+  const handleSendMessage = () => {
+    console.log(message);
+  };
+  const handleSendImages = () => {
+    console.log('Sent: ', selectedImages);
+  };
+  function removeItems(item) {}
+
+  // Bottomsheet variables
   const cameraBottomSheetModalRef = useRef(null);
   const imageBottomSheetModalRef = useRef(null);
-
   const cameraSnapPoints = useMemo(() => ['15%', '15%'], []);
   const imageSnapPoints = useMemo(() => ['80%', '80%'], []);
-
-  const dispatch = useDispatch();
-  const {selectedImages} = useSelector(state => state.P2P);
-  // console.log(selectedImages)
-
-  const getRecentPhotos = async () => {
-    const check = await GetStoragePermissions();
-
-    if (check) {
-      CameraRoll.getPhotos({
-        first: 20,
-        assetType: 'Photos',
-      })
-        .then(r => {
-          console.log(r.edges);
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    }
-  };
-
-  const takePhoto = () => {
-    cameraBottomSheetModalRef.current?.close();
-    try {
-      ImagePicker.openCamera({mediaType: 'photo'}).then(result => {
-        console.log(result);
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const recordVideo = () => {
-    cameraBottomSheetModalRef.current?.close();
-    try {
-      ImagePicker.openCamera({mediaType: 'video'}).then(result => {
-        console.log(result);
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // const handleSendMessage = () => {};
-
-  // const handleImageSelection = async () => {};
-
-  // function removeItems(item) {}
+  const [recentPhotos, setRecentPhotos] = useState([]);
 
   const handleShowCameraBottomSheet = () => {
     cameraBottomSheetModalRef.current?.present();
   };
+  const handleShowImageBottomSheet = () => {
+    dispatch(removeAllSelectedImages());
 
+    getRecentPhotos();
+
+    imageBottomSheetModalRef.current?.present();
+  };
   const renderBackdrop = useCallback(
     props => (
       <BottomSheetBackdrop
@@ -317,15 +285,42 @@ const ChatDetail = ({navigation, route}) => {
     ),
     [],
   );
-
-  const handleShowImageBottomSheet = () => {
-    dispatch(removeAllSelectedImages());
-
-    getRecentPhotos();
-
-    imageBottomSheetModalRef.current?.present();
+  const takePhoto = () => {
+    cameraBottomSheetModalRef.current?.close();
+    try {
+      ImagePicker.openCamera({mediaType: 'photo'}).then(result => {
+        console.log(result);
+      });
+    } catch (err) {
+      console.log(err);
+    }
   };
+  const recordVideo = () => {
+    cameraBottomSheetModalRef.current?.close();
+    try {
+      ImagePicker.openCamera({mediaType: 'video'}).then(result => {
+        console.log(result);
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const getRecentPhotos = async () => {
+    const check = await GetStoragePermissions();
 
+    if (check) {
+      CameraRoll.getPhotos({
+        first: 20,
+        assetType: 'Photos',
+      })
+        .then(r => {
+          setRecentPhotos(r.edges);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+  };
   const pickDocument = async () => {
     try {
       const result = await DocumentPicker.pick({
@@ -344,10 +339,6 @@ const ChatDetail = ({navigation, route}) => {
     }
   };
 
-  const handleSendImages = () => {
-    console.log('Sent: ', selectedImages);
-  };
-
   // return (
   //   <GiftedChat
   //     messages={messages}
@@ -362,22 +353,16 @@ const ChatDetail = ({navigation, route}) => {
       <KeyboardAvoidingView style={styles.container} enabled>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={images.left}
-              size={25}
-              style={{width: 25, height: 25, marginRight: 8}}
-            />
+            <Image source={images.left} size={25} style={styles.imgBtn} />
           </TouchableOpacity>
           <Image
             source={item.img ? item.img : images.profile}
             style={styles.avatarDetail}
           />
-          <Text style={{fontWeight: 'bold', fontSize: 16, marginLeft: 10}}>
-            {item.deviceName}
-          </Text>
+          <Text style={styles.deviceNameText}>{item.deviceName}</Text>
         </View>
 
-        <FlatList
+        {/* <FlatList
           data={messages}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({item}) => (
@@ -399,7 +384,7 @@ const ChatDetail = ({navigation, route}) => {
 
         <View style={styles.viewIcon}>
           <View style={styles.viewListImage}>
-            {/* <FlatList
+            <FlatList
               data={[...selectedImages, ...photo]} /// chỗ này show list ảnh
               horizontal={true}
               renderItem={({ item, index }) => (
@@ -412,7 +397,7 @@ const ChatDetail = ({navigation, route}) => {
                   </TouchableOpacity>
                 </View>
               )}
-            /> */}
+            />
 
             <FlatList
               data={selectedFiles}
@@ -442,69 +427,61 @@ const ChatDetail = ({navigation, route}) => {
               )}
             />
           </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 15,
-            }}>
-            <TouchableOpacity
-              style={{
-                marginLeft: 10,
-              }}
-              onPress={handleShowCameraBottomSheet}>
-              <Image
-                source={images.camera}
-                size={25}
-                style={{
-                  width: 25,
-                  height: 25,
-                  marginRight: 8,
-                  marginBottom: 55,
-                }}
-              />
-            </TouchableOpacity>
+        </View> */}
 
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập nội dung tin nhắn"
-                value={message}
-                onChangeText={text => setMessage(text)}
-              />
-
-              {message ? (
-                <TouchableOpacity onPress={handleSendMessage}>
-                  <Image
-                    source={images.send}
-                    size={25}
-                    style={{width: 25, height: 25, marginRight: 8}}
-                  />
+        <GiftedChat
+          messages={messages}
+          onSend={text => onSendMessage(text)}
+          messagesContainerStyle={styles.messagesContainer}
+          renderInputToolbar={props => (
+            <View style={styles.bottomContainer}>
+              <View style={styles.cameraContainer}>
+                <TouchableOpacity onPress={handleShowCameraBottomSheet}>
+                  <Image source={images.camera} style={styles.cameraImg} />
                 </TouchableOpacity>
-              ) : (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                  }}>
-                  <TouchableOpacity onPress={handleShowImageBottomSheet}>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  ref={messageRef}
+                  placeholder="Type your message..."
+                  onChangeText={text => setMessage(text)}
+                  {...props}
+                />
+
+                {message ? (
+                  <TouchableOpacity onPress={() => onSendMessage(message)}>
                     <Image
-                      source={images.image}
-                      size={25}
-                      style={{width: 25, height: 25, marginRight: 8}}
+                      source={images.send}
+                      style={[styles.imgBtn, {marginHorizontal: 5}]}
                     />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={pickDocument}>
-                    <Image
-                      source={images.attach}
-                      size={25}
-                      style={{width: 25, height: 25, marginRight: 8}}
-                    />
-                  </TouchableOpacity>
-                </View>
-              )}
+                ) : (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                    }}>
+                    <TouchableOpacity onPress={handleShowImageBottomSheet}>
+                      <Image
+                        source={images.image}
+                        size={25}
+                        style={[styles.imgBtn, {marginHorizontal: 5}]}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={pickDocument}>
+                      <Image
+                        source={images.attach}
+                        size={25}
+                        style={[styles.imgBtn, {marginHorizontal: 5}]}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             </View>
-          </View>
-        </View>
+          )}
+        />
 
         <BottomSheetModal
           ref={cameraBottomSheetModalRef}
