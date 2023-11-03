@@ -208,6 +208,26 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 10,
   },
+
+  sendBtnContainer: {
+    flexDirection: 'row',
+    // justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '2%',
+    paddingHorizontal: 8,
+    // backgroundColor: 'red'
+  },
+
+  allImagesTextContainer: {
+    flex: 1,
+  },
+
+  allImagesText: {
+    color: COLORS.black,
+    fontWeight: '500',
+    fontSize: 16,
+    textAlign: 'center'
+  },
 });
 
 export default styles;

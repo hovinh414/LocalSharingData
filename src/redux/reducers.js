@@ -25,17 +25,14 @@ const p2pSlice = createSlice({
       state.subscriptionOnThisDeviceChanged = action.payload;
     },
     selectedImagesList: (state, action) => {
-      const check = state.selectedImages.find(
-        image => image.node.timestamp === action.payload.node.timestamp,
-      );
-      // const check = state.selectedImages.find(image => image.node.timestamp === action.payload.node.timestamp)
-
-      if (check) {
-        state.selectedImages = state.selectedImages.filter(
-          image => image.node.timestamp !== action.payload.node.timestamp,
-        );
-      } else {
-        state.selectedImages.push(action.payload);
+      const check = state.selectedImages.find(image => image.node.image.filename === action.payload.node.image.filename)
+        // const check = state.selectedImages.find(image => image.node.timestamp === action.payload.node.timestamp)
+        
+        if (check) {
+        state.selectedImages = state.selectedImages.filter(image => image.node.image.filename !== action.payload.node.image.filename)
+      }
+      else {
+        state.selectedImages.push(action.payload)
       }
 
       // console.log(state.selectedImages)

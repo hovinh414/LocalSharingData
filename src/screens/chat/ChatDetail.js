@@ -8,9 +8,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Image,
-  ScrollView,
-  SafeAreaView,
-  Modal,
 } from 'react-native';
 import {COLORS} from '../../../constants';
 import {images} from '../../../constants';
@@ -21,8 +18,8 @@ import {
   getConnectionInfo,
 } from 'react-native-wifi-p2p';
 import styles from './chatDetail.style';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Feather from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {LogBox} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
@@ -46,7 +43,6 @@ import {GetStoragePermissions} from '../../../hook/GetPermissions';
 import LibraryImageCard from '../../common/LibraryImageCard';
 import {useDispatch, useSelector} from 'react-redux';
 import {removeAllSelectedImages} from '../../redux/reducers';
-import CustomButton from '../../common/CustomButton';
 
 const PORT = 6000;
 const IP = '192.168.49.1';
@@ -195,7 +191,6 @@ const ChatDetail = ({navigation, route}) => {
     },
   ]);
   const selectedImages = useSelector(state => state.P2P.selectedImages);
-  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const onReceiveMessage = () => {
     receiveMessage()
@@ -311,14 +306,15 @@ const ChatDetail = ({navigation, route}) => {
     if (check) {
       CameraRoll.getPhotos({
         first: 20,
-        assetType: 'Photos',
+        assetType: 'All',
+        include: ['filename', 'playableDuration']
+      }).then(r => {
+        setRecentPhotos(r.edges)
+        // console.log(r.edges)
       })
-        .then(r => {
-          setRecentPhotos(r.edges);
-        })
         .catch(err => {
-          console.log(err);
-        });
+          console.log(err)
+        })
     }
   };
   const pickDocument = async () => {
@@ -491,16 +487,12 @@ const ChatDetail = ({navigation, route}) => {
           style={styles.bottomSheet}
           backdropComponent={renderBackdrop}>
           <View style={styles.bottomSheetItemContainer}>
-            <TouchableOpacity
-              style={styles.bottomSheetItem}
-              onPress={takePhoto}>
-              <Feather name="image" size={30} color={COLORS.primary} />
+          <TouchableOpacity style={styles.bottomSheetItem} onPress={takePhoto}>
+              <Ionicons name='images-outline' size={30} color={COLORS.primary} />
               <Text style={styles.btnText}>Take Photo</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.bottomSheetItem}
-              onPress={recordVideo}>
-              <Feather name="video" size={30} color={COLORS.primary} />
+            <TouchableOpacity style={styles.bottomSheetItem} onPress={recordVideo} >
+              <Ionicons name='videocam-outline' size={30} color={COLORS.primary} />
               <Text style={styles.btnText}>Record Video</Text>
             </TouchableOpacity>
           </View>
@@ -511,8 +503,25 @@ const ChatDetail = ({navigation, route}) => {
           index={1}
           snapPoints={imageSnapPoints}
           style={styles.bottomSheet}
-          backdropComponent={renderBackdrop}>
-          <CustomButton title="Send" onPress={handleSendImages} />
+          backdropComponent={renderBackdrop}
+        >
+          <View style={styles.sendBtnContainer}>
+            <TouchableOpacity onPress={() => imageBottomSheetModalRef.current?.close()} style={styles.closeBtn}>
+              <Ionicons name='close' color={COLORS.primary} size={45} />
+            </TouchableOpacity>
+
+            <View style={styles.allImagesTextContainer}>
+              <Text style={styles.allImagesText}>All Images</Text>
+            </View>
+
+            <View style={{height: 45, width: 45}}>
+            {selectedImages.length !== 0
+              ? <TouchableOpacity style={styles.sendBtn} onPress={handleSendImages}>
+              <MaterialCommunityIcons name='send-circle' color={COLORS.primary} size={45} />
+            </TouchableOpacity>
+              : null}
+            </View>
+          </View>
 
           <BottomSheetFlatList
             data={recentPhotos}
@@ -520,8 +529,9 @@ const ChatDetail = ({navigation, route}) => {
             numColumns={4}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.imageList}
-            renderItem={({item, index}) => {
-              return <LibraryImageCard key={index} image={item} />;
+            renderItem={({ item, index }) => {
+              return <LibraryImageCard key={index} image={item} />
+
             }}
           />
         </BottomSheetModal>
