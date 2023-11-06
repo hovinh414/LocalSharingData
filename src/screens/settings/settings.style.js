@@ -1,5 +1,7 @@
-import {StyleSheet} from 'react-native';
+import {StyleSheet, Dimensions} from 'react-native';
 import {COLORS} from '../../../constants';
+
+const {width, height} = Dimensions.get('window')
 
 const styles = StyleSheet.create({
   container: {
@@ -9,13 +11,56 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     paddingHorizontal: 20,
-    backgroundColor: COLORS.primary,
+    // backgroundColor: COLORS.primary,
+    alignItems: 'center'
   },
   headerText: {
-    fontSize: 24,
-    color: 'white',
+    fontSize: 30,
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
+
+  avatarContainer: {
+    alignItems: 'center',
+    // backgroundColor: 'red',
+    paddingTop: '5%',
+    marginBottom: '5%'
+  },
+
+  avatar: {
+    resizeMode: 'contain',
+    // backgroundColor: 'green',
+    marginBottom: '2%',
+    height: height * 0.25
+  },
+
+  name: {
+    color: COLORS.black,
+    fontSize: height * 0.025,
+  },
+
+  settingContainer: {
+    // backgroundColor:'yellow',
+    paddingVertical: '3%',
+    gap: 7,
+    paddingHorizontal: '1%'
+  },
+
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: '2%',
+    backgroundColor: '#f6f6f6',
+    paddingHorizontal: '2%',
+    borderRadius: 5
+  },
+
+  settingText: {
+    flex: 1,
+    marginLeft: '3%',
+    color: COLORS.black,
+    fontSize: height * 0.015
+  }
 });
 
 export default styles;
