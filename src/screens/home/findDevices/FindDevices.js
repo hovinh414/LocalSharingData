@@ -13,23 +13,31 @@ import styles from './findDevices.style';
 import DeviceCard from '../../../common/DeviceCard';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {images} from '../../../../constants';
-import {useSelector} from 'react-redux';
-import {onConnect} from '../../../../hook/FunctionsP2P';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  onConnect,
+  onCreateGroup,
+  onRemoveGroup,
+  onGetAvailableDevices,
+} from '../../../../hook/FunctionsP2P';
 
 export default function FindDevices({navigation}) {
   const devices = useSelector(state => state.P2P.devices);
+  const dispatch = useDispatch();
   console.log('Devices: ', devices);
 
   return (
-    <View style={{flex: 1, backgroundColor: '#fff'}}>
-      <ScrollView style={{paddingHorizontal: 20}}>
-        <View style={{marginBottom: 10}}>
-          <TouchableOpacity style={styles.createGroupBtn}>
-            <Text style={styles.btnLabel}>Create Group</Text>
+    <View style={styles.container}>
+      <ScrollView style={styles.container}>
+        <View style={styles.btnContainer}>
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={() => onGetAvailableDevices(dispatch)}>
+            <Text style={styles.btnLabel}>Find Devices</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={{paddingTop: 10, paddingBottom: 10, flex: 1}}>
+        <View style={{paddingHorizontal: 10}}>
           {devices.length !== 0 ? (
             <View>
               <Text
@@ -52,7 +60,7 @@ export default function FindDevices({navigation}) {
               style={{
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginTop: '20%',
+                marginVertical: '5%',
               }}>
               {/* <ActivityIndicator size='large' color='grey'/> */}
               <Image
@@ -64,6 +72,16 @@ export default function FindDevices({navigation}) {
               </Text>
             </View>
           )}
+        </View>
+
+        <View style={styles.btnContainer}>
+          <TouchableOpacity style={styles.btn} onPress={() => onCreateGroup()}>
+            <Text style={styles.btnLabel}>Create Group</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.btn} onPress={() => onRemoveGroup()}>
+            <Text style={styles.btnLabel}>Remove Group</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

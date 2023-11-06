@@ -57,28 +57,29 @@ const ChatDetail = ({navigation, route}) => {
   const connectionInterval = useRef(null);
 
   useEffect(() => {
+    // Lắng nghe sự thay đổi kết nối mạng
     const unsubcribe = NetInfo.addEventListener(state => {
       console.log('Connection type', state.type);
       console.log('Is connected?', state.isConnected);
     });
-    unsubcribe();
 
+    // Lấy địa chỉ IP thiết bị
     NetInfo.fetch().then(state =>
       console.log(['DEVICES IP'], state.details.ipAddress),
     );
 
+    // Tạo kết nối P2P
     connectionInterval.current = setInterval(() => {
       onGetConnectionInfo();
     }, 10000);
 
     if (isOwner) {
       // SERVER SIDE
-
-      // create the group
       console.log('[INFO] Creating the group...');
       onCreateGroup();
 
-      // onRemoveGroup();
+      // Khi kết nối được thiết lập, máy chủ sẽ bắt đầu nhận tin nhắn
+      // Đề xuất gọi getConnectionInfo tại phía máy chủ sau khi kết nối được thiết lập
       receiveInterval.current = setInterval(() => onReceiveMessage(), 100);
 
       // Creating a socket at the server side.
@@ -106,15 +107,6 @@ const ChatDetail = ({navigation, route}) => {
       server.on('close', () => {
         console.log('Server closed connection');
       });
-
-      let second_client = TcpSocket.createConnection(
-        {port: PORT, host: SERVER_IP},
-        () => {
-          console.log('Client connected successfully');
-        },
-      );
-
-      second_client.on('error', err => console.log(err));
     } else {
       // CLIENT SIDE
 
@@ -158,7 +150,7 @@ const ChatDetail = ({navigation, route}) => {
       */
 
       setTimeout(() => {
-        let c = io.connect('http://192.168.1.5:6000');
+        let c = io.connect('http://127.0.0.1:6000');
         console.log(c);
         c.on('data', data => {
           console.log(data);
@@ -201,7 +193,7 @@ const ChatDetail = ({navigation, route}) => {
             text: text,
             createAt: new Date(),
             user: {
-              _id: 1,
+              _id: 2,
             },
           },
         ];
@@ -221,7 +213,7 @@ const ChatDetail = ({navigation, route}) => {
         text: text,
         createdAt: new Date(),
         user: {
-          _id: 2,
+          _id: 1,
         },
       };
 
@@ -307,14 +299,15 @@ const ChatDetail = ({navigation, route}) => {
       CameraRoll.getPhotos({
         first: 20,
         assetType: 'All',
-        include: ['filename', 'playableDuration']
-      }).then(r => {
-        setRecentPhotos(r.edges)
-        // console.log(r.edges)
+        include: ['filename', 'playableDuration'],
       })
-        .catch(err => {
-          console.log(err)
+        .then(r => {
+          setRecentPhotos(r.edges);
+          // console.log(r.edges)
         })
+        .catch(err => {
+          console.log(err);
+        });
     }
   };
   const pickDocument = async () => {
@@ -335,20 +328,15 @@ const ChatDetail = ({navigation, route}) => {
     }
   };
 
-  // return (
-  //   <GiftedChat
-  //     messages={messages}
-  //     onSend={message => onSendMessage(message)}
-  //     user={{
-  //       _id: 2,
-  //     }}
-  //   />)
-
   return (
     <BottomSheetModalProvider>
       <KeyboardAvoidingView style={styles.container} enabled>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.goBack();
+              onRemoveGroup();
+            }}>
             <Image source={images.left} size={25} style={styles.imgBtn} />
           </TouchableOpacity>
           <Image
@@ -428,6 +416,9 @@ const ChatDetail = ({navigation, route}) => {
         <GiftedChat
           messages={messages}
           onSend={text => onSendMessage(text)}
+          user={{
+            _id: 1,
+          }}
           messagesContainerStyle={styles.messagesContainer}
           renderInputToolbar={props => (
             <View style={styles.bottomContainer}>
@@ -487,12 +478,24 @@ const ChatDetail = ({navigation, route}) => {
           style={styles.bottomSheet}
           backdropComponent={renderBackdrop}>
           <View style={styles.bottomSheetItemContainer}>
-          <TouchableOpacity style={styles.bottomSheetItem} onPress={takePhoto}>
-              <Ionicons name='images-outline' size={30} color={COLORS.primary} />
+            <TouchableOpacity
+              style={styles.bottomSheetItem}
+              onPress={takePhoto}>
+              <Ionicons
+                name="images-outline"
+                size={30}
+                color={COLORS.primary}
+              />
               <Text style={styles.btnText}>Take Photo</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.bottomSheetItem} onPress={recordVideo} >
-              <Ionicons name='videocam-outline' size={30} color={COLORS.primary} />
+            <TouchableOpacity
+              style={styles.bottomSheetItem}
+              onPress={recordVideo}>
+              <Ionicons
+                name="videocam-outline"
+                size={30}
+                color={COLORS.primary}
+              />
               <Text style={styles.btnText}>Record Video</Text>
             </TouchableOpacity>
           </View>
@@ -503,11 +506,12 @@ const ChatDetail = ({navigation, route}) => {
           index={1}
           snapPoints={imageSnapPoints}
           style={styles.bottomSheet}
-          backdropComponent={renderBackdrop}
-        >
+          backdropComponent={renderBackdrop}>
           <View style={styles.sendBtnContainer}>
-            <TouchableOpacity onPress={() => imageBottomSheetModalRef.current?.close()} style={styles.closeBtn}>
-              <Ionicons name='close' color={COLORS.primary} size={45} />
+            <TouchableOpacity
+              onPress={() => imageBottomSheetModalRef.current?.close()}
+              style={styles.closeBtn}>
+              <Ionicons name="close" color={COLORS.primary} size={45} />
             </TouchableOpacity>
 
             <View style={styles.allImagesTextContainer}>
@@ -515,11 +519,17 @@ const ChatDetail = ({navigation, route}) => {
             </View>
 
             <View style={{height: 45, width: 45}}>
-            {selectedImages.length !== 0
-              ? <TouchableOpacity style={styles.sendBtn} onPress={handleSendImages}>
-              <MaterialCommunityIcons name='send-circle' color={COLORS.primary} size={45} />
-            </TouchableOpacity>
-              : null}
+              {selectedImages.length !== 0 ? (
+                <TouchableOpacity
+                  style={styles.sendBtn}
+                  onPress={handleSendImages}>
+                  <MaterialCommunityIcons
+                    name="send-circle"
+                    color={COLORS.primary}
+                    size={45}
+                  />
+                </TouchableOpacity>
+              ) : null}
             </View>
           </View>
 
@@ -529,9 +539,8 @@ const ChatDetail = ({navigation, route}) => {
             numColumns={4}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.imageList}
-            renderItem={({ item, index }) => {
-              return <LibraryImageCard key={index} image={item} />
-
+            renderItem={({item, index}) => {
+              return <LibraryImageCard key={index} image={item} />;
             }}
           />
         </BottomSheetModal>

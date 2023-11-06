@@ -37,7 +37,7 @@ export const onConnect = (navigation, device) => {
   connect(device.deviceAddress)
     .then(() => console.log('Successfully connected'))
     .catch(err => console.error('Something gone wrong. Details: ', err));
-  const itemWithIsOwner = {...device, isOwner: false};
+  const itemWithIsOwner = {...device, isOwner: true};
   navigation.navigate('Chat Detail', itemWithIsOwner);
 };
 
@@ -87,6 +87,12 @@ export const onStartInvestigate = () => {
         `Something is gone wrong. Maybe your WiFi is disabled? Error details: ${err}`,
       ),
     );
+};
+
+export const onGetAvailableDevices = dispatch => {
+  getAvailablePeers().then(peers => {
+    dispatch(setDevices(peers.devices));
+  });
 };
 
 export const onGetConnectionInfo = () => {
