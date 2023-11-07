@@ -45,9 +45,9 @@ import {useDispatch, useSelector} from 'react-redux';
 import {removeAllSelectedImages} from '../../redux/reducers';
 
 const PORT = 6000;
-const IP = '192.168.49.1';
+// const IP = '192.168.49.1';
 const SERVER_IP = '127.0.0.1';
-const IPIDK = '25.226.115.47';
+// const IPIDK = '25.226.115.47';
 
 const ChatDetail = ({navigation, route}) => {
   // Server variables
@@ -55,6 +55,7 @@ const ChatDetail = ({navigation, route}) => {
   const {isOwner} = route.params;
   const receiveInterval = useRef(null);
   const connectionInterval = useRef(null);
+  const [serverStarted, setServerStarted] = useState(false);
 
   useEffect(() => {
     // Lắng nghe sự thay đổi kết nối mạng
@@ -62,6 +63,7 @@ const ChatDetail = ({navigation, route}) => {
       console.log('Connection type', state.type);
       console.log('Is connected?', state.isConnected);
     });
+    let server;
 
     // Lấy địa chỉ IP thiết bị
     NetInfo.fetch().then(state =>
@@ -73,18 +75,10 @@ const ChatDetail = ({navigation, route}) => {
       onGetConnectionInfo();
     }, 10000);
 
-    if (isOwner) {
-      // SERVER SIDE
-      console.log('[INFO] Creating the group...');
-      onCreateGroup();
-
-      // Khi kết nối được thiết lập, máy chủ sẽ bắt đầu nhận tin nhắn
-      // Đề xuất gọi getConnectionInfo tại phía máy chủ sau khi kết nối được thiết lập
-      receiveInterval.current = setInterval(() => onReceiveMessage(), 100);
-
-      // Creating a socket at the server side.
+    // Function to handle creating a server
+    const handleCreateServer = () => {
       console.log('[SOCKET] Creating socket at the server side');
-      let server = TcpSocket.createServer(socket => {
+      server = TcpSocket.createServer(socket => {
         socket.write('hello from server');
 
         socket.on('data', data => Alert.alert(data));
@@ -96,8 +90,14 @@ const ChatDetail = ({navigation, route}) => {
         socket.on('close', error => {
           console.log('Closed connection with ', socket.address());
         });
-      }).listen({port: PORT, host: SERVER_IP}, () => {
+      });
+
+      server.listen({port: PORT, host: SERVER_IP}, () => {
         console.log('Server is up and running on', PORT, SERVER_IP);
+        setServerStarted(true);
+
+        // Khi kết nối được thiết lập, máy chủ sẽ bắt đầu nhận tin nhắn
+        receiveInterval.current = setInterval(() => onReceiveMessage(), 100);
       });
 
       server.on('error', error => {
@@ -106,7 +106,37 @@ const ChatDetail = ({navigation, route}) => {
 
       server.on('close', () => {
         console.log('Server closed connection');
+        setServerStarted(false);
       });
+    };
+
+    // Function to handle creating a client
+    const handleCreateClient = () => {
+      // Create socket
+      const client = TcpSocket.createConnection(
+        {port: PORT, host: SERVER_IP, localAddress: SERVER_IP},
+        () => {
+          // Write on the socket
+          client.write('Hello server from client!');
+
+          client.on('error', error => {
+            console.log('An error occurred with the client socket', error);
+          });
+
+          client.on('close', () => {
+            console.log('Client closed connection');
+          });
+        },
+      );
+    };
+
+    if (isOwner) {
+      // SERVER SIDE
+      console.log('[INFO] Creating the group...');
+      onCreateGroup();
+
+      // Create the server socket
+      handleCreateServer();
     } else {
       // CLIENT SIDE
 
@@ -116,8 +146,11 @@ const ChatDetail = ({navigation, route}) => {
           console.log('[INFO] Client connected to the group');
         })
         .catch(err =>
-          console.log('[FATAL] Unable to connect with the server group'),
+          console.log('[FATAL] Unable to connect with the server group: ', err),
         );
+
+      // Function to handle creating a client
+      handleCreateClient();
 
       setTimeout(() => {
         getConnectionInfo().then(info => {
@@ -135,7 +168,10 @@ const ChatDetail = ({navigation, route}) => {
             console.log('[INFO] Message from client -> server', metaInfo),
           )
           .catch(err =>
-            console.log('[ERROR] Error sending message from client -> server'),
+            console.log(
+              '[ERROR] Error sending message from client -> server: ',
+              err,
+            ),
           );
       }, 5000);
 
@@ -163,8 +199,16 @@ const ChatDetail = ({navigation, route}) => {
     }
 
     return () => {
-      clearInterval(receiveInterval);
-      clearInterval(connectionInterval);
+      clearInterval(receiveInterval.current);
+      clearInterval(connectionInterval.current);
+      if (serverStarted) {
+        server.close(() => {
+          console.log('Server closed');
+        });
+        setServerStarted(false);
+      }
+
+      unsubcribe();
     };
   }, []);
 
@@ -201,7 +245,7 @@ const ChatDetail = ({navigation, route}) => {
           GiftedChat.append(previousMessages, msg),
         );
       })
-      .catch(err => console.log('[FATAL] Unable to receive messages'));
+      .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
   };
   const onSendMessage = useCallback((text = []) => {
     console.log;
@@ -213,7 +257,7 @@ const ChatDetail = ({navigation, route}) => {
         text: text,
         createdAt: new Date(),
         user: {
-          _id: 1,
+          _id: 1, // Tin nhắn của phía người nhắn
         },
       };
 
@@ -231,7 +275,9 @@ const ChatDetail = ({navigation, route}) => {
         .then(metaInfo =>
           console.log('[INFO] Send client message successfully', metaInfo),
         )
-        .catch(err => console.log('[FATAL] Unable to send client message'));
+        .catch(err =>
+          console.log('[FATAL] Unable to send client message: ', err),
+        );
     }
   }, []);
   const handleSendMessage = () => {

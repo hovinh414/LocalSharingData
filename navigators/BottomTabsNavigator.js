@@ -3,9 +3,10 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BottomFabBar} from 'rn-wave-bottom-bar';
 import Icon from 'react-native-vector-icons/AntDesign';
+import Octicons from 'react-native-vector-icons/Octicons';
 import Home from '../src/screens/home/Home';
 import Chat from '../src/screens/chat/Chat';
-import ChatDetail from '../src/screens/chat/ChatDetail';
+import Task from '../src/screens/tasks/Task';
 import Settings from '../src/screens/settings/Settings';
 import {COLORS, SHADOWS, SIZES} from '../constants';
 
@@ -15,6 +16,15 @@ const Bottom = createBottomTabNavigator();
 const HomeTabIcon = ({focused}) => (
   <Icon
     name="home"
+    size={SIZES.xLarge}
+    color={focused ? COLORS.yellow : COLORS.white}
+    style={styles.tabBarIcon}
+  />
+);
+
+const TasksTabIcon = ({focused}) => (
+  <Icon
+    name="task"
     size={SIZES.xLarge}
     color={focused ? COLORS.yellow : COLORS.white}
     style={styles.tabBarIcon}
@@ -67,6 +77,11 @@ function BottomTabs() {
         name="Home"
         component={Home}
         options={{tabBarIcon: HomeTabIcon}}
+      />
+      <Bottom.Screen
+        name="Tasks"
+        component={Task}
+        options={{tabBarIcon: TasksTabIcon}}
       />
       <Bottom.Screen
         name="Chat"
