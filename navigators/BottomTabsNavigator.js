@@ -24,7 +24,7 @@ const HomeTabIcon = ({focused}) => (
 
 const TasksTabIcon = ({focused}) => (
   <Icon
-    name="task"
+    name="carryout"
     size={SIZES.xLarge}
     color={focused ? COLORS.yellow : COLORS.white}
     style={styles.tabBarIcon}

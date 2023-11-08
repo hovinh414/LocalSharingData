@@ -4,21 +4,26 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabsNavigator';
 import ChatDetail from '../src/screens/chat/ChatDetail';
+import TaskDetail from '../src/screens/tasks/TaskDetail';
 
 const Stack = createStackNavigator();
 
 function StackTabs() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="Task Detail">
       <Stack.Screen
         name="BottomTabsNavigator"
         component={BottomTabNavigator}
         options={{headerShown: false}}
       />
-      {/* <Stack.Screen name="Chat Wifi P2P" component={} />  */}
       <Stack.Screen
         name="Chat Detail"
         component={ChatDetail}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Task Detail"
+        component={TaskDetail}
         options={{headerShown: false}}
       />
     </Stack.Navigator>
