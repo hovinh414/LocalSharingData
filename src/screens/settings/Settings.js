@@ -10,6 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const { width, height } = Dimensions.get('window')
 
+const ICON_SIZE = height * 0.029
+
 const Settings = () => {
   const [avatar, setAvatar] = useState(profile)
   const [name, setName] = useState('Ho va ten')
@@ -38,21 +40,21 @@ const Settings = () => {
 
       <View style={styles.settingContainer}>
         <TouchableOpacity style={styles.settingItem}>
-          <Ionicons name='person-outline' size={height * 0.02} color={COLORS.black} />
+          <Ionicons name='person-outline' size={ICON_SIZE} color={COLORS.black} />
 
           <Text style={styles.settingText}>Profile</Text>
 
-          <Ionicons name='chevron-forward' size={height * 0.02} color={COLORS.black} />
+          <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black} />
         </TouchableOpacity>
 
         <View style={styles.settingItem}>
-          <MaterialIcons name='dark-mode' size={height * 0.02} color={COLORS.black} />
+          <MaterialIcons name='dark-mode' size={ICON_SIZE} color={COLORS.black} />
 
           <Text style={styles.settingText}>Dark Mode</Text>
 
           <Switch
             trackColor={{ false: '#767577', true: COLORS.primary }}
-            thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+            thumbColor={isEnabled ? COLORS.yellow : '#f4f3f4'}
             ios_backgroundColor="#3e3e3e"
             onValueChange={toggleSwitch}
             value={isEnabled}
@@ -60,27 +62,27 @@ const Settings = () => {
         </View>
 
         <TouchableOpacity style={styles.settingItem}>
-          <MaterialIcons name='lock-outline' size={height * 0.02} color={COLORS.black} />
+          <MaterialIcons name='lock-outline' size={ICON_SIZE} color={COLORS.black}/>
 
           <Text style={styles.settingText}>Privacy</Text>
 
-          <Ionicons name='chevron-forward' size={height * 0.02} color={COLORS.black} />
+          <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black}/>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.settingItem}>
-          <Ionicons name='information-circle-outline' size={height * 0.02} color={COLORS.black} />
+          <Ionicons name='information-circle-outline' size={ICON_SIZE} color={COLORS.black} />
 
           <Text style={styles.settingText}>About</Text>
 
-          <Ionicons name='chevron-forward' size={height * 0.02} color={COLORS.black} />
+          <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.settingItem}>
-          <MaterialIcons name='logout' size={height * 0.02} color={COLORS.black} />
+          <MaterialIcons name='logout' size={ICON_SIZE} color={COLORS.black} />
 
           <Text style={styles.settingText}>Log out</Text>
 
-          <Ionicons name='chevron-forward' size={height * 0.02} color={COLORS.black} />
+          <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black} />
         </TouchableOpacity>
       </View>
     </ScrollView>

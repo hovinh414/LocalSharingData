@@ -3,6 +3,8 @@ import {COLORS} from '../../../constants';
 
 const {width, height} = Dimensions.get('window')
 
+const settingText = height * 0.02
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -31,25 +33,25 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     // backgroundColor: 'green',
     marginBottom: '2%',
-    height: height * 0.25
+    height: height * 0.15
   },
 
   name: {
     color: COLORS.black,
-    fontSize: height * 0.025,
+    fontSize: height * 0.033,
   },
 
   settingContainer: {
     // backgroundColor:'yellow',
     paddingVertical: '3%',
-    gap: 7,
+    gap: 8,
     paddingHorizontal: '1%'
   },
 
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: '2%',
+    paddingVertical: '3%',
     backgroundColor: '#f6f6f6',
     paddingHorizontal: '2%',
     borderRadius: 5
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: '3%',
     color: COLORS.black,
-    fontSize: height * 0.015
+    fontSize: settingText
   }
 });
 

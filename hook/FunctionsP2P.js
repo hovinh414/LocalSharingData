@@ -37,7 +37,7 @@ export const onConnect = (navigation, device) => {
   connect(device.deviceAddress)
     .then(() => console.log('Successfully connected'))
     .catch(err => console.error('Something gone wrong. Details: ', err));
-  const itemWithIsOwner = {...device, isOwner: true};
+  const itemWithIsOwner = {...device, isOwner: false};
   navigation.navigate('Chat Detail', itemWithIsOwner);
 };
 

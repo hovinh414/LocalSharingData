@@ -10,7 +10,7 @@ const Stack = createStackNavigator();
 
 function StackTabs() {
   return (
-    <Stack.Navigator initialRouteName="Task Detail">
+    <Stack.Navigator>
       <Stack.Screen
         name="BottomTabsNavigator"
         component={BottomTabNavigator}

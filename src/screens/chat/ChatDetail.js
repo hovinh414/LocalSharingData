@@ -13,8 +13,8 @@ import {COLORS} from '../../../constants';
 import {images} from '../../../constants';
 import {
   connect,
-  receiveMessage,
   sendMessage,
+  receiveMessage,
   getConnectionInfo,
 } from 'react-native-wifi-p2p';
 import styles from './chatDetail.style';
@@ -56,6 +56,9 @@ const ChatDetail = ({navigation, route}) => {
   const receiveInterval = useRef(null);
   const connectionInterval = useRef(null);
   const [serverStarted, setServerStarted] = useState(false);
+  let server = useRef();
+  let client = useRef();
+  let socketRef = useRef(null);
 
   useEffect(() => {
     // Lắng nghe sự thay đổi kết nối mạng
@@ -63,7 +66,6 @@ const ChatDetail = ({navigation, route}) => {
       console.log('Connection type', state.type);
       console.log('Is connected?', state.isConnected);
     });
-    let server;
 
     // Lấy địa chỉ IP thiết bị
     NetInfo.fetch().then(state =>
@@ -78,10 +80,30 @@ const ChatDetail = ({navigation, route}) => {
     // Function to handle creating a server
     const handleCreateServer = () => {
       console.log('[SOCKET] Creating socket at the server side');
-      server = TcpSocket.createServer(socket => {
+      server.current = TcpSocket.createServer(socket => {
         socket.write('hello from server');
 
-        socket.on('data', data => Alert.alert(data));
+        // socket.on('data', data => Alert.alert(data));
+        socket.on('data', data => {
+          // Process the received data
+          const receivedText = data.toString();
+          console.log('Received data from client:', receivedText);
+
+          // Here, you can handle the received data as needed
+          const newMessage = {
+            _id: Math.random().toString(),
+            text: receivedText,
+            createdAt: new Date(),
+            user: {
+              _id: 2, // Tin nhắn từ phía máy khách
+            },
+          };
+
+          // Add the received message to your chat interface
+          setMessages(previousMessages =>
+            GiftedChat.append(previousMessages, [newMessage]),
+          );
+        });
 
         socket.on('error', error =>
           console.log('An error ocurred with client socket ', error),
@@ -92,19 +114,22 @@ const ChatDetail = ({navigation, route}) => {
         });
       });
 
-      server.listen({port: PORT, host: SERVER_IP}, () => {
+      server.current.listen({port: PORT, host: SERVER_IP}, () => {
         console.log('Server is up and running on', PORT, SERVER_IP);
         setServerStarted(true);
+
+        // Store the socket in the ref
+        socketRef.current = server;
 
         // Khi kết nối được thiết lập, máy chủ sẽ bắt đầu nhận tin nhắn
         receiveInterval.current = setInterval(() => onReceiveMessage(), 100);
       });
 
-      server.on('error', error => {
+      server.current.on('error', error => {
         console.log('An error ocurred with the server', error);
       });
 
-      server.on('close', () => {
+      server.current.on('close', () => {
         console.log('Server closed connection');
         setServerStarted(false);
       });
@@ -113,21 +138,43 @@ const ChatDetail = ({navigation, route}) => {
     // Function to handle creating a client
     const handleCreateClient = () => {
       // Create socket
-      const client = TcpSocket.createConnection(
+      client.current = TcpSocket.createConnection(
         {port: PORT, host: SERVER_IP, localAddress: SERVER_IP},
         () => {
-          // Write on the socket
-          client.write('Hello server from client!');
-
-          client.on('error', error => {
-            console.log('An error occurred with the client socket', error);
-          });
-
-          client.on('close', () => {
-            console.log('Client closed connection');
-          });
+          console.log('Connected to server');
         },
       );
+
+      // Write on the socket
+      client.current.write('Hello server from client!');
+
+      client.current.on('data', data => {
+        const receivedText = data.toString();
+        console.log('Received data from server:', receivedText);
+
+        // Process the received data as needed
+        const newMessage = {
+          _id: Math.random().toString(),
+          text: receivedText,
+          createdAt: new Date(),
+          user: {
+            _id: 2, // Tin nhắn từ phía máy chủ
+          },
+        };
+
+        // Add the received message to your chat interface
+        setMessages(previousMessages =>
+          GiftedChat.append(previousMessages, [newMessage]),
+        );
+      });
+
+      client.current.on('error', error => {
+        console.log('An error occurred with the client socket', error);
+      });
+
+      client.current.on('close', () => {
+        console.log('Client closed connection');
+      });
     };
 
     if (isOwner) {
@@ -189,11 +236,11 @@ const ChatDetail = ({navigation, route}) => {
         let c = io.connect('http://127.0.0.1:6000');
         console.log(c);
         c.on('data', data => {
-          console.log(data);
+          console.log('Data: ', data);
         });
 
         c.on('error', err => {
-          console.log(err);
+          console.log('Err: ', err);
         });
       }, 10000);
     }
@@ -202,7 +249,7 @@ const ChatDetail = ({navigation, route}) => {
       clearInterval(receiveInterval.current);
       clearInterval(connectionInterval.current);
       if (serverStarted) {
-        server.close(() => {
+        server.current.close(() => {
           console.log('Server closed');
         });
         setServerStarted(false);
@@ -216,16 +263,7 @@ const ChatDetail = ({navigation, route}) => {
   const dispatch = useDispatch();
   const messageRef = useRef('');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      _id: Math.random(1000).toString(),
-      text: 'alo',
-      createAt: new Date(),
-      user: {
-        _id: 1,
-      },
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const selectedImages = useSelector(state => state.P2P.selectedImages);
 
   const onReceiveMessage = () => {
@@ -248,9 +286,16 @@ const ChatDetail = ({navigation, route}) => {
       .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
   };
   const onSendMessage = useCallback((text = []) => {
-    console.log;
     // Kiểm tra xem nội dung tin nhắn có được điền hay không
     if (text) {
+      if (isOwner) {
+        // Ensure that the server is available and it has an active socket
+        if (socketRef.current) {
+          console.log(socketRef.current);
+          socketRef.current.socket.write(text);
+        }
+      }
+    } else {
       // Tạo một đối tượng tin nhắn
       const newMessage = {
         _id: Math.random().toString(),
@@ -461,7 +506,7 @@ const ChatDetail = ({navigation, route}) => {
 
         <GiftedChat
           messages={messages}
-          onSend={text => onSendMessage(text)}
+          // onSend={text => onSendMessage(text)}
           user={{
             _id: 1,
           }}
