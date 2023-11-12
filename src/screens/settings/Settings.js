@@ -12,7 +12,7 @@ const { width, height } = Dimensions.get('window')
 
 const ICON_SIZE = height * 0.029
 
-const Settings = () => {
+const Settings = ({navigation}) => {
   const [avatar, setAvatar] = useState(profile)
   const [name, setName] = useState('Ho va ten')
   const [isEnabled, setIsEnabled] = useState(false);
@@ -77,7 +77,7 @@ const Settings = () => {
           <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} style={styles.settingItem}>
           <MaterialIcons name='logout' size={ICON_SIZE} color={COLORS.black} />
 
           <Text style={styles.settingText}>Log out</Text>

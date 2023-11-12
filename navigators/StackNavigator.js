@@ -5,7 +5,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabsNavigator';
 import ChatDetail from '../src/screens/chat/ChatDetail';
 import TaskDetail from '../src/screens/tasks/TaskDetail';
-
+import LoginScreen from '../src/screens/auth/LoginScreen';
 const Stack = createStackNavigator();
 
 function StackTabs() {
@@ -24,6 +24,11 @@ function StackTabs() {
       <Stack.Screen
         name="Task Detail"
         component={TaskDetail}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="LoginScreen"
+        component={LoginScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

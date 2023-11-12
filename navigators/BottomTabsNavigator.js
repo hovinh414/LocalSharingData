@@ -8,6 +8,7 @@ import Home from '../src/screens/home/Home';
 import Chat from '../src/screens/chat/Chat';
 import Task from '../src/screens/tasks/Task';
 import Settings from '../src/screens/settings/Settings';
+import LoginScreen from '../src/screens/auth/LoginScreen';
 import {COLORS, SHADOWS, SIZES} from '../constants';
 
 const Bottom = createBottomTabNavigator();
