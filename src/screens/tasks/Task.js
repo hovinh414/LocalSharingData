@@ -18,17 +18,17 @@ import TaskCard from '../../common/TaskCard';
 import noTasks from '../../../assets/images/no-task.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import TaskTopTabNavigator from '../../../navigators/TaskTopTabNavigator';
-import { useDispatch, useSelector } from 'react-redux';
-import { setTaskList } from '../../redux/reducers';
+import {useDispatch, useSelector} from 'react-redux';
+import {setTaskList} from '../../redux/reducers';
 
 const Task = ({navigation}) => {
   let today = moment().format('YYYY-MM-DD');
   const [date, setDate] = useState(today);
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(setTaskList(tasks.filter(task => task.date === date)))
+    dispatch(setTaskList(tasks.filter(task => task.date === date)));
   }, [date]);
 
   const markedDatesFunc = today => [
@@ -75,11 +75,14 @@ const Task = ({navigation}) => {
         maxDate={moment().add(10, 'days')}
       />
 
-      <TouchableOpacity onPress={() => navigation.navigate('AddTask')} style={styles.buttonAdd}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('AddTask')}
+        style={styles.buttonAdd}>
         <Ionicons name="add-outline" size={32} color={COLORS.white} />
       </TouchableOpacity>
 
-      <TaskTopTabNavigator/>
+      <TaskTopTabNavigator />
     </SafeAreaView>
   );
 };
