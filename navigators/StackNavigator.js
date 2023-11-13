@@ -6,6 +6,8 @@ import BottomTabNavigator from './BottomTabsNavigator';
 import ChatDetail from '../src/screens/chat/ChatDetail';
 import TaskDetail from '../src/screens/tasks/TaskDetail';
 import LoginScreen from '../src/screens/auth/LoginScreen';
+import AddTask from '../src/screens/tasks/AddTask';
+
 const Stack = createStackNavigator();
 
 function StackTabs() {
@@ -31,6 +33,17 @@ function StackTabs() {
         component={LoginScreen}
         options={{headerShown: false}}
       />
+      <Stack.Screen
+        name="AddTask"
+        component={AddTask}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+          animationTypeForReplace: 'push',
+          animation: 'slide_from_bottom',
+        }}
+      />
+
     </Stack.Navigator>
   );
 }

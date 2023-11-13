@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { COLORS } from '../../../constants';
+import {StyleSheet} from 'react-native';
+import {COLORS} from '../../../constants';
 
 const styles = StyleSheet.create({
   container: {
@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     height: '13%',
     borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20
+    borderBottomRightRadius: 20,
   },
 
   filterContainer: {
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     gap: 20,
     marginHorizontal: '3%',
     marginTop: '2%',
-    borderRadius: 5
+    borderRadius: 5,
   },
 
   filterItem: {
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     width: '30%',
     alignItems: 'center',
-    borderRadius: 10
+    borderRadius: 10,
   },
 
   activeFilterItem: {
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
 
   filterText: {
     fontWeight: '500',
-    fontSize: 14
+    fontSize: 14,
   },
 
   activeFilterText: {
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
 
   inactiveFilterText: {
-    color: COLORS.gray
+    color: COLORS.gray,
   },
 
   taskList: {
@@ -70,19 +70,48 @@ const styles = StyleSheet.create({
     marginBottom: '20%',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 10
+    gap: 10,
   },
 
   noTasksImage: {
     height: '25%',
-    resizeMode: 'contain'
+    resizeMode: 'contain',
   },
 
   noTasks: {
     fontSize: 15,
     fontWeight: '500',
-    color: COLORS.gray
-  }
+    color: COLORS.gray,
+  },
+  buttonAdd: {
+    zIndex: 999,
+    position: 'absolute',
+    bottom: 80,
+    right: 10,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.75,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  textAdd: {
+    fontWeight: 'bold',
+    fontSize: 17,
+  },
+  imageAdd: {
+    width: 32,
+    height: 32,
+  },
 });
 
 export default styles;
