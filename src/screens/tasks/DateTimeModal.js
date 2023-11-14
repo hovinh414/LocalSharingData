@@ -8,6 +8,7 @@ import DatePicker from 'react-native-modern-datepicker';
 import styles from './addTask.style';
 import {COLORS} from '../../../constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {addYears, format, addDays, parse} from 'date-fns';
 const DateTimeModal = ({
   visible,
   onDateChanged,
