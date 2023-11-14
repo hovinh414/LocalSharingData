@@ -1,11 +1,11 @@
 import React from 'react'
 import {View, Text, SafeAreaView, Image, FlatList} from 'react-native'
 import { useSelector } from 'react-redux'
-import filterTasks from '../filterTasks'
+import filterTasks from '../methods/filterTasks'
 import styles from '../task.style'
 import noTasks from '../../../../assets/images/no-task.png'
 import TaskCard from '../../../common/TaskCard'
-import sortTasks from '../sortTasks'
+import sortTasks from '../methods/sortTasks'
 
 const CompletedTasks = () => {
   const taskList = useSelector(state => state.P2P.taskList)

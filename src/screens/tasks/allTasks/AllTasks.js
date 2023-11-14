@@ -4,7 +4,8 @@ import styles from '../task.style'
 import TaskCard from '../../../common/TaskCard'
 import noTasks from '../../../../assets/images/no-task.png'
 import { useSelector } from 'react-redux'
-import sortTasks from '../sortTasks'
+import sortTasks from '../methods/sortTasks'
+import { COLORS } from '../../../../constants'
 
 const AllTasks = () => {
   const taskList = useSelector(state => state.P2P.taskList)
@@ -12,7 +13,7 @@ const AllTasks = () => {
   sortedTasks = sortTasks(taskList)
   
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
       {sortedTasks.length === 0 ? (
         <View style={styles.noTasksContainer}>
           <Image source={noTasks} style={styles.noTasksImage} />

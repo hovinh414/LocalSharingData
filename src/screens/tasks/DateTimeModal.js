@@ -1,14 +1,10 @@
 import React from 'react';
 import {
   Modal,
-  StyleSheet,
   TouchableOpacity,
-  Text,
   View,
-  Image,
 } from 'react-native';
 import DatePicker from 'react-native-modern-datepicker';
-import {addYears, format, addDays, parse} from 'date-fns';
 import styles from './addTask.style';
 import {COLORS} from '../../../constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';

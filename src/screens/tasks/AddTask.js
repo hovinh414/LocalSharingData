@@ -13,15 +13,12 @@ import styles from './addTask.style';
 import {COLORS} from '../../../constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import DateTimeModal from './DateTimeModal';
-import {addYears, format, addDays, parse, daysInWeek} from 'date-fns';
-import moment from 'moment';
-import { da } from 'date-fns/locale';
+
 const AddTask = ({navigation}) => {
   const [detailTasks, setDetailTasks] = useState([]);
   const [date, setDate] = useState();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const formattedTime = moment(date).format('DD/MM/YYYY HH:mm');
   const handleAddTask = () => {
     const newTask = {isDone: false, description: ''};
     setDetailTasks([...detailTasks, newTask]);
