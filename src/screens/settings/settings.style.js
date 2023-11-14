@@ -7,14 +7,16 @@ const settingText = height * 0.02
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: COLORS.white,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingLeft: 12,
   },
   header: {
-    padding: 16,
-    paddingHorizontal: 20,
-    // backgroundColor: COLORS.primary,
-    alignItems: 'center'
+    marginHorizontal: 12,
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   headerText: {
     fontSize: 30,
@@ -31,9 +33,10 @@ const styles = StyleSheet.create({
 
   avatar: {
     resizeMode: 'contain',
-    // backgroundColor: 'green',
     marginBottom: '2%',
-    height: height * 0.15
+    height: 120,
+    width:120,
+    borderRadius:60,
   },
 
   name: {
@@ -58,10 +61,10 @@ const styles = StyleSheet.create({
   },
 
   settingText: {
-    flex: 1,
-    marginLeft: '3%',
+    marginVertical: 10,
+    fontWeight: 'bold',
+    fontSize: 18,
     color: COLORS.black,
-    fontSize: settingText
   }
 });
 

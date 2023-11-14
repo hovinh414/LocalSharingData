@@ -1,89 +1,205 @@
-import { Text, View, ScrollView, Switch, Image, TouchableOpacity, Dimensions } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Image,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {COLORS} from '../../../constants';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './settings.style';
-import profile from '../../../assets/images/profile.png'
-import Ionicons from 'react-native-vector-icons/Ionicons'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { COLORS } from '../../../constants';
-import { setDarkMode } from '../../redux/reducers';
-import { useDispatch, useSelector } from 'react-redux';
-
-const { width, height } = Dimensions.get('window')
-
-const ICON_SIZE = height * 0.029
-
+import profile from '../../../assets/images/profile.png';
 const Settings = ({navigation}) => {
-  const [avatar, setAvatar] = useState(profile)
-  const [name, setName] = useState('Ho va ten')
-  const [isEnabled, setIsEnabled] = useState(false);
+  const navigateToEditProfile = () => {
+    navigation.navigate('EditProfile');
+  };
 
+  const navigateToSecurity = () => {
+    console.log('Security function');
+  };
 
-  const dispatch = useDispatch()
-  const darkMode = useSelector(state => state.P2P.darkMode)
+  const navigateToNotifications = () => {
+    console.log('Notifications function');
+  };
 
-  const toggleSwitch = () => {
-    dispatch(setDarkMode(!isEnabled))
-    setIsEnabled(!isEnabled)
-  }
+  const navigateToPrivacy = () => {
+    console.log('Privacy function');
+  };
+
+  const navigateToSubscription = () => {
+    console.log('Subscription function');
+  };
+
+  const navigateToSupport = () => {
+    console.log('Support function');
+  };
+
+  const navigateToTermsAndPolicies = () => {
+    console.log('Terms and Policies function');
+  };
+
+  const navigateToFreeSpace = () => {
+    console.log('Free Space function');
+  };
+
+  const navigateToDateSaver = () => {
+    console.log('Date saver');
+  };
+
+  const navigateToReportProblem = () => {
+    console.log('Report a problem');
+  };
+
+  const addAccount = () => {
+    console.log('Aadd account ');
+  };
+
+  const logout = () => {
+    Alert.alert('Notification', 'Do you want to log out?', [
+      {
+        text: 'Cencel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {
+        text: 'Log out',
+        onPress: () => {
+          navigation.navigate('LoginScreen');
+        },
+      },
+    ]);
+  };
+
+  const accountItems = [
+    {
+      icon: 'person-outline',
+      text: 'Edit Profile',
+      action: navigateToEditProfile,
+    },
+    {icon: 'lock-closed-outline', text: 'Security', action: navigateToSecurity},
+    {
+      icon: 'notifications-outline',
+      text: 'Notifications',
+      action: navigateToNotifications,
+    },
+    {
+      icon: 'shield-checkmark-outline',
+      text: 'Privacy',
+      action: navigateToPrivacy,
+    },
+  ];
+
+  const supportItems = [
+    {
+      icon: 'card-outline',
+      text: 'My Subscription',
+      action: navigateToSubscription,
+    },
+    {
+      icon: 'help-circle-outline',
+      text: 'Help & Support',
+      action: navigateToSupport,
+    },
+    {
+      icon: 'information-circle-outline',
+      text: 'Terms and Policies',
+      action: navigateToTermsAndPolicies,
+    },
+  ];
+
+  const actionsItems = [
+    {
+      icon: 'flag-outline',
+      text: 'Report a problem',
+      action: navigateToReportProblem,
+    },
+    {icon: 'people-outline', text: 'Add Account', action: addAccount},
+    {icon: 'log-out-outline', text: 'Log out', action: logout},
+  ];
+  const [name, setName] = useState('Hoang Nhi');
+  const renderSettingsItem = ({icon, text, action}) => (
+    <TouchableOpacity onPress={action} style={styles.container}>
+      <Ionicons name={icon} size={24} color="black" />
+      <Text
+        style={{
+          marginLeft: 36,
+          fontWeight: 600,
+          fontSize: 16,
+          color: COLORS.black,
+        }}>
+        {text}{' '}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={{
+        flex: 1,
+        marginBottom:80,
+      }}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Settings</Text>
+        <Text style={{fontWeight: 'bold', fontSize: 22, color: COLORS.black}}>
+          Settings
+        </Text>
       </View>
-
       <View style={styles.avatarContainer}>
-        <Image source={avatar} style={styles.avatar} />
+        <Image source={profile} style={styles.avatar} />
 
         <Text style={styles.name}>{name}</Text>
       </View>
-
-      <View style={styles.settingContainer}>
-        <TouchableOpacity style={styles.settingItem}>
-          <Ionicons name='person-outline' size={ICON_SIZE} color={COLORS.black} />
-
-          <Text style={styles.settingText}>Profile</Text>
-
-          <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black} />
-        </TouchableOpacity>
-
-        <View style={styles.settingItem}>
-          <MaterialIcons name='dark-mode' size={ICON_SIZE} color={COLORS.black} />
-
-          <Text style={styles.settingText}>Dark Mode</Text>
-
-          <Switch
-            trackColor={{ false: '#767577', true: COLORS.primary }}
-            thumbColor={isEnabled ? COLORS.yellow : '#f4f3f4'}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
+      <View style={{marginHorizontal: 12}}>
+        {/* Account Settings */}
+        <View style={{marginBottom: 12}}>
+          <Text style={styles.settingText}>Account</Text>
+          <View
+            style={{
+              borderRadius: 12,
+              backgroundColor: '#E8E8E8',
+            }}>
+            {accountItems.map((item, index) => (
+              <React.Fragment key={index}>
+                {renderSettingsItem(item)}
+              </React.Fragment>
+            ))}
+          </View>
         </View>
 
-        <TouchableOpacity style={styles.settingItem}>
-          <MaterialIcons name='lock-outline' size={ICON_SIZE} color={COLORS.black}/>
+        {/* Support and About settings */}
 
-          <Text style={styles.settingText}>Privacy</Text>
+        <View style={{marginBottom: 12}}>
+          <Text style={styles.settingText}>Support & About </Text>
+          <View
+            style={{
+              borderRadius: 12,
+              backgroundColor: '#E8E8E8',
+            }}>
+            {supportItems.map((item, index) => (
+              <React.Fragment key={index}>
+                {renderSettingsItem(item)}
+              </React.Fragment>
+            ))}
+          </View>
+        </View>
 
-          <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black}/>
-        </TouchableOpacity>
+        {/* Actions Settings */}
 
-        <TouchableOpacity style={styles.settingItem}>
-          <Ionicons name='information-circle-outline' size={ICON_SIZE} color={COLORS.black} />
-
-          <Text style={styles.settingText}>About</Text>
-
-          <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black} />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} style={styles.settingItem}>
-          <MaterialIcons name='logout' size={ICON_SIZE} color={COLORS.black} />
-
-          <Text style={styles.settingText}>Log out</Text>
-
-          <Ionicons name='chevron-forward' size={ICON_SIZE} color={COLORS.black} />
-        </TouchableOpacity>
+        <View style={{marginBottom: 12}}>
+          <Text style={styles.settingText}>Actions</Text>
+          <View
+            style={{
+              borderRadius: 12,
+              backgroundColor: '#E8E8E8',
+            }}>
+            {actionsItems.map((item, index) => (
+              <React.Fragment key={index}>
+                {renderSettingsItem(item)}
+              </React.Fragment>
+            ))}
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
