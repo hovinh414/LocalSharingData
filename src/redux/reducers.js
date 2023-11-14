@@ -7,7 +7,7 @@ const initialState = {
   subscriptionOnThisDeviceChanged: {},
   selectedImages: [],
   darkMode: false,
-  taskList: []
+  taskList: [],
 };
 
 const p2pSlice = createSlice({
@@ -27,14 +27,19 @@ const p2pSlice = createSlice({
       state.subscriptionOnThisDeviceChanged = action.payload;
     },
     selectedImagesList: (state, action) => {
-      const check = state.selectedImages.find(image => image.node.image.filename === action.payload.node.image.filename)
-        // const check = state.selectedImages.find(image => image.node.timestamp === action.payload.node.timestamp)
-        
-        if (check) {
-        state.selectedImages = state.selectedImages.filter(image => image.node.image.filename !== action.payload.node.image.filename)
-      }
-      else {
-        state.selectedImages.push(action.payload)
+      const check = state.selectedImages.find(
+        image =>
+          image.node.image.filename === action.payload.node.image.filename,
+      );
+      // const check = state.selectedImages.find(image => image.node.timestamp === action.payload.node.timestamp)
+
+      if (check) {
+        state.selectedImages = state.selectedImages.filter(
+          image =>
+            image.node.image.filename !== action.payload.node.image.filename,
+        );
+      } else {
+        state.selectedImages.push(action.payload);
       }
 
       // console.log(state.selectedImages)
@@ -44,11 +49,11 @@ const p2pSlice = createSlice({
     },
 
     setDarkMode: (state, action) => {
-      state.darkMode = action.payload
+      state.darkMode = action.payload;
     },
     setTaskList: (state, action) => {
-      state.taskList = action.payload
-    }
+      state.taskList = action.payload;
+    },
   },
 });
 
@@ -60,7 +65,7 @@ export const {
   selectedImagesList,
   removeAllSelectedImages,
   setDarkMode,
-  setTaskList
+  setTaskList,
 } = p2pSlice.actions;
 
 export default p2pSlice.reducer;

@@ -14,7 +14,7 @@ const Chat = ({navigation}) => {
     },
     {
       img: images.profile,
-      deviceName: 'Hoang Nhi',
+      deviceName: 'Lan Anh',
       message: 'Hi, how are you?',
       available: false,
     },
