@@ -6,7 +6,8 @@ const initialState = {
   subscriptionOnConnectionInfoUpdates: {},
   subscriptionOnThisDeviceChanged: {},
   selectedImages: [],
-  darkMode: false
+  darkMode: false,
+  taskList: []
 };
 
 const p2pSlice = createSlice({
@@ -44,6 +45,9 @@ const p2pSlice = createSlice({
 
     setDarkMode: (state, action) => {
       state.darkMode = action.payload
+    },
+    setTaskList: (state, action) => {
+      state.taskList = action.payload
     }
   },
 });
@@ -55,7 +59,8 @@ export const {
   updateThisDeviceSubscription,
   selectedImagesList,
   removeAllSelectedImages,
-  setDarkMode
+  setDarkMode,
+  setTaskList
 } = p2pSlice.actions;
 
 export default p2pSlice.reducer;

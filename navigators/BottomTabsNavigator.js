@@ -2,7 +2,8 @@ import {StyleSheet} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BottomFabBar} from 'rn-wave-bottom-bar';
-import Icon from 'react-native-vector-icons/AntDesign';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import Home from '../src/screens/home/Home';
 import Chat from '../src/screens/chat/Chat';
 import Task from '../src/screens/tasks/Task';
@@ -13,7 +14,7 @@ const Bottom = createBottomTabNavigator();
 
 // Define the tab bar icons as separate components
 const HomeTabIcon = ({focused}) => (
-  <Icon
+  <AntDesign
     name="home"
     size={SIZES.xLarge}
     color={focused ? COLORS.yellow : COLORS.white}
@@ -22,8 +23,8 @@ const HomeTabIcon = ({focused}) => (
 );
 
 const TasksTabIcon = ({focused}) => (
-  <Icon
-    name="calendar"
+  <Ionicons 
+    name="calendar-outline"
     size={SIZES.xLarge}
     color={focused ? COLORS.yellow : COLORS.white}
     style={styles.tabBarIcon}
@@ -31,7 +32,7 @@ const TasksTabIcon = ({focused}) => (
 );
 
 const ChatTabIcon = ({focused}) => (
-  <Icon
+  <AntDesign
     name="message1"
     size={SIZES.xLarge}
     color={focused ? COLORS.yellow : COLORS.white}
@@ -40,7 +41,7 @@ const ChatTabIcon = ({focused}) => (
 );
 
 const SettingsTabIcon = ({focused}) => (
-  <Icon
+  <AntDesign
     name="setting"
     size={SIZES.xLarge}
     color={focused ? COLORS.yellow : COLORS.white}
@@ -71,7 +72,9 @@ function BottomTabs() {
         tabBarInactiveTintColor: COLORS.white,
         tabBarStyle: styles.tabBar,
       }}
-      tabBar={CustomTabBar}>
+      tabBar={CustomTabBar}
+      initialRouteName='Tasks'
+      >
       <Bottom.Screen
         name="Home"
         component={Home}

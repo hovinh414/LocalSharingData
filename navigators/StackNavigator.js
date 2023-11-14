@@ -5,12 +5,14 @@ import {createStackNavigator} from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabsNavigator';
 import ChatDetail from '../src/screens/chat/ChatDetail';
 import TaskDetail from '../src/screens/tasks/TaskDetail';
+import LoginScreen from '../src/screens/auth/LoginScreen';
+import AddTask from '../src/screens/tasks/AddTask';
 
 const Stack = createStackNavigator();
 
 function StackTabs() {
   return (
-    <Stack.Navigator initialRouteName="Task Detail">
+    <Stack.Navigator>
       <Stack.Screen
         name="BottomTabsNavigator"
         component={BottomTabNavigator}
@@ -26,6 +28,22 @@ function StackTabs() {
         component={TaskDetail}
         options={{headerShown: false}}
       />
+      <Stack.Screen
+        name="LoginScreen"
+        component={LoginScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="AddTask"
+        component={AddTask}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+          animationTypeForReplace: 'push',
+          animation: 'slide_from_bottom',
+        }}
+      />
+
     </Stack.Navigator>
   );
 }
