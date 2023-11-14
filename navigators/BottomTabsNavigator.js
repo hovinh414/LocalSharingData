@@ -3,9 +3,12 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BottomFabBar} from 'rn-wave-bottom-bar';
 import Icon from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import Home from '../src/screens/home/Home';
-import ChatDetail from '../src/screens/chat/ChatDetail';
+import Chat from '../src/screens/chat/Chat';
+import Task from '../src/screens/tasks/Task';
 import Settings from '../src/screens/settings/Settings';
+import LoginScreen from '../src/screens/auth/LoginScreen';
 import {COLORS, SHADOWS, SIZES} from '../constants';
 
 const Bottom = createBottomTabNavigator();
@@ -14,6 +17,15 @@ const Bottom = createBottomTabNavigator();
 const HomeTabIcon = ({focused}) => (
   <Icon
     name="home"
+    size={SIZES.xLarge}
+    color={focused ? COLORS.yellow : COLORS.white}
+    style={styles.tabBarIcon}
+  />
+);
+
+const TasksTabIcon = ({focused}) => (
+  <Ionicons 
+    name="calendar-outline"
     size={SIZES.xLarge}
     color={focused ? COLORS.yellow : COLORS.white}
     style={styles.tabBarIcon}
@@ -61,15 +73,22 @@ function BottomTabs() {
         tabBarInactiveTintColor: COLORS.white,
         tabBarStyle: styles.tabBar,
       }}
-      tabBar={CustomTabBar}>
+      tabBar={CustomTabBar}
+      initialRouteName='Tasks'
+      >
       <Bottom.Screen
         name="Home"
         component={Home}
         options={{tabBarIcon: HomeTabIcon}}
       />
       <Bottom.Screen
-        name="ChatDetail"
-        component={ChatDetail}
+        name="Tasks"
+        component={Task}
+        options={{tabBarIcon: TasksTabIcon}}
+      />
+      <Bottom.Screen
+        name="Chat"
+        component={Chat}
         options={{tabBarIcon: ChatTabIcon}}
       />
       <Bottom.Screen

@@ -1,20 +1,36 @@
-import {Text, View, SafeAreaView, ScrollView} from 'react-native';
-import React from 'react';
+import {SafeAreaView, ScrollView} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import styles from './home.style';
-import {FlatList} from 'react-native-gesture-handler';
-import ChatCard from '../../common/ChatCard';
-import {COLORS, SIZES, images} from '../../../constants';
+import {useDispatch, useSelector} from 'react-redux';
 import FindDevices from './findDevices/FindDevices';
 import Welcome from './welcome/Welcome';
+import {GetPermissions} from '../../../hook/GetPermissions';
+import {cleanUpWifiP2P, initWifiP2P} from '../../../hook/FunctionsP2P';
 
-const Home = () => {
+const Home = ({navigation}) => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    async function constructor() {
+      const check = await GetPermissions();
+      if (check) {
+        await initWifiP2P(dispatch);
+      }
+    }
+    constructor();
+
+    // Hàm này sẽ được gọi khi component unmount
+    return () => {
+      cleanUpWifiP2P(dispatch);
+    };
+  }, [dispatch]);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Welcome />
-        <FindDevices />
+        <FindDevices navigation={navigation} />
       </ScrollView>
-      {/* <FindDevices /> */}
     </SafeAreaView>
   );
 };

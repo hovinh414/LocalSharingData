@@ -5,12 +5,62 @@ const initialState = {
   subscriptionOnPeersUpdates: {},
   subscriptionOnConnectionInfoUpdates: {},
   subscriptionOnThisDeviceChanged: {},
+  selectedImages: [],
+  darkMode: false,
+  taskList: []
 };
 
-const slice = createSlice({
+const p2pSlice = createSlice({
   name: 'P2P',
   initialState,
-  reducers: {},
+  reducers: {
+    setDevices: (state, action) => {
+      state.devices = action.payload;
+    },
+    updatePeersSubscription: (state, action) => {
+      state.subscriptionOnPeersUpdates = action.payload;
+    },
+    updateConnectionInfoSubscription: (state, action) => {
+      state.subscriptionOnConnectionInfoUpdates = action.payload;
+    },
+    updateThisDeviceSubscription: (state, action) => {
+      state.subscriptionOnThisDeviceChanged = action.payload;
+    },
+    selectedImagesList: (state, action) => {
+      const check = state.selectedImages.find(image => image.node.image.filename === action.payload.node.image.filename)
+        // const check = state.selectedImages.find(image => image.node.timestamp === action.payload.node.timestamp)
+        
+        if (check) {
+        state.selectedImages = state.selectedImages.filter(image => image.node.image.filename !== action.payload.node.image.filename)
+      }
+      else {
+        state.selectedImages.push(action.payload)
+      }
+
+      // console.log(state.selectedImages)
+    },
+    removeAllSelectedImages: state => {
+      state.selectedImages = [];
+    },
+
+    setDarkMode: (state, action) => {
+      state.darkMode = action.payload
+    },
+    setTaskList: (state, action) => {
+      state.taskList = action.payload
+    }
+  },
 });
 
-export default slice.reducer;
+export const {
+  setDevices,
+  updatePeersSubscription,
+  updateConnectionInfoSubscription,
+  updateThisDeviceSubscription,
+  selectedImagesList,
+  removeAllSelectedImages,
+  setDarkMode,
+  setTaskList
+} = p2pSlice.actions;
+
+export default p2pSlice.reducer;

@@ -3,6 +3,10 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import BottomTabNavigator from './BottomTabsNavigator';
+import ChatDetail from '../src/screens/chat/ChatDetail';
+import TaskDetail from '../src/screens/tasks/TaskDetail';
+import LoginScreen from '../src/screens/auth/LoginScreen';
+import AddTask from '../src/screens/tasks/AddTask';
 
 const Stack = createStackNavigator();
 
@@ -14,8 +18,32 @@ function StackTabs() {
         component={BottomTabNavigator}
         options={{headerShown: false}}
       />
-      {/* <Stack.Screen name="Chat Wifi P2P" component={} />
-      <Stack.Screen name="Get Local Data" component={} /> */}
+      <Stack.Screen
+        name="Chat Detail"
+        component={ChatDetail}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Task Detail"
+        component={TaskDetail}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="LoginScreen"
+        component={LoginScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="AddTask"
+        component={AddTask}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+          animationTypeForReplace: 'push',
+          animation: 'slide_from_bottom',
+        }}
+      />
+
     </Stack.Navigator>
   );
 }

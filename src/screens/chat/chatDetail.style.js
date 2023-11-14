@@ -1,22 +1,31 @@
 import {StyleSheet} from 'react-native';
 import {COLORS, SHADOWS} from '../../../constants';
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingBottom: 5,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    marginBottom: 10,
     borderBottomColor: COLORS.lightgray,
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
-  avatarDetail: {
+  imgBtn: {
+    width: 25,
+    height: 25,
+  },
+  deviceNameText: {
+    fontWeight: 'bold',
+    fontSize: 16,
     marginLeft: 10,
+  },
+  avatarDetail: {
+    marginLeft: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -26,6 +35,7 @@ export const styles = StyleSheet.create({
     borderColor: '#ccc',
     flexDirection: 'column',
     marginBottom: 20,
+    // backgroundColor: 'red'
   },
   myMessage: {
     backgroundColor: COLORS.primary,
@@ -51,21 +61,41 @@ export const styles = StyleSheet.create({
     color: '#000',
     fontSize: 16,
   },
+
+  messagesContainer: {
+    paddingBottom: 5,
+  },
+  bottomContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignContent: 'center',
+    alignItems: 'center',
+  },
+  cameraContainer: {
+    width: '12%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cameraImg: {
+    width: 25,
+    height: 25,
+  },
   inputContainer: {
+    width: '85%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 55,
-    marginBottom: 55,
-    marginLeft: 12,
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 20,
-    fontSize: 16,
   },
   input: {
     flex: 1,
-    marginLeft: 12,
+    fontSize: 16,
   },
+
   sendButton: {
     color: COLORS.primary,
     fontSize: 16,
@@ -141,4 +171,63 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 5,
   },
+
+  bottomSheet: {
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 12,
+    },
+    shadowOpacity: 0.58,
+    shadowRadius: 16.0,
+
+    elevation: 24,
+    zIndex: 999,
+    // backgroundColor: 'red'
+  },
+
+  bottomSheetItemContainer: {
+    height: '100%',
+  },
+
+  bottomSheetItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // justifyContent: 'center',
+    height: '50%',
+    paddingHorizontal: '5%',
+  },
+
+  btnText: {
+    marginLeft: '4%',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+
+  imageList: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+  },
+
+  sendBtnContainer: {
+    flexDirection: 'row',
+    // justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '2%',
+    paddingHorizontal: 8,
+    // backgroundColor: 'red'
+  },
+
+  allImagesTextContainer: {
+    flex: 1,
+  },
+
+  allImagesText: {
+    color: COLORS.black,
+    fontWeight: '500',
+    fontSize: 16,
+    textAlign: 'center'
+  },
 });
+
+export default styles;

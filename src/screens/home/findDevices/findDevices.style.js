@@ -4,9 +4,7 @@ import {COLORS, FONT, SHADOWS} from '../../../../constants';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.light,
+    backgroundColor: COLORS.white,
   },
   welcome: {
     fontSize: 20,
@@ -19,16 +17,23 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 
-  createGroupBtn: {
-    borderRadius: 5,
-    padding: 12,
-    backgroundColor: COLORS.primary,
+  btnContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    alignContent: 'center',
+  },
+  btn: {
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 12,
+    marginVertical: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.primary,
   },
 
   btnLabel: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: '500',
     fontSize: 15,
   },
