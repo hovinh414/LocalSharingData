@@ -22,7 +22,7 @@ import SubTaskItem from '../../common/SubTaskItem';
 import RNFS from 'react-native-fs';
 import styles from './taskDetail.style';
 import {COLORS, SIZES, images} from '../../../constants';
-import {tasks} from './data';
+import {tasks} from '../../../assets/data/tasks';
 import ViewVideo from '../../common/ViewVideo';
 
 const TaskDetail = () => {

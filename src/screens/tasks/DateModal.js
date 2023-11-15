@@ -9,7 +9,7 @@ import styles from './addTask.style';
 import {COLORS} from '../../../constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {addYears, format, addDays, parse} from 'date-fns';
-const DateTimeModal = ({
+const DateModal = ({
   visible,
   onDateChanged,
   setDate,
@@ -21,6 +21,7 @@ const DateTimeModal = ({
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <DatePicker
+            mode="calendar"
             minimumDate={format(currentDate, 'yyyy-MM-dd')}
             onDateChanged={onDateChanged}
             onSelectedChange={setDate}
@@ -60,4 +61,4 @@ const DateTimeModal = ({
   );
 };
 
-export default DateTimeModal;
+export default DateModal;

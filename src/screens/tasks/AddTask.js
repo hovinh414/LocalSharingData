@@ -12,13 +12,17 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './addTask.style';
 import {COLORS} from '../../../constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import DateTimeModal from './DateTimeModal';
+import DateModal from './DateModal';
+import TimeModal from './TimeModal';
 
 const AddTask = ({navigation}) => {
   const [detailTasks, setDetailTasks] = useState([]);
   const [date, setDate] = useState();
+  const [time, setTime] = useState();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
+  const [openStartTimePicker, setOpenStartTimePicker] = useState(false);
   const handleAddTask = () => {
     const newTask = {isDone: false, description: ''};
     setDetailTasks([...detailTasks, newTask]);
@@ -27,7 +31,7 @@ const AddTask = ({navigation}) => {
     setDetailTasks([]);
   };
   const handleCreateTask = () => {
-    if(!date || detailTasks.length === 0 || !title || !description) {
+    if(!time || !date || detailTasks.length === 0 || !title || !description) {
       alert('Nhập đủ đi cm tụi mày :))))')
       return
     }
@@ -38,7 +42,7 @@ const AddTask = ({navigation}) => {
     updatedTasks.splice(index, 1);
     setDetailTasks(updatedTasks);
   };
-  const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
+  
   function handleChangeStartDate(propDate) {
     setStartedDate(propDate);
   }
@@ -46,16 +50,23 @@ const AddTask = ({navigation}) => {
   const handleOnPressStartDate = () => {
     setOpenStartDatePicker(!openStartDatePicker);
   };
-
+  const handleOnPressStartTime = () => {
+    setOpenStartTimePicker(!openStartTimePicker);
+  };
   return (
     <ScrollView style={styles.modalContainer}>
       <View>
         {/* Your content for the small screen */}
-        <DateTimeModal
+        <DateModal
           visible={openStartDatePicker}
           onDateChanged={handleChangeStartDate}
           setDate={date => setDate(date)}
           handleOnPressStartDate={handleOnPressStartDate}
+        />
+        <TimeModal
+          visible={openStartTimePicker}
+          setTime={time => setTime(time)}
+          handleOnPressStartDate={handleOnPressStartTime}
         />
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -89,14 +100,14 @@ const AddTask = ({navigation}) => {
             )}
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={handleOnPressStartDate}
+            onPress={handleOnPressStartTime}
             style={styles.dateTimeView}>
             <Ionicons name="time-outline" size={27} style={styles.icon} />
-            {!date ? (
+            {!time ? (
               <Text style={styles.date}>Time</Text>
             ) : (
               <Text style={styles.date}>
-                {date.slice(-5)}
+                {time}
               </Text>
             )}
           </TouchableOpacity>
