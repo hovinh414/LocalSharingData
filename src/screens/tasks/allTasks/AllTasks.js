@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux'
 import sortTasks from '../methods/sortTasks'
 import { COLORS } from '../../../../constants'
 
-const AllTasks = () => {
+const AllTasks = ({navigation}) => {
   const taskList = useSelector(state => state.P2P.taskList)
 
   sortedTasks = sortTasks(taskList)
@@ -26,7 +26,7 @@ const AllTasks = () => {
           showsVerticalScrollIndicator={false}
           data={sortedTasks}
           renderItem={({ item, index }) => {
-            return <TaskCard task={item} key={index} />;
+            return <TaskCard task={item} key={index} navigation={navigation}/>;
           }}
           style={styles.taskList}
         />

@@ -6,11 +6,14 @@ import { COLORS } from '../../constants'
 import moment from 'moment'
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 
-const TaskCard = ({ task }) => {
-  // console.log(task)
+
+const TaskCard = ({ navigation, task }) => {
+  const handleNavigate = () => {
+    navigation.navigate('Task Detail', task)
+  }
 
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handleNavigate}>
       <View style={[styles.priorityContainer,
       {
         backgroundColor: task.completed

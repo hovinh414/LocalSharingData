@@ -8,7 +8,7 @@ import TaskCard from '../../../common/TaskCard'
 import sortTasks from '../methods/sortTasks'
 import { COLORS } from '../../../../constants'
 
-const TodoTasks = () => {
+const TodoTasks = ({navigation}) => {
   const taskList = useSelector(state => state.P2P.taskList)
 
   filteredTasks = filterTasks(taskList, 'To do')
@@ -29,7 +29,7 @@ const TodoTasks = () => {
           showsVerticalScrollIndicator={false}
           data={sortedTasks}
           renderItem={({ item, index }) => {
-            return <TaskCard task={item} key={index} />;
+            return <TaskCard task={item} key={index} navigation={navigation}/>;
           }}
           style={styles.taskList}
         />
