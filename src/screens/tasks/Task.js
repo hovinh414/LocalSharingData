@@ -82,7 +82,7 @@ const Task = ({navigation}) => {
         <Ionicons name="add-outline" size={32} color={COLORS.white} />
       </TouchableOpacity>
 
-      <TaskTopTabNavigator />
+      <TaskTopTabNavigator navigation={navigation} />
     </SafeAreaView>
   );
 };

@@ -8,8 +8,7 @@ import { COLORS } from '../constants';
 
 const Tab = createMaterialTopTabNavigator();
 
-const TaskTopTabNavigator = () => {
-
+const TaskTopTabNavigator = ({navigation}) => {
   return (
     <Tab.Navigator initialRouteName='AllTasks'
       screenOptions={{
@@ -21,9 +20,8 @@ const TaskTopTabNavigator = () => {
         tabBarIndicatorContainerStyle: { justifyContent: 'center' },
         tabBarPressColor: 'transparent'
       }}
-
     >
-      <Tab.Screen name='All Tasks' component={AllTasks} />
+      <Tab.Screen name='All Tasks' component={AllTasks} initialParams={navigation}/>
       <Tab.Screen name='To do' component={TodoTasks} />
       <Tab.Screen name='Completed' component={CompletedTasks} />
     </Tab.Navigator>
@@ -44,8 +42,8 @@ const styles = StyleSheet.create({
 
   tabBarIndicator: {
     height: null,
-    width: 110,
-    left: (Dimensions.get('window').width / 3.15 - 110) / 2,
+    width: 115,
+    left: (Dimensions.get('window').width / 3.15 - 115) / 2,
     top: '10%',
     bottom: '10%',
     borderRadius: 10,

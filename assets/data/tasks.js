@@ -1,4 +1,4 @@
-import {images} from '../../../constants';
+import {images} from '../../constants';
 
 export const tasks = [
   {
@@ -6,7 +6,7 @@ export const tasks = [
     title: 'Đóng gói hàng hóa',
     description:
       'Đóng gói sản phẩm cho khách hàng, đảm bảo rằng chúng được đóng gói đúng cách và an toàn.',
-    date: '08:30 PM, 10/11/2023',
+    date: '2023-11-09',
     completed: true,
     images: [images.hieu, images.image, images.image, images.image],
     priority: 'High',
@@ -21,7 +21,7 @@ export const tasks = [
     title: 'Kiểm tra hàng hóa',
     description:
       'Kiểm tra sản phẩm để đảm bảo chất lượng và nguyên vẹn. Nếu có sản phẩm hỏng, thông báo cho quản lý hoặc khách hàng.',
-    date: '08:30 PM, 11/11/2023',
+    date: '2023-11-10',
     completed: false,
     images: [images.hieu, images.image, images.image, images.image],
     priority: 'Medium',
