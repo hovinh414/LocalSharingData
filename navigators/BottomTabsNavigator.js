@@ -3,7 +3,7 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {BottomFabBar} from 'rn-wave-bottom-bar';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Home from '../src/screens/home/Home';
 import Chat from '../src/screens/chat/Chat';
 import Task from '../src/screens/tasks/Task';
@@ -23,7 +23,7 @@ const HomeTabIcon = ({focused}) => (
 );
 
 const TasksTabIcon = ({focused}) => (
-  <Ionicons 
+  <Ionicons
     name="calendar-outline"
     size={SIZES.xLarge}
     color={focused ? COLORS.yellow : COLORS.white}
@@ -72,9 +72,7 @@ function BottomTabs() {
         tabBarInactiveTintColor: COLORS.white,
         tabBarStyle: styles.tabBar,
       }}
-      tabBar={CustomTabBar}
-      initialRouteName='Tasks'
-      >
+      tabBar={CustomTabBar}>
       <Bottom.Screen
         name="Home"
         component={Home}

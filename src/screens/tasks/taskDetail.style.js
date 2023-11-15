@@ -6,16 +6,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  backBtn: {
+    width: 25,
+    height: 25,
+  },
 
   header: {
-    flexDirection: 'column',
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    padding: 10,
+    borderBottomColor: COLORS.lightgray,
+    borderBottomWidth: 1,
     paddingVertical: 10,
   },
   headerText: {
+    flex: 1,
     fontSize: SIZES.xLarge,
     fontWeight: '600',
+    alignSelf: 'center',
+    textAlign: 'center',
     color: COLORS.primary,
   },
 
@@ -32,7 +41,7 @@ const styles = StyleSheet.create({
   inforContainer: {
     width: '90%',
     gap: 10,
-    paddingBottom: 10,
+    paddingVertical: 10,
     borderBottomWidth: 0.3,
     borderBottomColor: COLORS.lightgray,
     // backgroundColor: COLORS.secondary,
@@ -137,6 +146,7 @@ const styles = StyleSheet.create({
 
   footer: {
     alignItems: 'center',
+    marginBottom: 10,
     // backgroundColor: COLORS.red,
   },
   submitBtn: {

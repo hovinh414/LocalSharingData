@@ -21,7 +21,6 @@ export default ViewVideo;
 
 const styles = StyleSheet.create({
   vidPlayer: {
-    ưidth: width,
     height: height * 0.5,
   },
 });

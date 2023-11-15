@@ -1,30 +1,34 @@
-import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { COLORS } from '../../constants'
-import moment from 'moment'
-import BouncyCheckbox from "react-native-bouncy-checkbox";
+import React, {useState} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {COLORS} from '../../constants';
+import moment from 'moment';
+import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
-
-const TaskCard = ({ navigation, task }) => {
+const TaskCard = ({navigation, task}) => {
   const handleNavigate = () => {
-    navigation.navigate('Task Detail', task)
-  }
+    navigation.navigate('Task Detail', task);
+  };
 
   return (
     <TouchableOpacity style={styles.container} onPress={handleNavigate}>
-      <View style={[styles.priorityContainer,
-      {
-        backgroundColor: task.completed
-          ? 'green'
-          : (task.priority === 'High'
-            ? COLORS.red
-            : (task.priority === 'Medium'
+      <View
+        style={[
+          styles.priorityContainer,
+          {
+            backgroundColor: task.completed
+              ? 'green'
+              : task.priority === 'High'
+              ? COLORS.red
+              : task.priority === 'Medium'
               ? COLORS.yellow
-              : COLORS.darkgray))
-      }]} >
-        <Text style={styles.priority}>{task.completed ? "Done" : task.priority}</Text>
+              : COLORS.darkgray,
+          },
+        ]}>
+        <Text style={styles.priority}>
+          {task.completed ? 'Done' : task.priority}
+        </Text>
       </View>
 
       <View style={styles.in4Container}>
@@ -32,13 +36,23 @@ const TaskCard = ({ navigation, task }) => {
           <MaterialIcons name='task' size={30} color={COLORS.white} />
         </View> */}
 
-        <View style={[styles.titleContainer, { opacity: task.completed ? 0.5 : 1 }]}>
-          <Text style={[styles.title, { textDecorationLine: task.completed ? 'line-through' : 'none' }]} numberOfLines={1}>{task.title}</Text>
+        <View
+          style={[styles.titleContainer, {opacity: task.completed ? 0.5 : 1}]}>
+          <Text
+            style={[
+              styles.title,
+              {textDecorationLine: task.completed ? 'line-through' : 'none'},
+            ]}
+            numberOfLines={1}>
+            {task.title}
+          </Text>
 
           <View style={styles.dueContainer}>
-            <MaterialCommunityIcons name='alarm' color={COLORS.red} size={18} />
+            <MaterialCommunityIcons name="alarm" color={COLORS.red} size={18} />
 
-            <Text style={styles.due}>{moment(task.date, "YYYY-MM-DD").format("DD/MM/YYYY")}</Text>
+            <Text style={styles.due}>
+              {moment(task.date, 'YYYY-MM-DD').format('DD/MM/YYYY')}
+            </Text>
           </View>
         </View>
 
@@ -47,17 +61,20 @@ const TaskCard = ({ navigation, task }) => {
             size={25}
             fillColor="green"
             unfillColor="#FFFFFF"
-            innerIconStyle={{ borderWidth: 2, borderColor: task.completed ? 'green' : COLORS.lightgray }}
+            innerIconStyle={{
+              borderWidth: 2,
+              borderColor: task.completed ? 'green' : COLORS.lightgray,
+            }}
             disabled={true}
             isChecked={task.completed}
           />
         </View>
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
-export default TaskCard
+export default TaskCard;
 
 const styles = StyleSheet.create({
   container: {
@@ -77,12 +94,12 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 16,
     borderTopLeftRadius: 16,
     justifyContent: 'center',
-    paddingHorizontal: 15
+    paddingHorizontal: 15,
   },
 
   priority: {
     color: COLORS.lightwhite,
-    fontWeight: '500'
+    fontWeight: '500',
   },
 
   in4Container: {
@@ -91,7 +108,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     width: '100%',
     alignItems: 'center',
-    gap: 15
+    gap: 15,
     // backgroundColor: 'green'
   },
 
@@ -100,18 +117,18 @@ const styles = StyleSheet.create({
     padding: '2.5%',
     borderRadius: 50,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
 
   titleContainer: {
     gap: 10,
-    flex: 1
+    flex: 1,
   },
 
   title: {
     fontSize: 16,
     fontWeight: '500',
-    color: COLORS.black
+    color: COLORS.black,
   },
 
   dueContainer: {
@@ -121,6 +138,6 @@ const styles = StyleSheet.create({
   },
 
   due: {
-    color: COLORS.red
-  }
-})
+    color: COLORS.red,
+  },
+});

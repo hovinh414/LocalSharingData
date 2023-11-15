@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -21,12 +21,12 @@ import DocumentPicker from 'react-native-document-picker';
 import SubTaskItem from '../../common/SubTaskItem';
 import RNFS from 'react-native-fs';
 import styles from './taskDetail.style';
-import { COLORS, SIZES, images } from '../../../constants';
-import { tasks } from '../../../assets/data/tasks';
+import {COLORS, SIZES, images} from '../../../constants';
+import {tasks} from '../../../assets/data/tasks';
 import ViewVideo from '../../common/ViewVideo';
 
-const TaskDetail = ({ route }) => {
-  const task = route.params
+const TaskDetail = ({navigation, route}) => {
+  const task = route.params;
   const [files, setFiles] = useState([]);
   const [photos, setPhotos] = useState([]);
   const allItems = [...photos, ...files];
@@ -39,7 +39,7 @@ const TaskDetail = ({ route }) => {
     switch (item.type) {
       case 'image/jpeg':
       case 'image/png':
-        return <Image source={{ uri: item.uri }} style={styles.fileImg} />;
+        return <Image source={{uri: item.uri}} style={styles.fileImg} />;
       case 'application/pdf':
         return <Image source={images.pdf} style={styles.fileImg} />;
       case 'text/plain':
@@ -64,10 +64,14 @@ const TaskDetail = ({ route }) => {
     await RNFS.readFile(item.uri).then(result => setFileData(result));
   };
   const renderFileContent = item => {
+    if (item.mime === 'image/jpeg') {
+      return <Image source={{uri: item.path}} style={styles.fileContentImg} />;
+    }
+
     switch (item.type) {
       case 'image/jpeg':
       case 'image/png':
-        return <Image source={{ uri: item.uri }} style={styles.fileContentImg} />;
+        return <Image source={{uri: item.uri}} style={styles.fileContentImg} />;
       case 'video/mp4':
         return <ViewVideo uri={item.uri} />;
       case 'text/plain':
@@ -103,7 +107,7 @@ const TaskDetail = ({ route }) => {
   };
   const handleTakePhoto = () => {
     try {
-      ImagePicker.openCamera({ mediaType: 'photo' }).then(photo => {
+      ImagePicker.openCamera({mediaType: 'photo'}).then(photo => {
         const newPhoto = [...photos, photo]; // Thêm ảnh mới vào danh sách
         setPhotos(newPhoto);
         console.log(photo);
@@ -116,7 +120,7 @@ const TaskDetail = ({ route }) => {
   const handleRecordAudio = () => {
     try {
       ImagePicker.open;
-    } catch (error) { }
+    } catch (error) {}
   };
   const handleDeleteFile = index => {
     const updatedItems = [...allItems];
@@ -139,28 +143,34 @@ const TaskDetail = ({ route }) => {
 
   return (
     <KeyboardAvoidingView style={styles.container} enabled>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.goBack();
+          }}>
+          <Image source={images.left} size={25} style={styles.backBtn} />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Task Details</Text>
+        <View style={{width: 25, height: 25}} />
+      </View>
       <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Detail Task</Text>
-        </View>
-
         <View style={styles.content}>
           <View style={styles.frameContainer}>
             <View style={styles.inforContainer}>
               <Text style={styles.titleText}>{task.title}</Text>
-              <View style={{ paddingHorizontal: 10 }}>
+              <View style={{paddingHorizontal: 10}}>
                 <Text style={styles.descText}>{task.description}</Text>
-                {task.images.length !== 0
-                  ? <FlatList
+                {task.images.length !== 0 ? (
+                  <FlatList
                     horizontal
                     data={task.images}
                     renderItem={item => (
-                      <Image source={item} style={styles.imgItem} />
+                      <Image source={item.item} style={styles.imgItem} />
                     )}
                     style={styles.imgFlatList}
                     showsHorizontalScrollIndicator={false}
                   />
-                  : null}
+                ) : null}
               </View>
 
               <View style={styles.optionContainer}>
@@ -189,14 +199,14 @@ const TaskDetail = ({ route }) => {
                 <FlatList
                   horizontal
                   data={allItems}
-                  renderItem={({ item, index }) => {
+                  renderItem={({item, index}) => {
                     if (item.mime === 'image/jpeg') {
                       return (
                         <TouchableOpacity
                           onPress={() => handleDetailItem(item)}>
                           <View>
                             <Image
-                              source={{ uri: item.path }}
+                              source={{uri: item.path}}
                               style={styles.imgItem}
                             />
                             <TouchableOpacity
@@ -267,7 +277,7 @@ const TaskDetail = ({ route }) => {
             <View style={styles.subContainer}>
               <Text style={styles.titleSubText}>Sub-Task</Text>
 
-              <View style={{ paddingHorizontal: 10 }}>
+              <View style={{paddingHorizontal: 10}}>
                 {task.details.length !== 0 ? (
                   task.details.map((item, index) => {
                     return <SubTaskItem key={index} task={item} />;
@@ -279,13 +289,13 @@ const TaskDetail = ({ route }) => {
             </View>
           </View>
         </View>
-
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.submitBtn}>
-            <Text style={styles.btnText}>SUBMIT</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.submitBtn}>
+          <Text style={styles.btnText}>SUBMIT</Text>
+        </TouchableOpacity>
+      </View>
 
       <Modal
         animationType="fade"
@@ -329,7 +339,7 @@ const TaskDetail = ({ route }) => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalItem, { borderBottomWidth: 0 }]}
+                style={[styles.modalItem, {borderBottomWidth: 0}]}
                 activeOpacity={1}
                 onPress={() => handleRecordAudio()}>
                 <View style={styles.iconContainer}>
