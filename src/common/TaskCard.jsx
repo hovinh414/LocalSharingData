@@ -39,7 +39,6 @@ const TaskCard = ({ navigation, task }) => {
         <View style={styles.titleAndStatusContainer}>
           <Text
             style={[styles.title,
-            { textDecorationLine: task.completed ? 'line-through' : 'none' },
             ]}
             numberOfLines={1}>
             {task.title}

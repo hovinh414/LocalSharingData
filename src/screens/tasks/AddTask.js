@@ -5,7 +5,7 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
-  FlatList,
+  Alert,
   TextInput,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -24,6 +24,10 @@ const AddTask = ({navigation}) => {
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [openStartTimePicker, setOpenStartTimePicker] = useState(false);
   const handleAddTask = () => {
+    if (detailTasks.some(item => !item.description)) {
+      Alert.alert('Notification', 'Please enter subtask description');
+      return; // Ngừng hàm nếu điều kiện không đáp ứng
+    }
     const newTask = {isDone: false, description: ''};
     setDetailTasks([...detailTasks, newTask]);
   };
@@ -31,18 +35,18 @@ const AddTask = ({navigation}) => {
     setDetailTasks([]);
   };
   const handleCreateTask = () => {
-    if(!time || !date || detailTasks.length === 0 || !title || !description) {
-      alert('Nhập đủ đi cm tụi mày :))))')
-      return
+    if (!time || !date || detailTasks.length === 0 || !title || !description) {
+      alert('Nhập đủ đi cm tụi mày :))))');
+      return;
     }
-    alert('Lôn Lầm Hehehehe :))))')
+    alert('Lôn Lầm Hehehehe :))))');
   };
   const handleDeleteTask = index => {
     const updatedTasks = [...detailTasks];
     updatedTasks.splice(index, 1);
     setDetailTasks(updatedTasks);
   };
-  
+
   function handleChangeStartDate(propDate) {
     setStartedDate(propDate);
   }
@@ -106,9 +110,7 @@ const AddTask = ({navigation}) => {
             {!time ? (
               <Text style={styles.date}>Time</Text>
             ) : (
-              <Text style={styles.date}>
-                {time}
-              </Text>
+              <Text style={styles.date}>{time}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -119,7 +121,8 @@ const AddTask = ({navigation}) => {
             <TouchableOpacity
               activeOpacity={0.8}
               style={{flexDirection: 'row'}}
-              onPress={handleAddTask}>
+              onPress={handleAddTask}
+              >
               <Ionicons
                 name="add-circle-outline"
                 size={25}
@@ -130,13 +133,9 @@ const AddTask = ({navigation}) => {
             {detailTasks.length === 0 ? null : (
               <TouchableOpacity
                 activeOpacity={0.8}
-                style={{flexDirection: 'row', marginRight:10}}
+                style={{flexDirection: 'row', marginRight: 10}}
                 onPress={handleDeleteAllTask}>
-                <Ionicons
-                  name="trash-outline"
-                  size={25}
-                  color={COLORS.white}
-                />
+                <Ionicons name="trash-outline" size={25} color={COLORS.white} />
               </TouchableOpacity>
             )}
           </View>
@@ -162,6 +161,7 @@ const AddTask = ({navigation}) => {
                       updatedTasks[index].description = text;
                       setDetailTasks(updatedTasks);
                     }}
+                    placeholder='Subtask description'
                     style={styles.taskTextInput}
                   />
                   <TouchableOpacity onPress={() => handleDeleteTask(index)}>
@@ -184,7 +184,10 @@ const AddTask = ({navigation}) => {
             />
           </View>
         </View>
-        <TouchableOpacity onPress={handleCreateTask} activeOpacity={0.8} style={styles.buttonView}>
+        <TouchableOpacity
+          onPress={handleCreateTask}
+          activeOpacity={0.8}
+          style={styles.buttonView}>
           <Text style={styles.buttonText}>Create Task</Text>
         </TouchableOpacity>
       </View>
