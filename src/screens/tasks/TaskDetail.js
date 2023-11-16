@@ -24,6 +24,7 @@ import styles from './taskDetail.style';
 import {COLORS, SIZES, images} from '../../../constants';
 import {tasks} from '../../../assets/data/tasks';
 import ViewVideo from '../../common/ViewVideo';
+import countCompletedSubTask from './methods/countCompletedSubTask';
 
 const TaskDetail = ({navigation, route}) => {
   const task = route.params;
@@ -189,7 +190,7 @@ const TaskDetail = ({navigation, route}) => {
                     size={SIZES.medium}
                     color={COLORS.primary}
                   />
-                  <Text style={styles.memberText}>6</Text>
+                  <Text style={styles.memberText}>{task.taskAssignee.length}/{task.maxAssignee}</Text>
                 </View>
               </View>
             </View>
@@ -275,7 +276,9 @@ const TaskDetail = ({navigation, route}) => {
 
           <View style={styles.frameContainer}>
             <View style={styles.subContainer}>
-              <Text style={styles.titleSubText}>Sub-Task</Text>
+              <Text style={styles.titleSubText}>
+                Sub-Tasks
+              </Text>
 
               <View style={{paddingHorizontal: 10}}>
                 {task.details.length !== 0 ? (

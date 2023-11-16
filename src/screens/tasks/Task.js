@@ -28,7 +28,7 @@ const Task = ({navigation}) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(setTaskList(tasks.filter(task => task.date === date)));
+    dispatch(setTaskList(tasks.filter(task => task.date === moment(date).format('DD/MM/YYYY'))));
   }, [date]);
 
   const markedDatesFunc = today => [
@@ -56,7 +56,7 @@ const Task = ({navigation}) => {
         selectedDate={date}
         onDateSelected={params => {
           setDate(params.format('YYYY-MM-DD'));
-          // console.log(timestamp)
+          // console.log(params.format('DD/MM/YYYY'))
         }}
         calendarAnimation={{type: 'sequence', duration: 30}}
         iconLeft={leftIcon}

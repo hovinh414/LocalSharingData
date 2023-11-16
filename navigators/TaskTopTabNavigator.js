@@ -6,12 +6,15 @@ import CompletedTasks from '../src/screens/tasks/completedTasks/CompletedTasks';
 import { StyleSheet, Dimensions } from 'react-native'
 import { COLORS } from '../constants';
 
+const {width} = Dimensions.get('window')
+
 const Tab = createMaterialTopTabNavigator();
 
 const TaskTopTabNavigator = ({navigation}) => {
   return (
     <Tab.Navigator initialRouteName='AllTasks'
       screenOptions={{
+        swipeEnabled:false,
         tabBarLabelStyle: { fontWeight: 'bold' },
         tabBarIndicatorStyle: styles.tabBarIndicator,
         tabBarInactiveTintColor: 'gray',
@@ -22,8 +25,8 @@ const TaskTopTabNavigator = ({navigation}) => {
       }}
     >
       <Tab.Screen name='All Tasks' component={AllTasks} initialParams={navigation}/>
-      <Tab.Screen name='To do' component={TodoTasks} />
-      <Tab.Screen name='Completed' component={CompletedTasks} />
+      <Tab.Screen name='To do' component={TodoTasks} initialParams={navigation}/>
+      <Tab.Screen name='Completed' component={CompletedTasks} initialParams={navigation}/>
     </Tab.Navigator>
   )
 }
@@ -42,8 +45,8 @@ const styles = StyleSheet.create({
 
   tabBarIndicator: {
     height: null,
-    width: 115,
-    left: (Dimensions.get('window').width / 3.15 - 115) / 2,
+    width: width / 3.5,
+    left: (width / 3.15 - (width / 3.5)) / 2,
     top: '10%',
     bottom: '10%',
     borderRadius: 10,

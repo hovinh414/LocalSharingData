@@ -16,7 +16,9 @@ const COLORS = {
   lightwhite: '#F9F9F9',
 
   yellow: '#FCB446',
-  red: '#C44444',
+  lightyellow: '#FFE08B',
+  green: '#49D9AF',
+  red: '#EE6457',
   transparent: 'rgba(0,0,0,0)',
 };
 

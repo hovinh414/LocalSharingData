@@ -139,7 +139,7 @@ const ChatDetail = ({navigation, route}) => {
     const handleCreateClient = () => {
       // Create socket
       client.current = TcpSocket.createConnection(
-        {port: PORT, host: SERVER_IP, localAddress: SERVER_IP},
+        {port: PORT, host: '10.152.33.220'},
         () => {
           console.log('Connected to server');
         },

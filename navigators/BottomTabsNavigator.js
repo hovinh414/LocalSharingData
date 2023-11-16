@@ -72,6 +72,7 @@ function BottomTabs() {
         tabBarInactiveTintColor: COLORS.white,
         tabBarStyle: styles.tabBar,
       }}
+      initialRouteName="Tasks"
       tabBar={CustomTabBar}>
       <Bottom.Screen
         name="Home"
@@ -103,7 +104,7 @@ const BottomTabNavigator = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    position: 'absolute',
+    // position: 'absolute',
     shadow: true,
   },
   tabBarIcon: {
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     height: 24,
   },
   tabBarBottomContainer: {
-    position: 'absolute',
+    // position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,

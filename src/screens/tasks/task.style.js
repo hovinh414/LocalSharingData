@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
 
   taskList: {
-    marginBottom: '20%',
+    // marginBottom: '20%',
     flex: 1,
     // backgroundColor: 'red'
   },
@@ -86,10 +86,10 @@ const styles = StyleSheet.create({
   buttonAdd: {
     zIndex: 999,
     position: 'absolute',
-    bottom: 80,
+    bottom: 20,
     right: 10,
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 30,
     backgroundColor: COLORS.primary,
     flexDirection: 'row',

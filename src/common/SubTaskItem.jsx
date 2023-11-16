@@ -3,7 +3,7 @@ import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {COLORS, SIZES} from '../../constants';
 
 const SubTaskItem = ({task}) => {
-  const [completed, setCompleted] = useState(false);
+  const [completed, setCompleted] = useState(task.completed)
 
   const handlePress = () => {
     // Xử lý khi người dùng chạm vào văn bản hoặc hình tròn

@@ -1,12 +1,16 @@
-import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {COLORS} from '../../constants';
+import { COLORS, SIZES } from '../../constants';
 import moment from 'moment';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
+import * as Progress from 'react-native-progress'
+import countCompletedSubTask from '../screens/tasks/methods/countCompletedSubTask';
 
-const TaskCard = ({navigation, task}) => {
+const { width } = Dimensions.get('window')
+
+const TaskCard = ({ navigation, task }) => {
   const handleNavigate = () => {
     navigation.navigate('Task Detail', task);
   };
@@ -18,57 +22,72 @@ const TaskCard = ({navigation, task}) => {
           styles.priorityContainer,
           {
             backgroundColor: task.completed
-              ? 'green'
+              ? COLORS.green
               : task.priority === 'High'
-              ? COLORS.red
-              : task.priority === 'Medium'
-              ? COLORS.yellow
-              : COLORS.darkgray,
+                ? COLORS.red
+                : task.priority === 'Medium'
+                  ? COLORS.lightyellow
+                  : COLORS.darkgray,
           },
         ]}>
-        <Text style={styles.priority}>
+        <Text style={[styles.priority, { color: task.priority === 'Medium' ? COLORS.black : COLORS.lightwhite }]}>
           {task.completed ? 'Done' : task.priority}
         </Text>
       </View>
 
-      <View style={styles.in4Container}>
-        {/* <View style={[styles.iconContainer, { opacity: task.completed ? 0.5 : 1 }]}>
-          <MaterialIcons name='task' size={30} color={COLORS.white} />
-        </View> */}
-
-        <View
-          style={[styles.titleContainer, {opacity: task.completed ? 0.5 : 1}]}>
+      <View style={[styles.in4Container, { opacity: task.completed ? 0.5 : 1 }]}>
+        <View style={styles.titleAndStatusContainer}>
           <Text
-            style={[
-              styles.title,
-              {textDecorationLine: task.completed ? 'line-through' : 'none'},
+            style={[styles.title,
+            { textDecorationLine: task.completed ? 'line-through' : 'none' },
             ]}
             numberOfLines={1}>
             {task.title}
           </Text>
 
-          <View style={styles.dueContainer}>
-            <MaterialCommunityIcons name="alarm" color={COLORS.red} size={18} />
-
-            <Text style={styles.due}>
-              {moment(task.date, 'YYYY-MM-DD').format('DD/MM/YYYY')}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.statusContainer}>
           <BouncyCheckbox
             size={25}
-            fillColor="green"
+            fillColor={COLORS.green}
             unfillColor="#FFFFFF"
             innerIconStyle={{
               borderWidth: 2,
-              borderColor: task.completed ? 'green' : COLORS.lightgray,
+              borderColor: task.completed ? 'transparent' : COLORS.lightgray,
             }}
             disabled={true}
             isChecked={task.completed}
+            disableText
           />
         </View>
+
+        <View style={styles.dueContainer}>
+          <MaterialCommunityIcons name="alarm" color={COLORS.red} size={SIZES.large} />
+
+          <Text style={styles.due}>
+            {task.time}
+          </Text>
+        </View>
+
+        <View style={styles.assigneeContainer}>
+          <MaterialCommunityIcons name='account-group' size={SIZES.large} color={COLORS.primary} />
+
+          <Text style={styles.assigneeNumber}>{task.taskAssignee.length}/{task.maxAssignee}</Text>
+        </View>
+
+
+        {task.details.length === 0
+          ? null
+          : <View style={{gap: 5}}>
+            <Progress.Bar progress={countCompletedSubTask(task.details) / task.details.length}
+              width={width - width * 0.06 - 32} 
+              unfilledColor={COLORS.lightgray}
+              borderWidth={0} />
+
+            <View style={styles.progressContainer}>
+              <Text style={styles.progress}>TIẾN ĐỘ: {countCompletedSubTask(task.details)}/{task.details.length}</Text>
+
+              <Text style={styles.progress}>{(countCompletedSubTask(task.details) / task.details.length * 100).toFixed(0)}%</Text>
+            </View>
+          </View>}
       </View>
     </TouchableOpacity>
   );
@@ -98,26 +117,21 @@ const styles = StyleSheet.create({
   },
 
   priority: {
-    color: COLORS.lightwhite,
     fontWeight: '500',
   },
 
   in4Container: {
-    flexDirection: 'row',
-    paddingVertical: '4%',
+    paddingTop: 15,
+    paddingBottom: 20,
     paddingHorizontal: 16,
     width: '100%',
-    alignItems: 'center',
-    gap: 15,
-    // backgroundColor: 'green'
+    gap: 10,
   },
 
-  iconContainer: {
-    backgroundColor: COLORS.primary,
-    padding: '2.5%',
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
+  titleAndStatusContainer: {
+    flexDirection: 'row',
+    flex: 1,
+    alignItems: 'center'
   },
 
   titleContainer: {
@@ -126,18 +140,42 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '500',
     color: COLORS.black,
+    flex: 1
   },
 
   dueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 10,
   },
 
   due: {
     color: COLORS.red,
+    fontSize: 16,
+    fontWeight: '500'
   },
+
+  assigneeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10
+  },
+
+  assigneeNumber: {
+    fontSize: 16,
+    color: COLORS.primary
+  },
+
+  progressContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+
+  progress: {
+    color: COLORS.black,
+    fontWeight: '500'
+  }
 });
