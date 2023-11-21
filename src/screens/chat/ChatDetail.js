@@ -19,12 +19,13 @@ import {
 } from 'react-native-wifi-p2p';
 import styles from './chatDetail.style';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {LogBox} from 'react-native';
 import {GiftedChat} from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
 import TcpSocket from 'react-native-tcp-socket';
-import {io} from 'socket.io-client';
+// import arp from '@network-utils/arp-lookup';
 import {
   onCreateGroup,
   onGetConnectionInfo,
@@ -42,12 +43,12 @@ import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import {GetStoragePermissions} from '../../../hook/GetPermissions';
 import LibraryImageCard from '../../common/LibraryImageCard';
 import {useDispatch, useSelector} from 'react-redux';
-import {removeAllSelectedImages} from '../../redux/reducers';
+import {
+  selectedImagesList,
+  removeAllSelectedImages,
+} from '../../redux/reducers';
 
 const PORT = 6000;
-// const IP = '192.168.49.1';
-const SERVER_IP = '127.0.0.1';
-// const IPIDK = '25.226.115.47';
 
 const ChatDetail = ({navigation, route}) => {
   // Server variables
@@ -56,134 +57,150 @@ const ChatDetail = ({navigation, route}) => {
   const receiveInterval = useRef(null);
   const connectionInterval = useRef(null);
   const [serverStarted, setServerStarted] = useState(false);
+  const [clientStarted, setClientStarted] = useState(false);
+  const [ipAddress, setIpAddress] = useState();
+  const [serverIp, setServerIp] = useState();
+  const [clientIp, setClientIp] = useState();
   let server = useRef();
   let client = useRef();
   let socketRef = useRef(null);
 
+  // ---------------------------
+  // Messages, images, files variables
+  const dispatch = useDispatch();
+  const messageRef = useRef('');
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+  const selectedImages = useSelector(state => state.P2P.selectedImages); // ảnh đang được chọn để gửi
+  const [photos, setPhotos] = useState([]); // ảnh từ take photo
+  const [videos, setVideos] = useState([]); // video từ record video
+
+  // ---------------------------
+  // Bottomsheet variables
+  const cameraBottomSheetModalRef = useRef(null);
+  const imageBottomSheetModalRef = useRef(null);
+  const cameraSnapPoints = useMemo(() => ['15%', '15%'], []);
+  const imageSnapPoints = useMemo(() => ['80%', '80%'], []);
+  const [recentPhotos, setRecentPhotos] = useState([]); // ảnh trong điện thoại
+
   useEffect(() => {
     // Lắng nghe sự thay đổi kết nối mạng
-    const unsubcribe = NetInfo.addEventListener(state => {
+    const unsubscribe = NetInfo.addEventListener(state => {
       console.log('Connection type', state.type);
       console.log('Is connected?', state.isConnected);
     });
 
     // Lấy địa chỉ IP thiết bị
-    NetInfo.fetch().then(state =>
-      console.log(['DEVICES IP'], state.details.ipAddress),
-    );
+    const getIpAddress = async () => {
+      const state = await NetInfo.fetch();
+      console.log(['DEVICES IP'], state.details.ipAddress);
+      setIpAddress(state.details.ipAddress);
+
+      handleConnect();
+    };
 
     // Tạo kết nối P2P
     connectionInterval.current = setInterval(() => {
       onGetConnectionInfo();
     }, 10000);
 
-    // Function to handle creating a server
-    const handleCreateServer = () => {
-      console.log('[SOCKET] Creating socket at the server side');
-      server.current = TcpSocket.createServer(socket => {
-        socket.write('hello from server');
+    getIpAddress();
 
-        // socket.on('data', data => Alert.alert(data));
-        socket.on('data', data => {
-          // Process the received data
-          const receivedText = data.toString();
-          console.log('Received data from client:', receivedText);
-
-          // Here, you can handle the received data as needed
-          const newMessage = {
-            _id: Math.random().toString(),
-            text: receivedText,
-            createdAt: new Date(),
-            user: {
-              _id: 2, // Tin nhắn từ phía máy khách
-            },
-          };
-
-          // Add the received message to your chat interface
-          setMessages(previousMessages =>
-            GiftedChat.append(previousMessages, [newMessage]),
-          );
-        });
-
-        socket.on('error', error =>
-          console.log('An error ocurred with client socket ', error),
-        );
-
-        socket.on('close', error => {
-          console.log('Closed connection with ', socket.address());
-        });
-      });
-
-      server.current.listen({port: PORT, host: SERVER_IP}, () => {
-        console.log('Server is up and running on', PORT, SERVER_IP);
-        setServerStarted(true);
-
-        // Store the socket in the ref
-        socketRef.current = server;
-
-        // Khi kết nối được thiết lập, máy chủ sẽ bắt đầu nhận tin nhắn
-        receiveInterval.current = setInterval(() => onReceiveMessage(), 100);
-      });
-
-      server.current.on('error', error => {
-        console.log('An error ocurred with the server', error);
-      });
-
-      server.current.on('close', () => {
-        console.log('Server closed connection');
-        setServerStarted(false);
-      });
+    return () => {
+      unsubscribe();
+      // clearInterval(receiveInterval.current);
+      clearInterval(connectionInterval.current);
     };
+  }, []);
 
-    // Function to handle creating a client
-    const handleCreateClient = () => {
-      // Create socket
-      client.current = TcpSocket.createConnection(
-        {port: PORT, host: '10.152.33.220'},
-        () => {
-          console.log('Connected to server');
-        },
+  // Function to handle creating a server
+  const handleCreateServer = () => {
+    console.log('[SOCKET] Creating socket at the server side');
+    server.current = TcpSocket.createServer(socket => {
+      console.log('Client connected:', socket.remoteAddress, socket.remotePort);
+
+      socketRef.current = socket;
+
+      console.log(socketRef.current);
+
+      socket.write('hello from server');
+
+      socket.on('error', error =>
+        console.log('An error ocurred with client socket ', error),
       );
 
-      // Write on the socket
-      client.current.write('Hello server from client!');
-
-      client.current.on('data', data => {
-        const receivedText = data.toString();
-        console.log('Received data from server:', receivedText);
-
-        // Process the received data as needed
-        const newMessage = {
-          _id: Math.random().toString(),
-          text: receivedText,
-          createdAt: new Date(),
-          user: {
-            _id: 2, // Tin nhắn từ phía máy chủ
-          },
-        };
-
-        // Add the received message to your chat interface
-        setMessages(previousMessages =>
-          GiftedChat.append(previousMessages, [newMessage]),
-        );
+      socket.on('close', error => {
+        console.log('Closed connection with ', socket.address());
       });
+    });
 
-      client.current.on('error', error => {
-        console.log('An error occurred with the client socket', error);
-      });
+    server.current.listen({port: PORT, host: ipAddress}, () => {
+      console.log('Server is up and running on', PORT, ipAddress);
+      setServerStarted(true);
 
-      client.current.on('close', () => {
-        console.log('Client closed connection');
-      });
-    };
+      receiveInterval.current = setInterval(() => onReceiveMessage(), 100);
+    });
 
+    server.current.on('error', error => {
+      console.log('An error ocurred with the server', error);
+    });
+
+    server.current.on('close', () => {
+      console.log('Server closed connection');
+      setServerStarted(false);
+    });
+  };
+
+  // Function to handle creating a client
+  const handleCreateClient = () => {
+    client.current = TcpSocket.createConnection(
+      {port: PORT, host: item.deviceAddress},
+      () => {
+        console.log('Connected to server');
+      },
+    );
+
+    client.current.write('Hello server from client!');
+
+    client.current.on('data', data => {
+      const receivedText = data.toString();
+      console.log('Received data from server:', receivedText);
+
+      const newMessage = {
+        _id: Math.random().toString(),
+        text: receivedText,
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+        },
+      };
+
+      setMessages(previousMessages =>
+        GiftedChat.append(previousMessages, [newMessage]),
+      );
+    });
+
+    client.current.on('error', error => {
+      console.log('An error occurred with the client socket', error);
+    });
+
+    client.current.on('close', () => {
+      console.log('Client closed connection');
+    });
+
+    setClientStarted(true);
+  };
+
+  const handleConnect = () => {
     if (isOwner) {
       // SERVER SIDE
       console.log('[INFO] Creating the group...');
       onCreateGroup();
 
-      // Create the server socket
-      handleCreateServer();
+      if (!serverStarted) {
+        handleCreateServer();
+        console.log('123', ipAddress);
+      }
     } else {
       // CLIENT SIDE
 
@@ -195,9 +212,11 @@ const ChatDetail = ({navigation, route}) => {
         .catch(err =>
           console.log('[FATAL] Unable to connect with the server group: ', err),
         );
+      setClientIp(ipAddress);
 
-      // Function to handle creating a client
-      handleCreateClient();
+      if (!clientStarted) {
+        handleCreateClient();
+      }
 
       setTimeout(() => {
         getConnectionInfo().then(info => {
@@ -209,8 +228,7 @@ const ChatDetail = ({navigation, route}) => {
 
       setTimeout(() => {
         console.log('Sending Message...');
-        // After connecting to the group, call sendMessage function
-        sendMessage('[INFO] Connection got establised !')
+        sendMessage('[INFO] Connection got established!')
           .then(metaInfo =>
             console.log('[INFO] Message from client -> server', metaInfo),
           )
@@ -221,82 +239,34 @@ const ChatDetail = ({navigation, route}) => {
             ),
           );
       }, 5000);
-
-      /*
-        Hacky setup to receive messages from the server
-
-        This work as follows:
-          - [x] Client IP is sent to the server
-          - [x] Server socket is created at the client IP
-          - Client will join the connection socket of server
-          - Server will send message, which client will listen on
-      */
-
-      setTimeout(() => {
-        let c = io.connect('http://127.0.0.1:6000');
-        console.log(c);
-        c.on('data', data => {
-          console.log('Data: ', data);
-        });
-
-        c.on('error', err => {
-          console.log('Err: ', err);
-        });
-      }, 10000);
     }
+  };
 
-    return () => {
-      clearInterval(receiveInterval.current);
-      clearInterval(connectionInterval.current);
-      if (serverStarted) {
-        server.current.close(() => {
-          console.log('Server closed');
-        });
-        setServerStarted(false);
-      }
-
-      unsubcribe();
-    };
-  }, []);
-
-  // Messages, images, files variables
-  const dispatch = useDispatch();
-  const messageRef = useRef('');
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
-  const selectedImages = useSelector(state => state.P2P.selectedImages);
-
+  // ---------------------------
   const onReceiveMessage = () => {
+    // Server use this function to receive message from client
     receiveMessage()
       .then(text => {
-        const msg = [
-          {
-            _id: Math.random(1000).toString(),
-            text: text,
-            createAt: new Date(),
-            user: {
-              _id: 2,
-            },
+        const newMessage = {
+          _id: Math.random(1000).toString(),
+          text: text,
+          createAt: new Date(),
+          user: {
+            _id: 2, // Tin nhắn của phía người nhận
           },
-        ];
+        };
         setMessages(previousMessages =>
-          GiftedChat.append(previousMessages, msg),
+          GiftedChat.append(previousMessages, [newMessage]),
         );
       })
       .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
   };
-  const onSendMessage = useCallback((text = []) => {
-    // Kiểm tra xem nội dung tin nhắn có được điền hay không
-    if (text) {
-      if (isOwner) {
-        // Ensure that the server is available and it has an active socket
-        if (socketRef.current) {
-          console.log(socketRef.current);
-          socketRef.current.socket.write(text);
-        }
+  const onSendMessages = useCallback(
+    (text = []) => {
+      if (!text) {
+        return;
       }
-    } else {
-      // Tạo một đối tượng tin nhắn
+
       const newMessage = {
         _id: Math.random().toString(),
         text: text,
@@ -315,31 +285,43 @@ const ChatDetail = ({navigation, route}) => {
       setMessage('');
       messageRef.current.clear();
 
-      // Gửi tin nhắn đến đối tượng khác (thực hiện tùy theo logic của ứng dụng của bạn)
-      sendMessage(newMessage.text)
-        .then(metaInfo =>
-          console.log('[INFO] Send client message successfully', metaInfo),
-        )
-        .catch(err =>
-          console.log('[FATAL] Unable to send client message: ', err),
-        );
-    }
-  }, []);
-  const handleSendMessage = () => {
-    console.log(message);
+      if (isOwner && socketRef.current) {
+        const newText = text.toString();
+        console.log(socketRef.current);
+        socketRef.current.write(JSON.stringify({data: newText}));
+      } else if (!isOwner) {
+        // only client can use sendMessage function
+        sendMessage(newMessage.text)
+          .then(metaInfo =>
+            console.log('[INFO] Send client message successfully', metaInfo),
+          )
+          .catch(err =>
+            console.log('[FATAL] Unable to send client message: ', err),
+          );
+      }
+    },
+    [isOwner],
+  );
+  const onSendImages = useCallback((image = []) => {}, []);
+  const onSendFiles = useCallback((image = []) => {}, []);
+  const handleSendMessage = text => {
+    onSendMessages(text);
   };
-  const handleSendImages = () => {
-    console.log('Sent: ', selectedImages);
-  };
-  function removeItems(item) {}
+  // const handleSendImages = () => {
+  //   console.log('Sent: ', selectedImages);
+  // };
+  function removeItems(item) {
+    const image = selectedImages.filter(listItem => listItem !== item);
+    console.log(image[0]);
+    dispatch(selectedImagesList(image[0]));
 
-  // Bottomsheet variables
-  const cameraBottomSheetModalRef = useRef(null);
-  const imageBottomSheetModalRef = useRef(null);
-  const cameraSnapPoints = useMemo(() => ['15%', '15%'], []);
-  const imageSnapPoints = useMemo(() => ['80%', '80%'], []);
-  const [recentPhotos, setRecentPhotos] = useState([]);
+    // const newPhoto = photo.filter((listItem) => listItem !== item)
+    // setPhoto(newPhoto)
+    // const file = selectedFiles.filter((listItem) => listItem !== item)
+    // setSelectedFiles(file)
+  }
 
+  // ---------------------------
   const handleShowCameraBottomSheet = () => {
     cameraBottomSheetModalRef.current?.present();
   };
@@ -394,7 +376,6 @@ const ChatDetail = ({navigation, route}) => {
       })
         .then(r => {
           setRecentPhotos(r.edges);
-          // console.log(r.edges)
         })
         .catch(err => {
           console.log(err);
@@ -418,6 +399,92 @@ const ChatDetail = ({navigation, route}) => {
       }
     }
   };
+
+  const renderComposer = props => (
+    <View style={styles.bottomContainer}>
+      <View style={styles.inputContainer}>
+        <View
+          style={{
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}>
+          <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
+            <FlatList
+              data={[...selectedImages]} /// chỗ này show list ảnh
+              horizontal={true}
+              renderItem={({item, index}) => (
+                <View style={styles.viewImage} key={index}>
+                  <Image
+                    source={{uri: item.node.image.uri}}
+                    style={styles.image}
+                  />
+                  <TouchableOpacity
+                    onPress={() => removeItems(item)}
+                    style={styles.btnRemoveImage}>
+                    <MaterialIcons
+                      name="delete"
+                      size={20}
+                      color={COLORS.black}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <TextInput
+              style={styles.input}
+              ref={messageRef}
+              placeholder="Type your message..."
+              onChangeText={text => setMessage(text)}
+              {...props}
+            />
+
+            {message || selectedImages.length !== 0 ? (
+              <TouchableOpacity onPress={() => handleSendMessage(message)}>
+                <Image
+                  source={images.send}
+                  style={[styles.imgBtn, {marginHorizontal: 5}]}
+                />
+              </TouchableOpacity>
+            ) : (
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <TouchableOpacity onPress={handleShowImageBottomSheet}>
+                  <Image
+                    source={images.image}
+                    size={25}
+                    style={[styles.imgBtn, {marginHorizontal: 5}]}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={pickDocument}>
+                  <Image
+                    source={images.attach}
+                    size={25}
+                    style={[styles.imgBtn, {marginHorizontal: 5}]}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+  const renderActions = props => (
+    <View style={styles.cameraContainer}>
+      <TouchableOpacity onPress={handleShowCameraBottomSheet}>
+        <Image source={images.camera} style={styles.cameraImg} />
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <BottomSheetModalProvider>
@@ -511,54 +578,8 @@ const ChatDetail = ({navigation, route}) => {
             _id: 1,
           }}
           messagesContainerStyle={styles.messagesContainer}
-          renderInputToolbar={props => (
-            <View style={styles.bottomContainer}>
-              <View style={styles.cameraContainer}>
-                <TouchableOpacity onPress={handleShowCameraBottomSheet}>
-                  <Image source={images.camera} style={styles.cameraImg} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  ref={messageRef}
-                  placeholder="Type your message..."
-                  onChangeText={text => setMessage(text)}
-                  {...props}
-                />
-
-                {message ? (
-                  <TouchableOpacity onPress={() => onSendMessage(message)}>
-                    <Image
-                      source={images.send}
-                      style={[styles.imgBtn, {marginHorizontal: 5}]}
-                    />
-                  </TouchableOpacity>
-                ) : (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                    }}>
-                    <TouchableOpacity onPress={handleShowImageBottomSheet}>
-                      <Image
-                        source={images.image}
-                        size={25}
-                        style={[styles.imgBtn, {marginHorizontal: 5}]}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={pickDocument}>
-                      <Image
-                        source={images.attach}
-                        size={25}
-                        style={[styles.imgBtn, {marginHorizontal: 5}]}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            </View>
-          )}
+          renderComposer={renderComposer}
+          renderActions={renderActions}
         />
 
         <BottomSheetModal
@@ -610,7 +631,7 @@ const ChatDetail = ({navigation, route}) => {
             </View>
 
             <View style={{height: 45, width: 45}}>
-              {selectedImages.length !== 0 ? (
+              {/* {selectedImages.length !== 0 ? (
                 <TouchableOpacity
                   style={styles.sendBtn}
                   onPress={handleSendImages}>
@@ -620,7 +641,7 @@ const ChatDetail = ({navigation, route}) => {
                     size={45}
                   />
                 </TouchableOpacity>
-              ) : null}
+              ) : null} */}
             </View>
           </View>
 

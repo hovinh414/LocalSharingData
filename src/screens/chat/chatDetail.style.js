@@ -30,13 +30,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
   },
-  viewIcon: {
-    borderTopWidth: 0.5,
-    borderColor: '#ccc',
-    flexDirection: 'column',
-    marginBottom: 20,
-    // backgroundColor: 'red'
-  },
+
   myMessage: {
     backgroundColor: COLORS.primary,
     alignSelf: 'flex-end',
@@ -82,8 +76,8 @@ const styles = StyleSheet.create({
     height: 25,
   },
   inputContainer: {
-    width: '85%',
-    flexDirection: 'row',
+    width: '95%',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 8,
@@ -102,18 +96,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
   },
-  viewListImage: {
-    marginTop: 12,
-    marginLeft: 20,
-    marginRight: 20,
-    marginBottom: 12,
-  },
+
   viewImage: {
     position: 'relative',
     flexDirection: 'column',
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    marginTop: 10,
   },
   image: {
     paddingVertical: 4,
@@ -226,7 +216,7 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     fontWeight: '500',
     fontSize: 16,
-    textAlign: 'center'
+    textAlign: 'center',
   },
 });
 

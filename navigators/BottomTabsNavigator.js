@@ -72,7 +72,6 @@ function BottomTabs() {
         tabBarInactiveTintColor: COLORS.white,
         tabBarStyle: styles.tabBar,
       }}
-      initialRouteName="Tasks"
       tabBar={CustomTabBar}>
       <Bottom.Screen
         name="Home"
