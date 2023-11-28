@@ -1,4 +1,4 @@
-import React, {useState, useLayoutEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -14,19 +14,36 @@ import {COLORS} from '../../../constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import DateModal from './DateModal';
 import TimeModal from './TimeModal';
+import {SelectList} from 'react-native-dropdown-select-list';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AddTask = ({navigation}) => {
   const [detailTasks, setDetailTasks] = useState([]);
   const [date, setDate] = useState();
   const [time, setTime] = useState();
   const [title, setTitle] = useState('');
+  const [selected, setSelected] = useState('');
   const [description, setDescription] = useState('');
+  const [participants, setParticipants] = useState('');
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [openStartTimePicker, setOpenStartTimePicker] = useState(false);
+  const createTaskObject = () => {
+    const taskObject = {
+      detailTasks: detailTasks,
+      date: date,
+      time: time,
+      title: title,
+      selected: selected,
+      description: description,
+      participants: participants,
+    };
+    return taskObject;
+  };
+  const [newTask, setNewTask] = useState();
   const handleAddTask = () => {
     if (detailTasks.some(item => !item.description)) {
       Alert.alert('Notification', 'Please enter subtask description');
-      return; // Ngừng hàm nếu điều kiện không đáp ứng
+      return;
     }
     const newTask = {isDone: false, description: ''};
     setDetailTasks([...detailTasks, newTask]);
@@ -34,12 +51,42 @@ const AddTask = ({navigation}) => {
   const handleDeleteAllTask = () => {
     setDetailTasks([]);
   };
-  const handleCreateTask = () => {
-    if (!time || !date || detailTasks.length === 0 || !title || !description) {
-      alert('Nhập đủ đi cm tụi mày :))))');
-      return;
+  const handleCreateTask = async () => {
+    try {
+      if (
+        !time ||
+        !date ||
+        detailTasks.length === 0 ||
+        !title ||
+        !description ||
+        !participants ||
+        !selected
+      ) {
+        alert('Nhập đủ thông tin đi các cậu');
+        return;
+      }
+      const taskObject = createTaskObject();
+      const taskJSON = JSON.stringify(taskObject);
+      await AsyncStorage.setItem('taskKey', taskJSON);
+
+      console.log('Task saved to AsyncStorage');
+    } catch (error) {
+      console.error('Error saving task to AsyncStorage:', error);
     }
-    alert('Lôn Lầm Hehehehe :))))');
+  };
+  const getTaskFromStorage = async () => {
+    try {
+      const taskJSON = await AsyncStorage.getItem('taskKey');
+  
+      if (taskJSON) {
+        const taskObject = JSON.parse(taskJSON);
+        console.log('Task from AsyncStorage:', taskObject);
+      } else {
+        console.log('No task found in AsyncStorage');
+      }
+    } catch (error) {
+      console.error('Error getting task from AsyncStorage:', error);
+    }
   };
   const handleDeleteTask = index => {
     const updatedTasks = [...detailTasks];
@@ -57,6 +104,11 @@ const AddTask = ({navigation}) => {
   const handleOnPressStartTime = () => {
     setOpenStartTimePicker(!openStartTimePicker);
   };
+  const data = [
+    {key: '1', value: 'High'},
+    {key: '2', value: 'Medium'},
+    {key: '3', value: 'Low'},
+  ];
   return (
     <ScrollView style={styles.modalContainer}>
       <View>
@@ -121,8 +173,7 @@ const AddTask = ({navigation}) => {
             <TouchableOpacity
               activeOpacity={0.8}
               style={{flexDirection: 'row'}}
-              onPress={handleAddTask}
-              >
+              onPress={handleAddTask}>
               <Ionicons
                 name="add-circle-outline"
                 size={25}
@@ -161,7 +212,7 @@ const AddTask = ({navigation}) => {
                       updatedTasks[index].description = text;
                       setDetailTasks(updatedTasks);
                     }}
-                    placeholder='Subtask description'
+                    placeholder="Subtask description"
                     style={styles.taskTextInput}
                   />
                   <TouchableOpacity onPress={() => handleDeleteTask(index)}>
@@ -184,11 +235,37 @@ const AddTask = ({navigation}) => {
             />
           </View>
         </View>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <View style={{flexDirection: 'column'}}>
+            <Text style={styles.title}>Participants</Text>
+            <TextInput
+              style={styles.participants}
+              placeholder="10"
+              onChangeText={text => setParticipants(text)}
+            />
+          </View>
+          <View style={{flexDirection: 'column', marginRight: 50}}>
+            <Text style={styles.title}>Priority</Text>
+            <SelectList
+              setSelected={val => setSelected(val)}
+              data={data}
+              save="value"
+              boxStyles={styles.box}
+            />
+          </View>
+        </View>
+
         <TouchableOpacity
           onPress={handleCreateTask}
           activeOpacity={0.8}
           style={styles.buttonView}>
           <Text style={styles.buttonText}>Create Task</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={getTaskFromStorage}
+          activeOpacity={0.8}
+          style={styles.buttonView}>
+          <Text style={styles.buttonText}>Get Task Demo</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

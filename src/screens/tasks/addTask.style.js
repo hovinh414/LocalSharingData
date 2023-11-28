@@ -144,6 +144,22 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  participants: {
+    backgroundColor: '#F0F0F0',
+    width: '100%',
+    height: 50,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 22,
+    marginBottom: 10,
+  },
+  box: {
+    width: 150,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default styles;
