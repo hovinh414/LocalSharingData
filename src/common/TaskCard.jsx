@@ -21,7 +21,7 @@ const TaskCard = ({ navigation, task }) => {
         style={[
           styles.priorityContainer,
           {
-            backgroundColor: task.completed
+            backgroundColor: task.isDone
               ? COLORS.green
               : task.selected === 'High'
                 ? COLORS.red
@@ -31,11 +31,11 @@ const TaskCard = ({ navigation, task }) => {
           },
         ]}>
         <Text style={[styles.priority, { color: task.selected === 'Medium' ? COLORS.black : COLORS.lightwhite }]}>
-          {task.completed ? 'Done' : task.selected}
+          {task.isDone ? 'Done' : task.selected}
         </Text>
       </View>
 
-      <View style={[styles.in4Container, { opacity: task.completed ? 0.5 : 1 }]}>
+      <View style={[styles.in4Container, { opacity: task.isDone ? 0.5 : 1 }]}>
         <View style={styles.titleAndStatusContainer}>
           <Text
             style={[styles.title,
@@ -50,10 +50,10 @@ const TaskCard = ({ navigation, task }) => {
             unfillColor="#FFFFFF"
             innerIconStyle={{
               borderWidth: 2,
-              borderColor: task.completed ? 'transparent' : COLORS.lightgray,
+              borderColor: task.isDone ? 'transparent' : COLORS.lightgray,
             }}
             disabled={true}
-            isChecked={task.completed}
+            isChecked={task.isDone}
             disableText
           />
         </View>

@@ -20,12 +20,20 @@ import {
   onRemoveGroup,
   onGetAvailableDevices,
 } from '../../../../hook/FunctionsP2P';
+import {setUser} from '../../../redux/reducers';
 
 export default function FindDevices({navigation}) {
   const devices = useSelector(state => state.P2P.devices);
+  const user = useSelector(state => state.P2P.user);
   const dispatch = useDispatch();
   console.log('Devices: ', devices);
 
+  const handleCreateGroup = () => {
+    const itemWithIsOwner = {...user, isOwner: true};
+    dispatch(setUser(itemWithIsOwner));
+
+    navigation.navigate('Chat Detail', itemWithIsOwner);
+  };
   return (
     <View style={styles.container}>
       <ScrollView style={styles.container}>
@@ -75,7 +83,9 @@ export default function FindDevices({navigation}) {
         </View>
 
         <View style={styles.btnContainer}>
-          <TouchableOpacity style={styles.btn} onPress={() => onCreateGroup()}>
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={() => handleCreateGroup()}>
             <Text style={styles.btnLabel}>Create Group</Text>
           </TouchableOpacity>
 
