@@ -61,6 +61,7 @@ export const onRemoveGroup = () => {
   removeGroup()
     .then(() => console.log("Currently you don't belong to group!"))
     .catch(err => console.error('Something gone wrong. Details: ', err));
+  startDiscoveringPeers();
 };
 
 export const onStopInvestigation = () => {

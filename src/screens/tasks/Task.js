@@ -2,7 +2,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import CalendarStrip from 'react-native-calendar-strip';
 import moment from 'moment';
 import styles from './task.style';
@@ -14,6 +14,7 @@ import TaskTopTabNavigator from '../../../navigators/TaskTopTabNavigator';
 import { useDispatch } from 'react-redux';
 import { setTaskList } from '../../redux/reducers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Task = ({ navigation }) => {
   let today = moment().format('YYYY-MM-DD');
@@ -23,6 +24,7 @@ const Task = ({ navigation }) => {
 
   const getDataFromStorage = async () => {
    const storageData = await AsyncStorage.getItem('taskKey')
+   console.log(storageData)
 
     if (storageData !== null) {
       const data = JSON.parse(storageData)
@@ -38,6 +40,13 @@ const Task = ({ navigation }) => {
   //   getDataFromStorage()
   // }, [date]);
   getDataFromStorage()
+
+  useFocusEffect(
+    useCallback(() => {
+      // Logic cập nhật hoặc render lại ở đây
+      getDataFromStorage()
+    }, [])
+  );
 
   const markedDatesFunc = today => [
     {

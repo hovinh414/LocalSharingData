@@ -93,6 +93,7 @@ const AddTask = ({navigation}) => {
     }
   };
   const getTaskFromStorage = async () => {
+    // await AsyncStorage.clear()
     try {
       const taskJSON = await AsyncStorage.getItem('taskKey');
 
@@ -216,7 +217,7 @@ const AddTask = ({navigation}) => {
                   <BouncyCheckbox
                     size={20}
                     isChecked={item.isDone}
-                    onValueChange={newValue => {
+                    onPress={newValue => {
                       const updatedTasks = [...detailTasks];
                       updatedTasks[index].isDone = newValue;
                       setDetailTasks(updatedTasks);

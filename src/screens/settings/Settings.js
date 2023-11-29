@@ -138,7 +138,6 @@ const Settings = ({navigation}) => {
     <ScrollView
       style={{
         flex: 1,
-        marginBottom:80,
       }}>
       <View style={styles.header}>
         <Text style={{fontWeight: 'bold', fontSize: 22, color: COLORS.black}}>

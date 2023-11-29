@@ -2,10 +2,10 @@ import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   devices: [],
+  user: {},
   subscriptionOnPeersUpdates: {},
   subscriptionOnConnectionInfoUpdates: {},
   subscriptionOnThisDeviceChanged: {},
-  selectedImages: [],
   darkMode: false,
   taskList: [],
 };
@@ -17,6 +17,9 @@ const p2pSlice = createSlice({
     setDevices: (state, action) => {
       state.devices = action.payload;
     },
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
     updatePeersSubscription: (state, action) => {
       state.subscriptionOnPeersUpdates = action.payload;
     },
@@ -25,27 +28,6 @@ const p2pSlice = createSlice({
     },
     updateThisDeviceSubscription: (state, action) => {
       state.subscriptionOnThisDeviceChanged = action.payload;
-    },
-    selectedImagesList: (state, action) => {
-      const check = state.selectedImages.find(
-        image =>
-          image.node.image.filename === action.payload.node.image.filename,
-      );
-      // const check = state.selectedImages.find(image => image.node.timestamp === action.payload.node.timestamp)
-
-      if (check) {
-        state.selectedImages = state.selectedImages.filter(
-          image =>
-            image.node.image.filename !== action.payload.node.image.filename,
-        );
-      } else {
-        state.selectedImages.push(action.payload);
-      }
-
-      // console.log(state.selectedImages)
-    },
-    removeAllSelectedImages: state => {
-      state.selectedImages = [];
     },
 
     setDarkMode: (state, action) => {
@@ -59,11 +41,10 @@ const p2pSlice = createSlice({
 
 export const {
   setDevices,
+  setUser,
   updatePeersSubscription,
   updateConnectionInfoSubscription,
   updateThisDeviceSubscription,
-  selectedImagesList,
-  removeAllSelectedImages,
   setDarkMode,
   setTaskList,
 } = p2pSlice.actions;
