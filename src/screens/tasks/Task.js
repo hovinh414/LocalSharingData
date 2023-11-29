@@ -1,35 +1,43 @@
 import {
-  View,
-  Text,
   SafeAreaView,
   TouchableOpacity,
-  FlatList,
-  Image,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import CalendarStrip from 'react-native-calendar-strip';
 import moment from 'moment';
 import styles from './task.style';
-import {COLORS, images} from '../../../constants';
+import { COLORS, } from '../../../constants';
 import leftIcon from '../../../assets/images/left-chevron.png';
 import rightIcon from '../../../assets/images/right-chevron.png';
-import {tasks} from '../../../assets/data/tasks';
-import TaskCard from '../../common/TaskCard';
-import noTasks from '../../../assets/images/no-task.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import TaskTopTabNavigator from '../../../navigators/TaskTopTabNavigator';
-import {useDispatch, useSelector} from 'react-redux';
-import {setTaskList} from '../../redux/reducers';
+import { useDispatch } from 'react-redux';
+import { setTaskList } from '../../redux/reducers';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Task = ({navigation}) => {
+const Task = ({ navigation }) => {
   let today = moment().format('YYYY-MM-DD');
   const [date, setDate] = useState(today);
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(setTaskList(tasks.filter(task => task.date === moment(date).format('DD/MM/YYYY'))));
-  }, [date]);
+  const getDataFromStorage = async () => {
+   const storageData = await AsyncStorage.getItem('taskKey')
+
+    if (storageData !== null) {
+      const data = JSON.parse(storageData)
+
+      dispatch(setTaskList(data.filter(task => task.date === moment(date).format('DD/MM/YYYY'))));
+    }
+    else {
+      dispatch(setTaskList([]));
+    }
+  }
+  
+  // useEffect(() => {
+  //   getDataFromStorage()
+  // }, [date]);
+  getDataFromStorage()
 
   const markedDatesFunc = today => [
     {
@@ -49,21 +57,21 @@ const Task = ({navigation}) => {
         markedDates={markedDatesFunc(today)}
         style={styles.calendarStrip}
         calendarColor={COLORS.primary}
-        calendarHeaderStyle={{color: COLORS.white, marginBottom: 15}}
-        dateNumberStyle={{color: COLORS.white}}
-        dateNameStyle={{color: COLORS.white}}
-        iconContainer={{flex: 0.1}}
+        calendarHeaderStyle={{ color: COLORS.white, marginBottom: 15 }}
+        dateNumberStyle={{ color: COLORS.white }}
+        dateNameStyle={{ color: COLORS.white }}
+        iconContainer={{ flex: 0.1 }}
         selectedDate={date}
         onDateSelected={params => {
           setDate(params.format('YYYY-MM-DD'));
           // console.log(params.format('DD/MM/YYYY'))
         }}
-        calendarAnimation={{type: 'sequence', duration: 30}}
+        calendarAnimation={{ type: 'sequence', duration: 30 }}
         iconLeft={leftIcon}
         iconRight={rightIcon}
-        dayContainerStyle={{paddingTop: 7, paddingBottom: 7}}
-        highlightDateNameStyle={{color: COLORS.white}}
-        highlightDateNumberStyle={{color: COLORS.white}}
+        dayContainerStyle={{ paddingTop: 7, paddingBottom: 7 }}
+        highlightDateNameStyle={{ color: COLORS.white }}
+        highlightDateNumberStyle={{ color: COLORS.white }}
         daySelectionAnimation={{
           type: 'border',
           duration: 100,
@@ -82,7 +90,7 @@ const Task = ({navigation}) => {
         <Ionicons name="add-outline" size={32} color={COLORS.white} />
       </TouchableOpacity>
 
-      <TaskTopTabNavigator navigation={navigation} />
+      <TaskTopTabNavigator/>
     </SafeAreaView>
   );
 };

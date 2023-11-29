@@ -11,9 +11,10 @@ import { COLORS } from '../../../../constants'
 const TodoTasks = ({navigation}) => {
   const taskList = useSelector(state => state.P2P.taskList)
 
-  filteredTasks = filterTasks(taskList, 'To do')
 
-  sortedTasks = sortTasks(filteredTasks)
+  const filteredTasks = filterTasks(taskList, 'To do')
+
+  const sortedTasks = sortTasks(filteredTasks)
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>

@@ -16,6 +16,7 @@ import DateModal from './DateModal';
 import TimeModal from './TimeModal';
 import {SelectList} from 'react-native-dropdown-select-list';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
 
 const AddTask = ({navigation}) => {
   const [detailTasks, setDetailTasks] = useState([]);
@@ -36,6 +37,9 @@ const AddTask = ({navigation}) => {
       selected: selected,
       description: description,
       participants: participants,
+      images: [],
+      files: [],
+      isDone: false
     };
     return taskObject;
   };
@@ -65,9 +69,23 @@ const AddTask = ({navigation}) => {
         alert('Nhập đủ thông tin đi các cậu');
         return;
       }
-      const taskObject = createTaskObject();
-      const taskJSON = JSON.stringify(taskObject);
-      await AsyncStorage.setItem('taskKey', taskJSON);
+
+      const data = await AsyncStorage.getItem('taskKey')
+
+      if (data === null) {
+        const taskObject = [createTaskObject()]
+        await AsyncStorage.setItem('taskKey', JSON.stringify(taskObject));
+      }
+      else {
+        const taskObject = createTaskObject();
+        const newData = JSON.parse(data)
+
+        newData.push(taskObject)
+
+
+        await AsyncStorage.setItem('taskKey', JSON.stringify(newData))
+      }
+
 
       console.log('Task saved to AsyncStorage');
     } catch (error) {
@@ -77,6 +95,7 @@ const AddTask = ({navigation}) => {
   const getTaskFromStorage = async () => {
     try {
       const taskJSON = await AsyncStorage.getItem('taskKey');
+
   
       if (taskJSON) {
         const taskObject = JSON.parse(taskJSON);
@@ -116,7 +135,7 @@ const AddTask = ({navigation}) => {
         <DateModal
           visible={openStartDatePicker}
           onDateChanged={handleChangeStartDate}
-          setDate={date => setDate(date)}
+          setDate={date => setDate(moment(date, "YYYY/MM/DD").format("DD/MM/YYYY").toString())}
           handleOnPressStartDate={handleOnPressStartDate}
         />
         <TimeModal

@@ -1,11 +1,14 @@
 const countCompletedSubTask = (subTaskList) => {
     let count = 0
 
-    subTaskList.map(subTask => {
-        if (subTask.completed === true) {
-            count++
-        }
-    })
+    if (subTaskList) {
+        subTaskList.map(subTask => {
+            if (subTask.isDone === true) {
+                count++
+            }
+        })
+    
+    }
 
     return count
 }

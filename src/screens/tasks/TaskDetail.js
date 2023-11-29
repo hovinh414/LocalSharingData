@@ -28,6 +28,7 @@ import countCompletedSubTask from './methods/countCompletedSubTask';
 
 const TaskDetail = ({navigation, route}) => {
   const task = route.params;
+  console.log(task)
   const [files, setFiles] = useState([]);
   const [photos, setPhotos] = useState([]);
   const allItems = [...photos, ...files];
@@ -190,7 +191,7 @@ const TaskDetail = ({navigation, route}) => {
                     size={SIZES.medium}
                     color={COLORS.primary}
                   />
-                  <Text style={styles.memberText}>{task.taskAssignee.length}/{task.maxAssignee}</Text>
+                  <Text style={styles.memberText}>{1}/{task.participants}</Text>
                 </View>
               </View>
             </View>
@@ -281,8 +282,8 @@ const TaskDetail = ({navigation, route}) => {
               </Text>
 
               <View style={{paddingHorizontal: 10}}>
-                {task.details.length !== 0 ? (
-                  task.details.map((item, index) => {
+                {task.detailTasks.length !== 0 ? (
+                  task.detailTasks.map((item, index) => {
                     return <SubTaskItem key={index} task={item} />;
                   })
                 ) : (

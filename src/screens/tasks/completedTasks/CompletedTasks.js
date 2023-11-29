@@ -11,9 +11,9 @@ import { COLORS } from '../../../../constants'
 const CompletedTasks = ({navigation}) => {
   const taskList = useSelector(state => state.P2P.taskList)
 
-  filteredTasks = filterTasks(taskList, 'Completed')
+  const filteredTasks = filterTasks(taskList, 'Completed')
 
-  sortedTasks = sortTasks(filteredTasks)
+  const sortedTasks = sortTasks(filteredTasks)
 
 
   return (

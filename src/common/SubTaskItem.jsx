@@ -3,7 +3,7 @@ import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {COLORS, SIZES} from '../../constants';
 
 const SubTaskItem = ({task}) => {
-  const [completed, setCompleted] = useState(task.completed)
+  const [completed, setCompleted] = useState(task.isDone)
 
   const handlePress = () => {
     // Xử lý khi người dùng chạm vào văn bản hoặc hình tròn
@@ -16,7 +16,7 @@ const SubTaskItem = ({task}) => {
         <View style={[styles.circle, completed && styles.completedCircle]}>
           {completed && <Text style={styles.checkmark}>✓</Text>}
         </View>
-        <Text style={styles.titleText}>{task.title}</Text>
+        <Text style={styles.titleText}>{task.description}</Text>
       </TouchableOpacity>
 
       <Text style={styles.descText}>{task.text}</Text>

@@ -10,7 +10,7 @@ const {width} = Dimensions.get('window')
 
 const Tab = createMaterialTopTabNavigator();
 
-const TaskTopTabNavigator = ({navigation}) => {
+const TaskTopTabNavigator = () => {
   return (
     <Tab.Navigator initialRouteName='AllTasks'
       screenOptions={{
@@ -24,9 +24,9 @@ const TaskTopTabNavigator = ({navigation}) => {
         tabBarPressColor: 'transparent'
       }}
     >
-      <Tab.Screen name='All Tasks' component={AllTasks} initialParams={navigation}/>
-      <Tab.Screen name='To do' component={TodoTasks} initialParams={navigation}/>
-      <Tab.Screen name='Completed' component={CompletedTasks} initialParams={navigation}/>
+      <Tab.Screen name='All Tasks' component={AllTasks} />
+      <Tab.Screen name='To do' component={TodoTasks}/>
+      <Tab.Screen name='Completed' component={CompletedTasks}/>
     </Tab.Navigator>
   )
 }

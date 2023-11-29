@@ -23,15 +23,15 @@ const TaskCard = ({ navigation, task }) => {
           {
             backgroundColor: task.completed
               ? COLORS.green
-              : task.priority === 'High'
+              : task.selected === 'High'
                 ? COLORS.red
-                : task.priority === 'Medium'
+                : task.selected === 'Medium'
                   ? COLORS.lightyellow
                   : COLORS.darkgray,
           },
         ]}>
-        <Text style={[styles.priority, { color: task.priority === 'Medium' ? COLORS.black : COLORS.lightwhite }]}>
-          {task.completed ? 'Done' : task.priority}
+        <Text style={[styles.priority, { color: task.selected === 'Medium' ? COLORS.black : COLORS.lightwhite }]}>
+          {task.completed ? 'Done' : task.selected}
         </Text>
       </View>
 
@@ -69,22 +69,22 @@ const TaskCard = ({ navigation, task }) => {
         <View style={styles.assigneeContainer}>
           <MaterialCommunityIcons name='account-group' size={SIZES.large} color={COLORS.primary} />
 
-          <Text style={styles.assigneeNumber}>{task.taskAssignee.length}/{task.maxAssignee}</Text>
+          <Text style={styles.assigneeNumber}>1/{task.participants}</Text>
         </View>
 
 
-        {task.details.length === 0
+        {task.detailTasks.length === 0
           ? null
           : <View style={{gap: 5}}>
-            <Progress.Bar progress={countCompletedSubTask(task.details) / task.details.length}
+            <Progress.Bar progress={countCompletedSubTask(task.detailTasks) / task.detailTasks.length}
               width={width - width * 0.06 - 32} 
               unfilledColor={COLORS.lightgray}
               borderWidth={0} />
 
             <View style={styles.progressContainer}>
-              <Text style={styles.progress}>TIẾN ĐỘ: {countCompletedSubTask(task.details)}/{task.details.length}</Text>
+              <Text style={styles.progress}>TIẾN ĐỘ: {countCompletedSubTask(task.detailTasks)}/{task.detailTasks.length}</Text>
 
-              <Text style={styles.progress}>{(countCompletedSubTask(task.details) / task.details.length * 100).toFixed(0)}%</Text>
+              <Text style={styles.progress}>{(countCompletedSubTask(task.detailTasks) / task.detailTasks.length * 100).toFixed(0)}%</Text>
             </View>
           </View>}
       </View>

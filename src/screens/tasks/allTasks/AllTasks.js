@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { View, Text, FlatList, SafeAreaView, Image } from 'react-native'
 import styles from '../task.style'
 import TaskCard from '../../../common/TaskCard'
@@ -8,9 +8,17 @@ import sortTasks from '../methods/sortTasks'
 import { COLORS } from '../../../../constants'
 
 const AllTasks = ({navigation}) => {
-  const taskList = useSelector(state => state.P2P.taskList)
+  let taskList = useSelector(state => state.P2P.taskList)
 
-  sortedTasks = sortTasks(taskList)
+  // const GetData = async () => {
+  //  taskList =  await useSelector(state => state.P2P.taskList)
+  // }
+
+  // GetData()
+
+  
+
+  const sortedTasks = sortTasks(taskList)
   
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>

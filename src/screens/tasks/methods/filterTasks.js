@@ -1,15 +1,16 @@
 const filterTasks = (tasks, filter) => {
     // const copy_tasks = [...tasks]
 
-    filteredTasks = tasks.filter(task => {
+
+    const filteredTasks = tasks.filter(task => {
         if (filter === 'To do') {
-            return task.completed === false;
+            return task.isDone === false;
         }
 
-        return task.completed === true;
+        return task.isDone === true;
     })
 
-    return filteredTasks
+    return filteredTasks;
 }
 
 export default filterTasks
