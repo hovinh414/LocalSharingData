@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   box: {
-    width: 150,
+    width: 140,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
@@ -196,6 +196,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#C5C7C7',
     borderRadius: 12, // Bo tròn góc
     padding: 5,
+  },
+  buttonImage: {
+    height: 50,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    borderRadius: 16,
+    padding: 14,
   },
 });
 

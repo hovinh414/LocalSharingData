@@ -20,7 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import * as ImagesPickers from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { selectedImagesList } from '../../redux/reducers';
+import {selectedImagesList} from '../../redux/reducers';
 const AddTask = ({navigation}) => {
   const [detailTasks, setDetailTasks] = useState([]);
   const [date, setDate] = useState();
@@ -285,35 +285,34 @@ const AddTask = ({navigation}) => {
               onChangeText={text => setParticipants(text)}
             />
           </View>
-          <View style={{flexDirection: 'column', marginRight: 50}}>
+          <View style={{flexDirection: 'column', alignItems: 'center'}}>
             <Text style={styles.title}>Priority</Text>
             <SelectList
+              placeholder="Priority"
               setSelected={val => setSelected(val)}
               data={data}
               save="value"
               boxStyles={styles.box}
             />
           </View>
+          <View style={{flexDirection: 'column'}}>
+            <Text style={styles.title}>Images</Text>
+            <TouchableOpacity
+              onPress={handleImageSelection}
+              activeOpacity={0.8}
+              style={styles.buttonImage}>
+              <MaterialIcons name="image" size={25} color={COLORS.white} />
+            </TouchableOpacity>
+          </View>
         </View>
-        <TouchableOpacity
-          onPress={handleImageSelection}
-          activeOpacity={0.8}
-          style={styles.buttonView}>
-          <Text style={styles.buttonText}>Choose Task Image</Text>
-          <MaterialIcons name="image" size={25} color={COLORS.white} />
-        </TouchableOpacity>
+
         <FlatList
           showsHorizontalScrollIndicator={false}
           data={selectedImages}
           horizontal={true}
           renderItem={({item, index}) => (
-            <View
-              key={index}
-              style={styles.listImage}>
-              <Image
-                source={{uri: item.uri}}
-                style={styles.imageTask}
-              />
+            <View key={index} style={styles.listImage}>
+              <Image source={{uri: item.uri}} style={styles.imageTask} />
               <TouchableOpacity
                 onPress={() => removeImage(item)}
                 style={styles.deleteButton}>
@@ -328,16 +327,13 @@ const AddTask = ({navigation}) => {
           style={styles.buttonView}>
           <Text style={styles.buttonText}>Create Task</Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={getTaskFromStorage}
           activeOpacity={0.8}
           style={styles.buttonView}>
           <Text style={styles.buttonText}>Get Task Demo</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-
-          style={styles.buttonTest}>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+        <TouchableOpacity style={styles.buttonTest}></TouchableOpacity>
       </View>
     </ScrollView>
   );
