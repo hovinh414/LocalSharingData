@@ -2,10 +2,11 @@ import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
-  Modal,
+  FlatList,
   TouchableOpacity,
   ScrollView,
   Alert,
+  Image,
   TextInput,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -17,7 +18,9 @@ import TimeModal from './TimeModal';
 import {SelectList} from 'react-native-dropdown-select-list';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
-
+import * as ImagesPickers from 'react-native-image-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { selectedImagesList } from '../../redux/reducers';
 const AddTask = ({navigation}) => {
   const [detailTasks, setDetailTasks] = useState([]);
   const [date, setDate] = useState();
@@ -26,6 +29,7 @@ const AddTask = ({navigation}) => {
   const [selected, setSelected] = useState('');
   const [description, setDescription] = useState('');
   const [participants, setParticipants] = useState('');
+  const [selectedImages, setSelectedImages] = useState([]);
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [openStartTimePicker, setOpenStartTimePicker] = useState(false);
   const createTaskObject = () => {
@@ -37,13 +41,12 @@ const AddTask = ({navigation}) => {
       selected: selected,
       description: description,
       participants: participants,
-      images: [],
+      images: selectedImages,
       files: [],
-      isDone: false
+      isDone: false,
     };
     return taskObject;
   };
-  const [newTask, setNewTask] = useState();
   const handleAddTask = () => {
     if (detailTasks.some(item => !item.description)) {
       Alert.alert('Notification', 'Please enter subtask description');
@@ -64,28 +67,26 @@ const AddTask = ({navigation}) => {
         !title ||
         !description ||
         !participants ||
-        !selected
+        !selected ||
+        selectedImages.length === 0
       ) {
         alert('Nhập đủ thông tin đi các cậu');
         return;
       }
 
-      const data = await AsyncStorage.getItem('taskKey')
+      const data = await AsyncStorage.getItem('taskKey');
 
       if (data === null) {
-        const taskObject = [createTaskObject()]
+        const taskObject = [createTaskObject()];
         await AsyncStorage.setItem('taskKey', JSON.stringify(taskObject));
-      }
-      else {
+      } else {
         const taskObject = createTaskObject();
-        const newData = JSON.parse(data)
+        const newData = JSON.parse(data);
 
-        newData.push(taskObject)
+        newData.push(taskObject);
 
-
-        await AsyncStorage.setItem('taskKey', JSON.stringify(newData))
+        await AsyncStorage.setItem('taskKey', JSON.stringify(newData));
       }
-
 
       console.log('Task saved to AsyncStorage');
     } catch (error) {
@@ -96,7 +97,6 @@ const AddTask = ({navigation}) => {
     try {
       const taskJSON = await AsyncStorage.getItem('taskKey');
 
-  
       if (taskJSON) {
         const taskObject = JSON.parse(taskJSON);
         console.log('Task from AsyncStorage:', taskObject);
@@ -128,6 +128,26 @@ const AddTask = ({navigation}) => {
     {key: '2', value: 'Medium'},
     {key: '3', value: 'Low'},
   ];
+  const handleImageSelection = async () => {
+    let result = await ImagesPickers.launchImageLibrary({
+      mediaType: 'mixed',
+      allowMultiSelection: true,
+      selectionLimit: 10,
+      aspect: [5, 5],
+    });
+    delete result.cancelled;
+    if (!result.canceled) {
+      if (!selectedImages) {
+        setSelectedImages(result.assets);
+      } else {
+        setSelectedImages([...selectedImages, ...result.assets]);
+      }
+    }
+  };
+  function removeImage(item) {
+    const newList = selectedImages.filter(listItem => listItem !== item);
+    setSelectedImages(newList);
+  }
   return (
     <ScrollView style={styles.modalContainer}>
       <View>
@@ -135,7 +155,9 @@ const AddTask = ({navigation}) => {
         <DateModal
           visible={openStartDatePicker}
           onDateChanged={handleChangeStartDate}
-          setDate={date => setDate(moment(date, "YYYY/MM/DD").format("DD/MM/YYYY").toString())}
+          setDate={date =>
+            setDate(moment(date, 'YYYY/MM/DD').format('DD/MM/YYYY').toString())
+          }
           handleOnPressStartDate={handleOnPressStartDate}
         />
         <TimeModal
@@ -273,7 +295,33 @@ const AddTask = ({navigation}) => {
             />
           </View>
         </View>
-
+        <TouchableOpacity
+          onPress={handleImageSelection}
+          activeOpacity={0.8}
+          style={styles.buttonView}>
+          <Text style={styles.buttonText}>Choose Task Image</Text>
+          <MaterialIcons name="image" size={25} color={COLORS.white} />
+        </TouchableOpacity>
+        <FlatList
+          showsHorizontalScrollIndicator={false}
+          data={selectedImages}
+          horizontal={true}
+          renderItem={({item, index}) => (
+            <View
+              key={index}
+              style={styles.listImage}>
+              <Image
+                source={{uri: item.uri}}
+                style={styles.imageTask}
+              />
+              <TouchableOpacity
+                onPress={() => removeImage(item)}
+                style={styles.deleteButton}>
+                <MaterialIcons name="delete" size={20} color={COLORS.black} />
+              </TouchableOpacity>
+            </View>
+          )}
+        />
         <TouchableOpacity
           onPress={handleCreateTask}
           activeOpacity={0.8}
@@ -285,6 +333,10 @@ const AddTask = ({navigation}) => {
           activeOpacity={0.8}
           style={styles.buttonView}>
           <Text style={styles.buttonText}>Get Task Demo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+
+          style={styles.buttonTest}>
         </TouchableOpacity>
       </View>
     </ScrollView>

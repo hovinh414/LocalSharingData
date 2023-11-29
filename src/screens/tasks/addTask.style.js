@@ -32,12 +32,12 @@ const styles = StyleSheet.create({
   closeButton: {
     position: 'absolute',
     right: 10,
-    top:10,
+    top: 10,
   },
   backButton: {
     position: 'absolute',
-    top:10,
-    flexDirection:'row'
+    top: 10,
+    flexDirection: 'row',
   },
   icon: {
     marginRight: 10,
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingLeft: 15,
     flexDirection: 'row',
-    justifyContent:'space-between'
+    justifyContent: 'space-between',
   },
   headerText: {
     color: COLORS.white,
@@ -96,7 +96,20 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   buttonView: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: COLORS.primary,
+    borderRadius: 16,
+    alignItems: 'center',
+    padding: 14,
+    marginTop: 10, // Adjust this value based on your design
+  },
+  buttonTest: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
     borderRadius: 16,
     alignItems: 'center',
     padding: 14,
@@ -105,6 +118,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: 'bold',
     color: COLORS.white,
+    marginRight: 10,
   },
   date: {
     fontSize: 18,
@@ -159,6 +173,29 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  listImage: {
+    position: 'relative',
+    flexDirection: 'column',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageTask: {
+    paddingVertical: 4,
+    marginRight: 12,
+    marginTop: 10,
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 12,
+    backgroundColor: '#C5C7C7',
+    borderRadius: 12, // Bo tròn góc
+    padding: 5,
   },
 });
 
