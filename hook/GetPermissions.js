@@ -4,6 +4,7 @@ import {PermissionsAndroid, Platform} from 'react-native';
 export const GetPermissions = async () => {
   try {
     const permissions = [
+      PermissionsAndroid.PERMISSIONS.ACCESS_MEDIA_LOCATION,
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
       PermissionsAndroid.PERMISSIONS.NEARBY_WIFI_DEVICES,
@@ -15,8 +16,10 @@ export const GetPermissions = async () => {
     });
 
     if (
-      (granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
+      (granted[PermissionsAndroid.PERMISSIONS.ACCESS_MEDIA_LOCATION] ===
         PermissionsAndroid.RESULTS.GRANTED &&
+        granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
+          PermissionsAndroid.RESULTS.GRANTED &&
         granted[PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION] ===
           PermissionsAndroid.RESULTS.GRANTED) ||
       granted[PermissionsAndroid.PERMISSIONS.NEARBY_WIFI_DEVICES] ===
@@ -37,6 +40,7 @@ export const GetPermissions = async () => {
 
 export const GetStoragePermissions = async () => {
   try {
+    console.log('Platform version: ', Platform.Version);
     if (Platform.Version >= 33) {
       const permissions = [
         PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
@@ -59,11 +63,19 @@ export const GetStoragePermissions = async () => {
         return false;
       }
     } else {
-      const permissions = PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+      const permissions = [
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      ];
 
-      const granted = await PermissionsAndroid.request(permissions);
+      const granted = await PermissionsAndroid.requestMultiple(permissions);
 
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      if (
+        granted[PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE] ===
+          PermissionsAndroid.RESULTS.GRANTED &&
+        granted[PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE] ===
+          PermissionsAndroid.RESULTS.GRANTED
+      ) {
         return true;
       } else {
         console.log('Permission denied: READ_EXTERNAL_STORAGE will not work');

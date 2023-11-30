@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, {useState, useCallback, useMemo, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Image,
   PermissionsAndroid,
 } from 'react-native';
-import { images, COLORS } from '../../../constants';
+import {images, COLORS} from '../../../constants';
 import {
   connect,
   sendMessage,
@@ -22,7 +22,7 @@ import styles from './chatDetail.style';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as ImagesPickers from 'react-native-image-picker';
-import { GiftedChat } from 'react-native-gifted-chat';
+import {GiftedChat} from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
 import TcpSocket from 'react-native-tcp-socket';
 // import arp from '@network-utils/arp-lookup';
@@ -37,17 +37,17 @@ import {
   BottomSheetModalProvider,
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
-import { GetStoragePermissions } from '../../../hook/GetPermissions';
+import {GetStoragePermissions} from '../../../hook/GetPermissions';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs';
 
 const PORT = 6000;
 const SERVER_IP = '10.152.32.209';
 
-const ChatDetail = ({ navigation, route }) => {
+const ChatDetail = ({navigation, route}) => {
   // Server variables
   const device = route.params;
-  const { isOwner } = route.params;
+  const {isOwner} = route.params;
   const receiveInterval = useRef(null);
   const connectionInterval = useRef(null);
   const [serverStarted, setServerStarted] = useState(false);
@@ -67,7 +67,6 @@ const ChatDetail = ({ navigation, route }) => {
   const [photos, setPhotos] = useState([]); // ảnh từ take photo
   const [videos, setVideos] = useState([]); // video từ record video
   const [files, setFiles] = useState([]); // chọn file từ attach
-
 
   // ---------------------------
   // Bottomsheet variables
@@ -150,7 +149,7 @@ const ChatDetail = ({ navigation, route }) => {
       });
       setServerStarted(true);
 
-      server.current.listen({ port: PORT, host: ipAddress }, () => {
+      server.current.listen({port: PORT, host: ipAddress}, () => {
         console.log('Server is up and running on', PORT, ipAddress);
 
         receiveInterval.current = setInterval(() => {
@@ -175,7 +174,7 @@ const ChatDetail = ({ navigation, route }) => {
     const handleCreateClient = () => {
       // Create socket
       client.current = TcpSocket.createConnection(
-        { port: PORT, host: SERVER_IP },
+        {port: PORT, host: SERVER_IP},
         () => {
           console.log('Connected to server');
           client.current.write('Hello server from client!');
@@ -214,11 +213,11 @@ const ChatDetail = ({ navigation, route }) => {
               _id: 2, // Tin nhắn của phía người nhắn
             },
           };
-        }
-        else if (receivedData.type.startsWith('file/')) {
+          // Xứ lý tin nhắn file
+        } else if (receivedData.type.startsWith('file/')) {
           console.log('Received file from client:', receivedData.data);
           const receivedFile = await receivedData.data.name;
-          console.log(receivedFile)
+          console.log(receivedFile);
           newMessage = {
             _id: Math.random().toString(),
             text: `${receivedFile}`,
@@ -392,11 +391,11 @@ const ChatDetail = ({ navigation, route }) => {
       .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
   };
   const onSendImages = useCallback(
-    async (image) => {
+    async image => {
       if (!image) {
         return;
       }
-      console.log(image)
+      console.log(image);
 
       const newMessage = {
         _id: Math.random().toString(),
@@ -423,14 +422,13 @@ const ChatDetail = ({ navigation, route }) => {
 
         socketRef.current.write(JSON.stringify(newData));
       } else if (!isOwner) {
-        console.log(image)
+        console.log(image);
 
-        sendMessage(image.fileName)
+        sendMessage(image.fileName);
 
-        const uri = await image.originalPath.toString()
+        const uri = await image.originalPath.toString();
 
-
-        console.log(uri)
+        console.log(uri);
         // only client can use sendMessage function
         sendFile(uri)
           .then(metaInfo =>
@@ -566,7 +564,7 @@ const ChatDetail = ({ navigation, route }) => {
     switch (item.type) {
       case 'image/jpeg':
       case 'image/png':
-        return <Image source={{ uri: item.uri }} style={styles.image} />;
+        return <Image source={{uri: item.uri}} style={styles.image} />;
       case 'application/pdf':
         return <Image source={images.pdf} style={styles.image} />;
       case 'text/plain':
@@ -590,11 +588,11 @@ const ChatDetail = ({ navigation, route }) => {
   const takePhoto = () => {
     cameraBottomSheetModalRef.current?.close();
     try {
-      ImagePicker.openCamera({ mediaType: 'photo' }).then(result => {
-        console.log(result)
-        setPhotos(result)
+      ImagePicker.openCamera({mediaType: 'photo'}).then(result => {
+        console.log(result);
+        setPhotos(result);
 
-        onSendImages(result)
+        onSendImages(result);
       });
     } catch (err) {
       console.log(err);
@@ -603,7 +601,7 @@ const ChatDetail = ({ navigation, route }) => {
   const recordVideo = () => {
     cameraBottomSheetModalRef.current?.close();
     try {
-      ImagePicker.openCamera({ mediaType: 'video' }).then(result => {
+      ImagePicker.openCamera({mediaType: 'video'}).then(result => {
         console.log(result);
       });
     } catch (err) {
@@ -639,7 +637,7 @@ const ChatDetail = ({ navigation, route }) => {
         quality: 1,
       });
 
-      console.log(result)
+      console.log(result);
 
       // Thêm thuộc tính filePath cho mỗi đối tượng trong mảng result
       const updatedResult = await Promise.all(
@@ -648,8 +646,6 @@ const ChatDetail = ({ navigation, route }) => {
           filePath: await uriToFilePath(item.uri),
         })),
       );
-
-      
 
       // Cập nhật state files bằng kết quả đã được cập nhật
       setFiles(updatedResult);
@@ -670,16 +666,16 @@ const ChatDetail = ({ navigation, route }) => {
             flexDirection: 'column',
             alignItems: 'center',
           }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+          <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
             <FlatList
-            showsHorizontalScrollIndicator={false}
-              data={[...selectedImages, ...files,]} /// chỗ này show list ảnh
+              showsHorizontalScrollIndicator={false}
+              data={[...selectedImages, ...files]} /// chỗ này show list ảnh
               horizontal={true}
-              renderItem={({ item, index }) => {
+              renderItem={({item, index}) => {
                 return (
                   <View style={styles.viewImage} key={index}>
                     {getFileImage(item)}
-  
+
                     <TouchableOpacity
                       onPress={() => removeItems(item)}
                       style={styles.btnRemoveImage}>
@@ -690,7 +686,7 @@ const ChatDetail = ({ navigation, route }) => {
                       />
                     </TouchableOpacity>
                   </View>
-                )
+                );
                 // console.log(item)
               }}
             />
@@ -716,7 +712,7 @@ const ChatDetail = ({ navigation, route }) => {
                 }>
                 <Image
                   source={images.send}
-                  style={[styles.imgBtn, { marginHorizontal: 5 }]}
+                  style={[styles.imgBtn, {marginHorizontal: 5}]}
                 />
               </TouchableOpacity>
             ) : (
@@ -728,14 +724,14 @@ const ChatDetail = ({ navigation, route }) => {
                   <Image
                     source={images.image}
                     size={25}
-                    style={[styles.imgBtn, { marginHorizontal: 5 }]}
+                    style={[styles.imgBtn, {marginHorizontal: 5}]}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => pickDocument()}>
                   <Image
                     source={images.attach}
                     size={25}
-                    style={[styles.imgBtn, { marginHorizontal: 5 }]}
+                    style={[styles.imgBtn, {marginHorizontal: 5}]}
                   />
                 </TouchableOpacity>
               </View>
