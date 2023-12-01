@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ToastAndroid } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, SIZES } from '../../constants';
@@ -7,13 +7,49 @@ import moment from 'moment';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import * as Progress from 'react-native-progress'
 import countCompletedSubTask from '../screens/tasks/methods/countCompletedSubTask';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import { useSelector } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window')
 
 const TaskCard = ({ navigation, task }) => {
+  const [joinedPeople, setJoinedPeople] = useState(task.joinedParticipants.length)
+  console.log(joinedPeople)
+  const user = useSelector(state => state.P2P.user)
+
   const handleNavigate = () => {
     navigation.navigate('Task Detail', task);
   };
+
+  const checkJoinedTask = () => {
+    const findDevice = task.joinedParticipants.find(participant => participant.deviceName === user.deviceName)
+
+    if (findDevice) {
+      return true
+    }
+
+    return false
+  }
+
+  const [joined, setJoined] = useState(checkJoinedTask())
+
+  const handleJoinTask = async () => {
+    const newArray = JSON.parse(await AsyncStorage.getItem('taskKey'))
+
+    const indexToUpdate = newArray.findIndex(item => item.taskId === task.taskId)
+
+    newArray[indexToUpdate].joinedParticipants.push({ deviceName: user.deviceName })
+
+    await AsyncStorage.setItem('taskKey', JSON.stringify(newArray))
+
+    setJoinedPeople(joinedPeople + 1)
+    setJoined(!joined)
+
+    ToastAndroid.show('Join task thành công!', ToastAndroid.SHORT)
+  }
+
+
 
   return (
     <TouchableOpacity style={styles.container} onPress={handleNavigate}>
@@ -30,7 +66,7 @@ const TaskCard = ({ navigation, task }) => {
                   : COLORS.darkgray,
           },
         ]}>
-        <Text style={[styles.priority, { color: task.selected === 'Medium' ? COLORS.black : COLORS.lightwhite }]}>
+        <Text style={[styles.priority, { color: (task.isDone === false && task.selected === 'Medium') ? COLORS.black : COLORS.lightwhite }]}>
           {task.isDone ? 'Done' : task.selected}
         </Text>
       </View>
@@ -44,8 +80,37 @@ const TaskCard = ({ navigation, task }) => {
             {task.title}
           </Text>
 
+          {joinedPeople === parseInt(task.maxParticipants)
+            ? <Text style={styles.fullParticipants}>Đã đủ</Text>
+            : (
+              joined
+                ? <FontAwesome5 name='user-check' size={SIZES.large + 2} color={COLORS.primary} />
+                : <TouchableOpacity onPress={handleJoinTask}>
+                  <FontAwesome5 name='user-plus' size={SIZES.large + 2} color={COLORS.primary} />
+                </TouchableOpacity>
+            )
+          }
+        </View>
+
+        <View style={styles.detailsContainer}>
+          <View style={styles.dueAndAssigneeWrapper}>
+            <View style={styles.dueContainer}>
+              <MaterialCommunityIcons name="alarm" color={COLORS.red} size={SIZES.large} />
+
+              <Text style={styles.due}>
+                {task.time}
+              </Text>
+            </View>
+
+            <View style={styles.assigneeContainer}>
+              <MaterialCommunityIcons name='account-group' size={SIZES.large} color={COLORS.primary} />
+
+              <Text style={styles.assigneeNumber}>{joinedPeople}/{task.maxParticipants}</Text>
+            </View>
+          </View>
+
           <BouncyCheckbox
-            size={25}
+            size={28}
             fillColor={COLORS.green}
             unfillColor="#FFFFFF"
             innerIconStyle={{
@@ -58,27 +123,14 @@ const TaskCard = ({ navigation, task }) => {
           />
         </View>
 
-        <View style={styles.dueContainer}>
-          <MaterialCommunityIcons name="alarm" color={COLORS.red} size={SIZES.large} />
-
-          <Text style={styles.due}>
-            {task.time}
-          </Text>
-        </View>
-
-        <View style={styles.assigneeContainer}>
-          <MaterialCommunityIcons name='account-group' size={SIZES.large} color={COLORS.primary} />
-
-          <Text style={styles.assigneeNumber}>1/{task.participants}</Text>
-        </View>
-
 
         {task.detailTasks.length === 0
           ? null
-          : <View style={{gap: 5}}>
+          : <View style={{ gap: 5 }}>
             <Progress.Bar progress={countCompletedSubTask(task.detailTasks) / task.detailTasks.length}
-              width={width - width * 0.06 - 32} 
+              width={width - width * 0.06 - 32}
               unfilledColor={COLORS.lightgray}
+              color={COLORS.primary}
               borderWidth={0} />
 
             <View style={styles.progressContainer}>
@@ -130,7 +182,7 @@ const styles = StyleSheet.create({
   titleAndStatusContainer: {
     flexDirection: 'row',
     flex: 1,
-    alignItems: 'center'
+    alignItems: 'center',
   },
 
   titleContainer: {
@@ -138,11 +190,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  fullParticipants: {
+    fontWeight: '500',
+    color: COLORS.gray
+  },
+
   title: {
     fontSize: 18,
     fontWeight: '500',
     color: COLORS.black,
     flex: 1
+  },
+
+  detailsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+  },
+
+  dueAndAssigneeWrapper: {
+    gap: 10,
+    flex: 1,
   },
 
   dueContainer: {

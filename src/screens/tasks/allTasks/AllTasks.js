@@ -15,9 +15,6 @@ const AllTasks = ({navigation}) => {
   // }
 
   // GetData()
-
-  
-
   const sortedTasks = sortTasks(taskList)
   
   return (

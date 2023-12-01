@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,20 +8,24 @@ import {
   Alert,
   Image,
   TextInput,
+  ToastAndroid,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './addTask.style';
-import {COLORS} from '../../../constants';
+import { COLORS } from '../../../constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import DateModal from './DateModal';
 import TimeModal from './TimeModal';
-import {SelectList} from 'react-native-dropdown-select-list';
+import { SelectList } from 'react-native-dropdown-select-list';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import * as ImagesPickers from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {selectedImagesList} from '../../redux/reducers';
-const AddTask = ({navigation}) => {
+import { selectedImagesList } from '../../redux/reducers';
+import 'react-native-get-random-values'
+import { v4 as uuidv4 } from 'uuid';
+
+const AddTask = ({ navigation }) => {
   const [detailTasks, setDetailTasks] = useState([]);
   const [date, setDate] = useState();
   const [time, setTime] = useState();
@@ -34,16 +38,19 @@ const AddTask = ({navigation}) => {
   const [openStartTimePicker, setOpenStartTimePicker] = useState(false);
   const createTaskObject = () => {
     const taskObject = {
+      taskId: uuidv4(),
       detailTasks: detailTasks,
       date: date,
       time: time,
-      title: title,
+      title: title.trim(),
       selected: selected,
-      description: description,
-      participants: participants,
+      description: description.trim(),
+      maxParticipants: participants.trim(),
       images: selectedImages,
       files: [],
+      joinedParticipants: [],
       isDone: false,
+      note: ''
     };
     return taskObject;
   };
@@ -52,7 +59,7 @@ const AddTask = ({navigation}) => {
       Alert.alert('Notification', 'Please enter subtask description');
       return;
     }
-    const newTask = {isDone: false, description: ''};
+    const newTask = { isDone: false, description: '' };
     setDetailTasks([...detailTasks, newTask]);
   };
   const handleDeleteAllTask = () => {
@@ -65,30 +72,41 @@ const AddTask = ({navigation}) => {
         !date ||
         detailTasks.length === 0 ||
         !title ||
-        !description ||
         !participants ||
-        !selected ||
-        selectedImages.length === 0
+        !description ||
+        !selected
+        // selectedImages.length === 0
       ) {
-        alert('Nhập đủ thông tin đi các cậu');
+        alert('Vui lòng nhập đầy đủ thông tin!');
         return;
       }
+      else {
+        if (!participants) {
+          alert('Vui lòng nhập số người tham gia lớn hơn 0!');
 
-      const data = await AsyncStorage.getItem('taskKey');
-
-      if (data === null) {
-        const taskObject = [createTaskObject()];
-        await AsyncStorage.setItem('taskKey', JSON.stringify(taskObject));
-      } else {
-        const taskObject = createTaskObject();
-        const newData = JSON.parse(data);
-
-        newData.push(taskObject);
-
-        await AsyncStorage.setItem('taskKey', JSON.stringify(newData));
+          return;
+        }
       }
 
-      console.log('Task saved to AsyncStorage');
+      const datas = await AsyncStorage.getItem('taskKey');
+
+      if (datas === null) {
+        const taskObject = [createTaskObject()];
+        await AsyncStorage.setItem('taskKey', JSON.stringify(taskObject));
+
+        ToastAndroid.show('Thêm thành công!', ToastAndroid.SHORT)
+      } else {
+        const jsonDatas = JSON.parse(datas)
+
+        const taskObject = createTaskObject()
+
+        jsonDatas.push(taskObject)
+
+        await AsyncStorage.setItem('taskKey', JSON.stringify(jsonDatas))
+
+        ToastAndroid.show('Thêm thành công!', ToastAndroid.SHORT)
+
+      }
     } catch (error) {
       console.error('Error saving task to AsyncStorage:', error);
     }
@@ -115,7 +133,7 @@ const AddTask = ({navigation}) => {
   };
 
   function handleChangeStartDate(propDate) {
-    setStartedDate(propDate);
+    // setStartedDate(propDate);
   }
 
   const handleOnPressStartDate = () => {
@@ -125,9 +143,9 @@ const AddTask = ({navigation}) => {
     setOpenStartTimePicker(!openStartTimePicker);
   };
   const data = [
-    {key: '1', value: 'High'},
-    {key: '2', value: 'Medium'},
-    {key: '3', value: 'Low'},
+    { key: '0', value: 'High' },
+    { key: '1', value: 'Medium' },
+    { key: '2', value: 'Low' },
   ];
   const handleImageSelection = async () => {
     let result = await ImagesPickers.launchImageLibrary({
@@ -149,6 +167,19 @@ const AddTask = ({navigation}) => {
     const newList = selectedImages.filter(listItem => listItem !== item);
     setSelectedImages(newList);
   }
+
+  const handleInputChange = (text) => {
+    // Loại bỏ các ký tự không phải là số từ chuỗi
+    const sanitizedText = text.replace(/[^0-9]/g, '');
+
+    // Kiểm tra xem giá trị đã nhập có lớn hơn 0 không
+    if (sanitizedText !== '' && parseInt(sanitizedText) > 0) {
+      setParticipants(sanitizedText);
+    } else {
+      setParticipants('');
+    }
+  };
+
   return (
     <ScrollView style={styles.modalContainer}>
       <View>
@@ -214,7 +245,7 @@ const AddTask = ({navigation}) => {
           <View style={styles.headerAddDetail}>
             <TouchableOpacity
               activeOpacity={0.8}
-              style={{flexDirection: 'row'}}
+              style={{ flexDirection: 'row' }}
               onPress={handleAddTask}>
               <Ionicons
                 name="add-circle-outline"
@@ -226,7 +257,7 @@ const AddTask = ({navigation}) => {
             {detailTasks.length === 0 ? null : (
               <TouchableOpacity
                 activeOpacity={0.8}
-                style={{flexDirection: 'row', marginRight: 10}}
+                style={{ flexDirection: 'row', marginRight: 10 }}
                 onPress={handleDeleteAllTask}>
                 <Ionicons name="trash-outline" size={25} color={COLORS.white} />
               </TouchableOpacity>
@@ -277,16 +308,18 @@ const AddTask = ({navigation}) => {
             />
           </View>
         </View>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <View style={{flexDirection: 'column'}}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'column' }}>
             <Text style={styles.title}>Participants</Text>
             <TextInput
+              keyboardType='numeric'
               style={styles.participants}
               placeholder="10"
-              onChangeText={text => setParticipants(text)}
+              placeholderTextColor={COLORS.gray}
+              onChangeText={text => handleInputChange(text)}
             />
           </View>
-          <View style={{flexDirection: 'column', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'column', alignItems: 'center' }}>
             <Text style={styles.title}>Priority</Text>
             <SelectList
               placeholder="Priority"
@@ -294,9 +327,10 @@ const AddTask = ({navigation}) => {
               data={data}
               save="value"
               boxStyles={styles.box}
+              dropdownStyles={{ height: 120 }}
             />
           </View>
-          <View style={{flexDirection: 'column'}}>
+          <View style={{ flexDirection: 'column' }}>
             <Text style={styles.title}>Images</Text>
             <TouchableOpacity
               onPress={handleImageSelection}
@@ -311,9 +345,9 @@ const AddTask = ({navigation}) => {
           showsHorizontalScrollIndicator={false}
           data={selectedImages}
           horizontal={true}
-          renderItem={({item, index}) => (
+          renderItem={({ item, index }) => (
             <View key={index} style={styles.listImage}>
-              <Image source={{uri: item.uri}} style={styles.imageTask} />
+              <Image source={{ uri: item.uri }} style={styles.imageTask} />
               <TouchableOpacity
                 onPress={() => removeImage(item)}
                 style={styles.deleteButton}>
@@ -328,13 +362,12 @@ const AddTask = ({navigation}) => {
           style={styles.buttonView}>
           <Text style={styles.buttonText}>Create Task</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity
+        <TouchableOpacity
           onPress={getTaskFromStorage}
           activeOpacity={0.8}
           style={styles.buttonView}>
           <Text style={styles.buttonText}>Get Task Demo</Text>
-        </TouchableOpacity> */}
-        <TouchableOpacity style={styles.buttonTest}></TouchableOpacity>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
