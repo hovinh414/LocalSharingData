@@ -11,7 +11,7 @@ import leftIcon from '../../../assets/images/left-chevron.png';
 import rightIcon from '../../../assets/images/right-chevron.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import TaskTopTabNavigator from '../../../navigators/TaskTopTabNavigator';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setTaskList } from '../../redux/reducers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -20,11 +20,14 @@ const Task = ({ navigation }) => {
   let today = moment().format('YYYY-MM-DD');
   const [date, setDate] = useState(today);
 
+  const user = useSelector(state => state.P2P.user)
+
+  
+
   const dispatch = useDispatch();
 
   const getDataFromStorage = async () => {
    const storageData = await AsyncStorage.getItem('taskKey')
-   console.log(storageData)
 
     if (storageData !== null) {
       const data = JSON.parse(storageData)
@@ -42,10 +45,10 @@ const Task = ({ navigation }) => {
   getDataFromStorage()
 
   useFocusEffect(
-    useCallback(() => {
-      // Logic cập nhật hoặc render lại ở đây
+      () => {
+        // Logic cập nhật hoặc render lại ở đây
       getDataFromStorage()
-    }, [])
+      }
   );
 
   const markedDatesFunc = today => [
