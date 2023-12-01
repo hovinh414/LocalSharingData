@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -12,20 +12,21 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './addTask.style';
-import { COLORS } from '../../../constants';
+import {COLORS} from '../../../constants';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import DateModal from './DateModal';
 import TimeModal from './TimeModal';
-import { SelectList } from 'react-native-dropdown-select-list';
+import {SelectList} from 'react-native-dropdown-select-list';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import * as ImagesPickers from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { selectedImagesList } from '../../redux/reducers';
-import 'react-native-get-random-values'
-import { v4 as uuidv4 } from 'uuid';
+import {selectedImagesList} from '../../redux/reducers';
+import {useSelector} from 'react-redux';
+import 'react-native-get-random-values';
+import {v4 as uuidv4} from 'uuid';
 
-const AddTask = ({ navigation }) => {
+const AddTask = ({navigation}) => {
   const [detailTasks, setDetailTasks] = useState([]);
   const [date, setDate] = useState();
   const [time, setTime] = useState();
@@ -36,6 +37,7 @@ const AddTask = ({ navigation }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [openStartTimePicker, setOpenStartTimePicker] = useState(false);
+  const user = useSelector(state => state.P2P.user);
   const createTaskObject = () => {
     const taskObject = {
       taskId: uuidv4(),
@@ -50,7 +52,8 @@ const AddTask = ({ navigation }) => {
       files: [],
       joinedParticipants: [],
       isDone: false,
-      note: ''
+      note: '',
+      deviceName: user.deviceName,
     };
     return taskObject;
   };
@@ -59,7 +62,7 @@ const AddTask = ({ navigation }) => {
       Alert.alert('Notification', 'Please enter subtask description');
       return;
     }
-    const newTask = { isDone: false, description: '' };
+    const newTask = {isDone: false, description: ''};
     setDetailTasks([...detailTasks, newTask]);
   };
   const handleDeleteAllTask = () => {
@@ -79,8 +82,7 @@ const AddTask = ({ navigation }) => {
       ) {
         alert('Vui lòng nhập đầy đủ thông tin!');
         return;
-      }
-      else {
+      } else {
         if (!participants) {
           alert('Vui lòng nhập số người tham gia lớn hơn 0!');
 
@@ -94,25 +96,24 @@ const AddTask = ({ navigation }) => {
         const taskObject = [createTaskObject()];
         await AsyncStorage.setItem('taskKey', JSON.stringify(taskObject));
 
-        ToastAndroid.show('Thêm thành công!', ToastAndroid.SHORT)
+        ToastAndroid.show('Thêm thành công!', ToastAndroid.SHORT);
       } else {
-        const jsonDatas = JSON.parse(datas)
+        const jsonDatas = JSON.parse(datas);
 
-        const taskObject = createTaskObject()
+        const taskObject = createTaskObject();
 
-        jsonDatas.push(taskObject)
+        jsonDatas.push(taskObject);
 
-        await AsyncStorage.setItem('taskKey', JSON.stringify(jsonDatas))
+        await AsyncStorage.setItem('taskKey', JSON.stringify(jsonDatas));
 
-        ToastAndroid.show('Thêm thành công!', ToastAndroid.SHORT)
-
+        ToastAndroid.show('Thêm thành công!', ToastAndroid.SHORT);
       }
     } catch (error) {
       console.error('Error saving task to AsyncStorage:', error);
     }
   };
   const getTaskFromStorage = async () => {
-    // await AsyncStorage.clear()
+    // await AsyncStorage.clear();
     try {
       const taskJSON = await AsyncStorage.getItem('taskKey');
 
@@ -143,9 +144,9 @@ const AddTask = ({ navigation }) => {
     setOpenStartTimePicker(!openStartTimePicker);
   };
   const data = [
-    { key: '0', value: 'High' },
-    { key: '1', value: 'Medium' },
-    { key: '2', value: 'Low' },
+    {key: '0', value: 'High'},
+    {key: '1', value: 'Medium'},
+    {key: '2', value: 'Low'},
   ];
   const handleImageSelection = async () => {
     let result = await ImagesPickers.launchImageLibrary({
@@ -168,7 +169,7 @@ const AddTask = ({ navigation }) => {
     setSelectedImages(newList);
   }
 
-  const handleInputChange = (text) => {
+  const handleInputChange = text => {
     // Loại bỏ các ký tự không phải là số từ chuỗi
     const sanitizedText = text.replace(/[^0-9]/g, '');
 
@@ -245,7 +246,7 @@ const AddTask = ({ navigation }) => {
           <View style={styles.headerAddDetail}>
             <TouchableOpacity
               activeOpacity={0.8}
-              style={{ flexDirection: 'row' }}
+              style={{flexDirection: 'row'}}
               onPress={handleAddTask}>
               <Ionicons
                 name="add-circle-outline"
@@ -257,7 +258,7 @@ const AddTask = ({ navigation }) => {
             {detailTasks.length === 0 ? null : (
               <TouchableOpacity
                 activeOpacity={0.8}
-                style={{ flexDirection: 'row', marginRight: 10 }}
+                style={{flexDirection: 'row', marginRight: 10}}
                 onPress={handleDeleteAllTask}>
                 <Ionicons name="trash-outline" size={25} color={COLORS.white} />
               </TouchableOpacity>
@@ -308,18 +309,18 @@ const AddTask = ({ navigation }) => {
             />
           </View>
         </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'column' }}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <View style={{flexDirection: 'column'}}>
             <Text style={styles.title}>Participants</Text>
             <TextInput
-              keyboardType='numeric'
+              keyboardType="numeric"
               style={styles.participants}
               placeholder="10"
               placeholderTextColor={COLORS.gray}
               onChangeText={text => handleInputChange(text)}
             />
           </View>
-          <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+          <View style={{flexDirection: 'column', alignItems: 'center'}}>
             <Text style={styles.title}>Priority</Text>
             <SelectList
               placeholder="Priority"
@@ -327,10 +328,10 @@ const AddTask = ({ navigation }) => {
               data={data}
               save="value"
               boxStyles={styles.box}
-              dropdownStyles={{ height: 120 }}
+              dropdownStyles={{height: 120}}
             />
           </View>
-          <View style={{ flexDirection: 'column' }}>
+          <View style={{flexDirection: 'column'}}>
             <Text style={styles.title}>Images</Text>
             <TouchableOpacity
               onPress={handleImageSelection}
@@ -345,9 +346,9 @@ const AddTask = ({ navigation }) => {
           showsHorizontalScrollIndicator={false}
           data={selectedImages}
           horizontal={true}
-          renderItem={({ item, index }) => (
+          renderItem={({item, index}) => (
             <View key={index} style={styles.listImage}>
-              <Image source={{ uri: item.uri }} style={styles.imageTask} />
+              <Image source={{uri: item.uri}} style={styles.imageTask} />
               <TouchableOpacity
                 onPress={() => removeImage(item)}
                 style={styles.deleteButton}>

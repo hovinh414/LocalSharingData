@@ -36,6 +36,9 @@ const p2pSlice = createSlice({
     setTaskList: (state, action) => {
       state.taskList = action.payload;
     },
+    setTodoTask: (state, action) => {
+      state.todoTask = action.payload;
+    },
   },
 });
 
@@ -47,6 +50,7 @@ export const {
   updateThisDeviceSubscription,
   setDarkMode,
   setTaskList,
+  setTodoTask,
 } = p2pSlice.actions;
 
 export default p2pSlice.reducer;

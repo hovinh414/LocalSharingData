@@ -1,55 +1,87 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ToastAndroid } from 'react-native';
+import React, {useState, useCallback} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  ToastAndroid,
+  Alert,
+} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { COLORS, SIZES } from '../../constants';
+import {COLORS, SIZES} from '../../constants';
 import moment from 'moment';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import * as Progress from 'react-native-progress'
+import * as Progress from 'react-native-progress';
 import countCompletedSubTask from '../screens/tasks/methods/countCompletedSubTask';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
-import { useSelector } from 'react-redux';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import {useSelector} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { width } = Dimensions.get('window')
+const {width} = Dimensions.get('window');
 
-const TaskCard = ({ navigation, task }) => {
-  const [joinedPeople, setJoinedPeople] = useState(task.joinedParticipants.length)
-  console.log(joinedPeople)
-  const user = useSelector(state => state.P2P.user)
-
+const TaskCard = ({navigation, task}) => {
+  const [tempTask, setTempTask] = useState(task);
+  const [joinedPeople, setJoinedPeople] = useState(
+    task.joinedParticipants.length,
+  );
+  const user = useSelector(state => state.P2P.user);
   const handleNavigate = () => {
-    navigation.navigate('Task Detail', task);
+    navigation.navigate('Task Detail', tempTask);
   };
 
   const checkJoinedTask = () => {
-    const findDevice = task.joinedParticipants.find(participant => participant.deviceName === user.deviceName)
+    const findDevice = task.joinedParticipants.find(
+      participant => participant.deviceName === user.deviceName,
+    );
 
     if (findDevice) {
-      return true
+      return true;
     }
 
-    return false
-  }
+    return false;
+  };
 
-  const [joined, setJoined] = useState(checkJoinedTask())
+  const [joined, setJoined] = useState(checkJoinedTask());
 
   const handleJoinTask = async () => {
-    const newArray = JSON.parse(await AsyncStorage.getItem('taskKey'))
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc muốn tham gia task này không?',
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
 
-    const indexToUpdate = newArray.findIndex(item => item.taskId === task.taskId)
+        {
+          text: 'Tham gia',
+          onPress: async () => {
+            const newArray = JSON.parse(await AsyncStorage.getItem('taskKey'));
 
-    newArray[indexToUpdate].joinedParticipants.push({ deviceName: user.deviceName })
+            const indexToUpdate = newArray.findIndex(
+              item => item.taskId === task.taskId,
+            );
 
-    await AsyncStorage.setItem('taskKey', JSON.stringify(newArray))
+            newArray[indexToUpdate].joinedParticipants.push({
+              deviceName: user.deviceName,
+            });
 
-    setJoinedPeople(joinedPeople + 1)
-    setJoined(!joined)
+            await AsyncStorage.setItem('taskKey', JSON.stringify(newArray));
 
-    ToastAndroid.show('Join task thành công!', ToastAndroid.SHORT)
-  }
+            setJoinedPeople(joinedPeople + 1);
+            setJoined(!joined);
 
+            ToastAndroid.show('Join task thành công!', ToastAndroid.SHORT);
 
+            setTempTask(newArray[indexToUpdate]);
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  };
 
   return (
     <TouchableOpacity style={styles.container} onPress={handleNavigate}>
@@ -60,52 +92,73 @@ const TaskCard = ({ navigation, task }) => {
             backgroundColor: task.isDone
               ? COLORS.green
               : task.selected === 'High'
-                ? COLORS.red
-                : task.selected === 'Medium'
-                  ? COLORS.lightyellow
-                  : COLORS.darkgray,
+              ? COLORS.red
+              : task.selected === 'Medium'
+              ? COLORS.lightyellow
+              : COLORS.darkgray,
           },
         ]}>
-        <Text style={[styles.priority, { color: (task.isDone === false && task.selected === 'Medium') ? COLORS.black : COLORS.lightwhite }]}>
+        <Text
+          style={[
+            styles.priority,
+            {
+              color:
+                task.isDone === false && task.selected === 'Medium'
+                  ? COLORS.black
+                  : COLORS.lightwhite,
+            },
+          ]}>
           {task.isDone ? 'Done' : task.selected}
         </Text>
       </View>
 
-      <View style={[styles.in4Container, { opacity: task.isDone ? 0.5 : 1 }]}>
+      <View style={[styles.in4Container, {opacity: task.isDone ? 0.5 : 1}]}>
         <View style={styles.titleAndStatusContainer}>
-          <Text
-            style={[styles.title,
-            ]}
-            numberOfLines={1}>
+          <Text style={[styles.title]} numberOfLines={1}>
             {task.title}
           </Text>
 
-          {joinedPeople === parseInt(task.maxParticipants)
-            ? <Text style={styles.fullParticipants}>Đã đủ</Text>
-            : (
-              joined
-                ? <FontAwesome5 name='user-check' size={SIZES.large + 2} color={COLORS.primary} />
-                : <TouchableOpacity onPress={handleJoinTask}>
-                  <FontAwesome5 name='user-plus' size={SIZES.large + 2} color={COLORS.primary} />
-                </TouchableOpacity>
-            )
-          }
+          {joined ? (
+            <FontAwesome5
+              name="user-check"
+              size={SIZES.large + 2}
+              color={COLORS.primary}
+            />
+          ) : joinedPeople === parseInt(task.maxParticipants) ? (
+            <Text style={styles.fullParticipants}>Đã đủ</Text>
+          ) : user.deviceName === task.deviceName ? null : (
+            <TouchableOpacity onPress={handleJoinTask}>
+              <FontAwesome5
+                name="user-plus"
+                size={SIZES.large + 2}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.detailsContainer}>
           <View style={styles.dueAndAssigneeWrapper}>
             <View style={styles.dueContainer}>
-              <MaterialCommunityIcons name="alarm" color={COLORS.red} size={SIZES.large} />
+              <MaterialCommunityIcons
+                name="alarm"
+                color={COLORS.red}
+                size={SIZES.large}
+              />
 
-              <Text style={styles.due}>
-                {task.time}
-              </Text>
+              <Text style={styles.due}>{task.time}</Text>
             </View>
 
             <View style={styles.assigneeContainer}>
-              <MaterialCommunityIcons name='account-group' size={SIZES.large} color={COLORS.primary} />
+              <MaterialCommunityIcons
+                name="account-group"
+                size={SIZES.large}
+                color={COLORS.primary}
+              />
 
-              <Text style={styles.assigneeNumber}>{joinedPeople}/{task.maxParticipants}</Text>
+              <Text style={styles.assigneeNumber}>
+                {joinedPeople}/{task.maxParticipants}
+              </Text>
             </View>
           </View>
 
@@ -123,22 +176,36 @@ const TaskCard = ({ navigation, task }) => {
           />
         </View>
 
-
-        {task.detailTasks.length === 0
-          ? null
-          : <View style={{ gap: 5 }}>
-            <Progress.Bar progress={countCompletedSubTask(task.detailTasks) / task.detailTasks.length}
+        {task.detailTasks.length === 0 ? null : (
+          <View style={{gap: 5}}>
+            <Progress.Bar
+              progress={
+                countCompletedSubTask(task.detailTasks) /
+                task.detailTasks.length
+              }
               width={width - width * 0.06 - 32}
               unfilledColor={COLORS.lightgray}
               color={COLORS.primary}
-              borderWidth={0} />
+              borderWidth={0}
+            />
 
             <View style={styles.progressContainer}>
-              <Text style={styles.progress}>TIẾN ĐỘ: {countCompletedSubTask(task.detailTasks)}/{task.detailTasks.length}</Text>
+              <Text style={styles.progress}>
+                TIẾN ĐỘ: {countCompletedSubTask(task.detailTasks)}/
+                {task.detailTasks.length}
+              </Text>
 
-              <Text style={styles.progress}>{(countCompletedSubTask(task.detailTasks) / task.detailTasks.length * 100).toFixed(0)}%</Text>
+              <Text style={styles.progress}>
+                {(
+                  (countCompletedSubTask(task.detailTasks) /
+                    task.detailTasks.length) *
+                  100
+                ).toFixed(0)}
+                %
+              </Text>
             </View>
-          </View>}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -192,20 +259,19 @@ const styles = StyleSheet.create({
 
   fullParticipants: {
     fontWeight: '500',
-    color: COLORS.gray
+    color: COLORS.gray,
   },
 
   title: {
     fontSize: 18,
     fontWeight: '500',
     color: COLORS.black,
-    flex: 1
+    flex: 1,
   },
 
   detailsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-
   },
 
   dueAndAssigneeWrapper: {
@@ -222,27 +288,27 @@ const styles = StyleSheet.create({
   due: {
     color: COLORS.red,
     fontSize: 16,
-    fontWeight: '500'
+    fontWeight: '500',
   },
 
   assigneeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10
+    gap: 10,
   },
 
   assigneeNumber: {
     fontSize: 16,
-    color: COLORS.primary
+    color: COLORS.primary,
   },
 
   progressContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
 
   progress: {
     color: COLORS.black,
-    fontWeight: '500'
-  }
+    fontWeight: '500',
+  },
 });
