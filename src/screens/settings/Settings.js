@@ -59,7 +59,7 @@ const Settings = ({navigation}) => {
   const logout = () => {
     Alert.alert('Notification', 'Do you want to log out?', [
       {
-        text: 'Cencel',
+        text: 'Cancel',
         onPress: () => console.log('Cancel Pressed'),
         style: 'cancel',
       },

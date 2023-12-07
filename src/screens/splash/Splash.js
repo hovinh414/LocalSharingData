@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
+import splashImage from '../../../assets/images/splash.png'
 
 const wait = time => new Promise(resolve => setTimeout(resolve, time));
 
@@ -15,7 +16,7 @@ const Splash = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 25 }}>SPLASH SCREEN</Text>
+      <Image source={splashImage} style={styles.splashImage}/>
     </View>
   );
 };
@@ -26,6 +27,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
+  splashImage: {
+    height: '50%',
+    resizeMode: 'contain'
+  }
 });
 
 export default Splash;

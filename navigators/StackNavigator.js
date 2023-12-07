@@ -8,6 +8,7 @@ import TaskDetail from '../src/screens/tasks/TaskDetail';
 import LoginScreen from '../src/screens/auth/LoginScreen';
 import AddTask from '../src/screens/tasks/AddTask';
 
+
 const Stack = createStackNavigator();
 
 function StackTabs() {
