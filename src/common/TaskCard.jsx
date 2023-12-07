@@ -19,17 +19,19 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {useSelector} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const {width} = Dimensions.get('window');
 
 const TaskCard = ({navigation, task}) => {
-  const [tempTask, setTempTask] = useState(task);
-  const [joinedPeople, setJoinedPeople] = useState(
-    task.joinedParticipants.length,
-  );
+  // const [tempTask, setTempTask] = useState(task);
+  const joinedPeople = task.joinedParticipants.length
   const user = useSelector(state => state.P2P.user);
   const handleNavigate = () => {
-    navigation.navigate('Task Detail', tempTask);
+    // console.log("tempTask:", tempTask)
+    navigation.navigate('Task Detail', task);
   };
+
+  
 
   const checkJoinedTask = () => {
     const findDevice = task.joinedParticipants.find(
@@ -43,7 +45,8 @@ const TaskCard = ({navigation, task}) => {
     return false;
   };
 
-  const [joined, setJoined] = useState(checkJoinedTask());
+  // console.log('tempTask', tempTask)
+
 
   const handleJoinTask = async () => {
     Alert.alert(
@@ -70,12 +73,16 @@ const TaskCard = ({navigation, task}) => {
 
             await AsyncStorage.setItem('taskKey', JSON.stringify(newArray));
 
-            setJoinedPeople(joinedPeople + 1);
-            setJoined(!joined);
+            // setJoinedPeople(joinedPeople + 1);
+            // setJoined(!joined);
 
             ToastAndroid.show('Join task thành công!', ToastAndroid.SHORT);
 
-            setTempTask(newArray[indexToUpdate]);
+            // setTempTask(newArray[indexToUpdate]);
+
+            
+
+            // console.log('newArray[indexToUpdate]', newArray[indexToUpdate])
           },
         },
       ],
@@ -118,7 +125,7 @@ const TaskCard = ({navigation, task}) => {
             {task.title}
           </Text>
 
-          {joined ? (
+          {checkJoinedTask() ? (
             <FontAwesome5
               name="user-check"
               size={SIZES.large + 2}

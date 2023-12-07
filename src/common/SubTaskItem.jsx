@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {COLORS, SIZES} from '../../constants';
 
-const SubTaskItem = ({task, onCheckBoxChange}) => {
+const SubTaskItem = ({task, onCheckBoxChange, clickable}) => {
   const [completed, setCompleted] = useState(task.isDone)
 
   const handlePress = () => {
@@ -13,7 +13,7 @@ const SubTaskItem = ({task, onCheckBoxChange}) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={handlePress} style={styles.touchable}>
+      <TouchableOpacity onPress={handlePress} style={styles.touchable} disabled={!clickable}>
         <View style={[styles.circle, completed && styles.completedCircle]}>
           {completed && <Text style={styles.checkmark}>✓</Text>}
         </View>

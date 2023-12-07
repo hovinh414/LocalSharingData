@@ -13,6 +13,10 @@ const TodoTasks = ({navigation}) => {
   const filteredTasks = filterTasks(taskList, 'To do');
 
   const sortedTasks = sortTasks(filteredTasks);
+  // console.log(sortedTasks.length)
+  // console.log('sortedTasks:', sortedTasks[2].detailTasks)
+
+  // console.log(sortedTasks)
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>

@@ -16,6 +16,8 @@ const AllTasks = ({navigation}) => {
 
   // GetData()
   const sortedTasks = sortTasks(taskList)
+
+  // console.log(sortedTasks)
   
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>

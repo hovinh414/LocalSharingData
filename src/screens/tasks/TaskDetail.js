@@ -13,7 +13,7 @@ import {
   TouchableWithoutFeedback,
   ToastAndroid
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -27,11 +27,12 @@ import { tasks } from '../../../assets/data/tasks';
 import ViewVideo from '../../common/ViewVideo';
 import countCompletedSubTask from './methods/countCompletedSubTask';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
 
 const TaskDetail = ({ navigation, route }) => {
   const task = route.params;
-  console.log(task)
-  const [files, setFiles] = useState([]);
+  console.log('task:', task)
+  const [files, setFiles] = useState(task.files.length === 0 ? [] : task.files);
   const [photos, setPhotos] = useState([]);
   const allItems = [...photos, ...files];
   const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
@@ -40,6 +41,9 @@ const TaskDetail = ({ navigation, route }) => {
   const [fileData, setFileData] = useState();
   const [note, setNote] = useState('')
   const [countCheck, setCountCheck] = useState(0) //đếm task con hoàn thành
+  const [joined, setJoined] = useState(false)
+
+  const {user} = useSelector(state => state.P2P)
 
   const handleCheckBoxChange = (isChecked) => {
     setCountCheck(isChecked ? countCheck + 1 : countCheck - 1)
@@ -192,6 +196,23 @@ const TaskDetail = ({ navigation, route }) => {
     setSelectedItem(item);
   };
 
+  useEffect(() => {
+    if (task.joinedParticipants.length === 0) {
+      setJoined(false)
+    }
+    else {
+      for (let item of task.joinedParticipants) {
+        if (item.deviceName === user.deviceName) {
+          setJoined(true)
+        }
+
+        break;
+      }
+    }
+  }, [task.joinedParticipants, user.deviceName])
+
+  // console.log(joined)
+
   return (
     <KeyboardAvoidingView style={styles.container} enabled>
       <View style={styles.header}>
@@ -313,10 +334,11 @@ const TaskDetail = ({ navigation, route }) => {
                 defaultValue={task.note === '' ? '' : 'Note: ' + task.note}
                 style={styles.textInput}
                 placeholderTextColor={COLORS.gray2}
+                editable={joined}
                 onChangeText={text => setNote(text)}
               />
 
-              <TouchableOpacity onPress={() => setIsOptionModalOpen(true)}>
+              <TouchableOpacity onPress={() => setIsOptionModalOpen(true)} disabled={!joined}>
                 <Entypo
                   name="attachment"
                   size={SIZES.large}
@@ -335,7 +357,7 @@ const TaskDetail = ({ navigation, route }) => {
               <View style={{ paddingHorizontal: 10 }}>
                 {task.detailTasks.length !== 0 ? (
                   task.detailTasks.map((item, index) => {
-                    return <SubTaskItem key={index} task={item} onCheckBoxChange={handleCheckBoxChange}/>;
+                    return <SubTaskItem key={index} task={item} onCheckBoxChange={handleCheckBoxChange} clickable={joined}/>;
                   })
                 ) : (
                   <Text> No subtasks available</Text>

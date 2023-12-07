@@ -6,7 +6,7 @@ const wait = time => new Promise(resolve => setTimeout(resolve, time));
 
 const navigateToHome = async navigation => {
   await wait(2000);
-  navigation.navigate('Home');
+  navigation.navigate('BottomTabsNavigator');
 };
 
 const Splash = ({ navigation }) => {
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   },
 
   splashImage: {
-    height: '50%',
+    width: '60%',
     resizeMode: 'contain'
   }
 });
