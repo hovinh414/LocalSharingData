@@ -25,14 +25,17 @@ const Task = ({navigation}) => {
     if (storageData !== null) {
       const data = JSON.parse(storageData);
 
-      const todoTasks = data.filter(task =>
-        task.joinedParticipants.some(
-          participant => user.deviceName === participant.deviceName,
-        ),
+      const todoTasks = data.filter(
+        task =>
+          task.date === moment(date).format('DD/MM/YYYY') &&
+          task.joinedParticipants.some(
+            participant => user.deviceName === participant.deviceName,
+          ),
       );
 
       const regularTasks = data.filter(
         task =>
+          task.date === moment(date).format('DD/MM/YYYY') &&
           !task.joinedParticipants.some(
             participant => user.deviceName === participant.deviceName,
           ),

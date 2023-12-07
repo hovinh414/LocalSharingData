@@ -126,7 +126,7 @@ const TaskCard = ({navigation, task}) => {
             />
           ) : joinedPeople === parseInt(task.maxParticipants) ? (
             <Text style={styles.fullParticipants}>Đã đủ</Text>
-          ) :  (
+          ) : (
             <TouchableOpacity onPress={handleJoinTask}>
               <FontAwesome5
                 name="user-plus"
