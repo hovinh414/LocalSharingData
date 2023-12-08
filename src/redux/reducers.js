@@ -2,7 +2,16 @@ import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   devices: [],
-  user: {},
+  user: {
+    deviceName: '',
+    img: null,
+    available: false,
+    connection: {
+      groupFormed: false,
+      groupOwnerAddress: null,
+      isGroupOwner: false,
+    },
+  },
   subscriptionOnPeersUpdates: {},
   subscriptionOnConnectionInfoUpdates: {},
   subscriptionOnThisDeviceChanged: {},
@@ -17,8 +26,17 @@ const p2pSlice = createSlice({
     setDevices: (state, action) => {
       state.devices = action.payload;
     },
-    setUser: (state, action) => {
-      state.user = action.payload;
+    updateUser: (state, action) => {
+      state.user = {
+        ...state.user,
+        ...action.payload,
+      };
+    },
+    updateConnection: (state, action) => {
+      state.user.connection = {
+        ...state.user.connection,
+        ...action.payload,
+      };
     },
     updatePeersSubscription: (state, action) => {
       state.subscriptionOnPeersUpdates = action.payload;
@@ -29,7 +47,6 @@ const p2pSlice = createSlice({
     updateThisDeviceSubscription: (state, action) => {
       state.subscriptionOnThisDeviceChanged = action.payload;
     },
-
     setDarkMode: (state, action) => {
       state.darkMode = action.payload;
     },
@@ -41,7 +58,8 @@ const p2pSlice = createSlice({
 
 export const {
   setDevices,
-  setUser,
+  updateUser,
+  updateConnection,
   updatePeersSubscription,
   updateConnectionInfoSubscription,
   updateThisDeviceSubscription,

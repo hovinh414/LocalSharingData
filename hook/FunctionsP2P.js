@@ -37,8 +37,8 @@ export const onConnect = (navigation, device) => {
   connect(device.deviceAddress)
     .then(() => console.log('Successfully connected'))
     .catch(err => console.error('Something gone wrong. Details: ', err));
-  const itemWithIsOwner = {...device, isOwner: false};
-  navigation.navigate('Chat Detail', itemWithIsOwner);
+
+  navigation.navigate('Chat Detail', device);
 };
 
 export const onCancelConnect = () => {
@@ -96,12 +96,26 @@ export const onGetAvailableDevices = dispatch => {
   });
 };
 
-export const onGetConnectionInfo = () => {
-  getConnectionInfo().then(info => console.log('getConnectionInfo', info));
+export const onGetConnectionInfo = async () => {
+  try {
+    const info = await getConnectionInfo();
+    console.log('getConnectionInfo', info);
+    return info;
+  } catch (error) {
+    console.error('Error getting connection info:', error);
+    throw error; // Re-throw the error to handle it where the function is called
+  }
 };
 
-export const onGetGroupInfo = () => {
-  getGroupInfo().then(info => console.log('getGroupInfo', info));
+export const onGetGroupInfo = async () => {
+  try {
+    const info = await getGroupInfo();
+    console.log('getGroupInfo', info);
+    return info;
+  } catch (error) {
+    console.error('Error getting group info:', error);
+    throw error;
+  }
 };
 
 export const initWifiP2P = async dispatch => {
