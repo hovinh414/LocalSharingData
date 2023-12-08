@@ -1,42 +1,38 @@
 import React, {useState, useEffect, useLayoutEffect} from 'react';
-import {
-  StyleSheet,
-  Button,
-  ScrollView,
-  Text,
-  View,
-  ActivityIndicator,
-  Image,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/AntDesign';
+import {ScrollView, Text, View, Image} from 'react-native';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import styles from './findDevices.style';
 import DeviceCard from '../../../common/DeviceCard';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {images} from '../../../../constants';
 import {useDispatch, useSelector} from 'react-redux';
+import p2pService from '../../../../hook/P2PService';
 import {
   onConnect,
-  onCreateGroup,
   onRemoveGroup,
   onGetAvailableDevices,
 } from '../../../../hook/FunctionsP2P';
-import {setUser} from '../../../redux/reducers';
+import {updateUser} from '../../../redux/reducers';
 
-export default function FindDevices({navigation}) {
+const FindDevices = ({navigation, user, setIsOptionModalOpen}) => {
   const devices = useSelector(state => state.P2P.devices);
-  const user = useSelector(state => state.P2P.user);
   const dispatch = useDispatch();
+
   console.log('Devices: ', devices);
 
-  const handleCreateGroup = () => {
-    const itemWithIsOwner = {...user, isOwner: true};
-    dispatch(setUser(itemWithIsOwner));
-
-    navigation.navigate('Chat Detail', itemWithIsOwner);
+  const handleOpenModal = () => {
+    setIsOptionModalOpen(true);
   };
+
+  const handleConnect = data => {
+    const itemWithIsOwner = {...user, isOwner: false};
+    dispatch(updateUser(itemWithIsOwner));
+    onConnect(navigation, data);
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.container}>
+      <ScrollView style={[styles.container, styles.scrollView]}>
         <View style={styles.btnContainer}>
           <TouchableOpacity
             style={styles.btn}
@@ -45,55 +41,51 @@ export default function FindDevices({navigation}) {
           </TouchableOpacity>
         </View>
 
-        <View style={{paddingHorizontal: 10}}>
+        <View style={styles.contentContainer}>
           {devices.length !== 0 ? (
             <View>
-              <Text
-                style={{fontSize: 14, fontWeight: '500', marginVertical: 10}}>
-                Available Devices
-              </Text>
+              <Text style={styles.devicesTitle}>Available Devices</Text>
 
               {devices.map((data, index) => {
                 return (
                   <DeviceCard
                     key={index}
                     device={data}
-                    onPress={() => onConnect(navigation, data)}
+                    onPress={() => handleConnect(data)}
                   />
                 );
               })}
             </View>
           ) : (
-            <View
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginVertical: '5%',
-              }}>
-              {/* <ActivityIndicator size='large' color='grey'/> */}
-              <Image
-                source={images.deviceFinding}
-                style={{height: 140, width: 140}}
-              />
-              <Text style={{fontSize: 18, marginTop: 10}}>
-                Searching for devices...
-              </Text>
+            <View style={styles.findingContainer}>
+              <Image source={images.deviceFinding} style={styles.findingGif} />
+              <Text style={styles.findingTitle}>Searching for devices...</Text>
             </View>
           )}
         </View>
 
         <View style={styles.btnContainer}>
           <TouchableOpacity
-            style={styles.btn}
-            onPress={() => handleCreateGroup()}>
+            style={
+              !user.connection.groupFormed ? styles.btn : styles.btnDisable
+            }
+            disabled={user.connection.groupFormed}
+            onPress={() => handleOpenModal()}>
             <Text style={styles.btnLabel}>Create Group</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.btn} onPress={() => onRemoveGroup()}>
+          <TouchableOpacity
+            style={user.connection.groupFormed ? styles.btn : styles.btnDisable}
+            disabled={!user.connection.groupFormed}
+            onPress={() => {
+              p2pService.cleanUp();
+              onRemoveGroup();
+            }}>
             <Text style={styles.btnLabel}>Remove Group</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
   );
-}
+};
+export default FindDevices;

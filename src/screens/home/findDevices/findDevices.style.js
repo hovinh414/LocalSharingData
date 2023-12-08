@@ -6,6 +6,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  scrollView: {
+    marginTop: -10,
+  },
+  contentContainer: {
+    paddingHorizontal: 10,
+  },
   welcome: {
     fontSize: 20,
     textAlign: 'center',
@@ -16,7 +22,24 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
-
+  devicesTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginVertical: 10,
+  },
+  findingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: '5%',
+  },
+  findingGif: {
+    height: 140,
+    width: 140,
+  },
+  findingTitle: {
+    fontSize: 18,
+    marginTop: 10,
+  },
   btnContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -30,6 +53,14 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 5,
     backgroundColor: COLORS.primary,
+  },
+  btnDisable: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    marginVertical: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.gray,
   },
 
   btnLabel: {

@@ -1,29 +1,59 @@
-import {StyleSheet, Text, View, SafeAreaView, FlatList} from 'react-native';
-import React from 'react';
-import {images} from '../../../constants';
+import React, {useEffect, useMemo, useState, useCallback} from 'react';
+import {
+  Text,
+  View,
+  SafeAreaView,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import p2pService from '../../../hook/P2PService';
 import styles from './chat.style';
 import ChatCard from '../../common/ChatCard';
+import {images, COLORS} from '../../../constants';
+import {onGetGroupInfo} from '../../../hook/FunctionsP2P';
+import {ToastAndroid} from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
 
 const Chat = ({navigation}) => {
-  const list = [
-    {
-      img: images.hieu,
-      deviceName: 'Hieu',
-      message: 'Hello there!',
-      available: true,
-    },
-    {
-      img: images.profile,
-      deviceName: 'Lâm Alile',
-      message: 'Hi, how are you?',
-      available: false,
-    },
-    // Add more chat messages here...
-  ];
+  const [chatList, setChatList] = useState([]);
+
+  useEffect(() => {
+    // Get the initial chatList from P2PService when the component is created
+    const initialChatList = p2pService.chatList;
+    setChatList(initialChatList);
+  }, []);
+
+  useFocusEffect(() => {
+    setChatList(p2pService.chatList);
+  });
 
   const renderItem = ({item}) => (
     <ChatCard navigation={navigation} item={item} />
   );
+
+  const createChatObject = data => {
+    return {
+      chatId: Math.random().toString(),
+      img: images.profile,
+      deviceName: data.networkName,
+      messages: [],
+    };
+  };
+
+  const handleCreateChat = async () => {
+    if (p2pService.isServer) {
+      console.log('được phép nhắn tin');
+      const group = await onGetGroupInfo();
+      const item = createChatObject(group);
+      p2pService.addChatToChatList(item);
+      setChatList(p2pService.chatList);
+      navigation.navigate('Chat Detail', item);
+    } else {
+      ToastAndroid.show('Bạn không có quyền này!!', ToastAndroid.SHORT);
+      console.log('CÚT');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,12 +61,23 @@ const Chat = ({navigation}) => {
         <Text style={styles.headerText}>Chats</Text>
       </View>
       <View style={styles.chatList}>
-        <FlatList
-          data={list}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-        />
+        {chatList.length > 0 ? (
+          <FlatList
+            data={chatList}
+            renderItem={renderItem}
+            keyExtractor={item => item.chatId.toString()}
+          />
+        ) : (
+          <Text style={styles.chatText}>No messages available</Text>
+        )}
       </View>
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => handleCreateChat()}
+        style={styles.buttonAdd}>
+        <Ionicons name="add-outline" size={32} color={COLORS.white} />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
