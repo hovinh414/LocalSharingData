@@ -7,12 +7,13 @@ import ChatDetail from '../src/screens/chat/ChatDetail';
 import TaskDetail from '../src/screens/tasks/TaskDetail';
 import LoginScreen from '../src/screens/auth/LoginScreen';
 import AddTask from '../src/screens/tasks/AddTask';
+import Splash from '../src/screens/splash/Splash';
 
 const Stack = createStackNavigator();
 
 function StackTabs() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName='Splash'>
       <Stack.Screen
         name="BottomTabsNavigator"
         component={BottomTabNavigator}
@@ -36,6 +37,16 @@ function StackTabs() {
       <Stack.Screen
         name="AddTask"
         component={AddTask}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+          animationTypeForReplace: 'push',
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name="Splash"
+        component={Splash}
         options={{
           headerShown: false,
           presentation: 'modal',

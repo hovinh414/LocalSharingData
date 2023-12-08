@@ -21,10 +21,14 @@ const TaskTopTabNavigator = () => {
         tabBarActiveTintColor: '#fff',
         tabBarStyle: styles.tabBar,
         tabBarIndicatorContainerStyle: { justifyContent: 'center' },
-        tabBarPressColor: 'transparent'
+        tabBarPressColor: '#fff',
       }}
+      // screenListeners={{state: (e) => {
+      //   const index = e.data.state.index
+      //   console.log(e.data.state.routeNames[index])
+      // }}}
     >
-      <Tab.Screen name='All Tasks' component={AllTasks} />
+      <Tab.Screen name='All Tasks' component={AllTasks}/>
       <Tab.Screen name='To do' component={TodoTasks}/>
       <Tab.Screen name='Completed' component={CompletedTasks}/>
     </Tab.Navigator>

@@ -8,6 +8,7 @@ import {
   Alert,
   Image,
   TextInput,
+  ToastAndroid,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './addTask.style';
@@ -21,6 +22,10 @@ import moment from 'moment';
 import * as ImagesPickers from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {selectedImagesList} from '../../redux/reducers';
+import {useSelector} from 'react-redux';
+import 'react-native-get-random-values';
+import {v4 as uuidv4} from 'uuid';
+
 const AddTask = ({navigation}) => {
   const [detailTasks, setDetailTasks] = useState([]);
   const [date, setDate] = useState();
@@ -32,18 +37,23 @@ const AddTask = ({navigation}) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
   const [openStartTimePicker, setOpenStartTimePicker] = useState(false);
+  const user = useSelector(state => state.P2P.user);
   const createTaskObject = () => {
     const taskObject = {
+      taskId: uuidv4(),
       detailTasks: detailTasks,
       date: date,
       time: time,
-      title: title,
+      title: title.trim(),
       selected: selected,
-      description: description,
-      participants: participants,
+      description: description.trim(),
+      maxParticipants: participants.trim(),
       images: selectedImages,
       files: [],
+      joinedParticipants: [],
       isDone: false,
+      note: '',
+      deviceName: user.deviceName,
     };
     return taskObject;
   };
@@ -65,36 +75,45 @@ const AddTask = ({navigation}) => {
         !date ||
         detailTasks.length === 0 ||
         !title ||
-        !description ||
         !participants ||
-        !selected ||
-        selectedImages.length === 0
+        !description ||
+        !selected
+        // selectedImages.length === 0
       ) {
-        alert('Nhập đủ thông tin đi các cậu');
+        alert('Vui lòng nhập đầy đủ thông tin!');
         return;
+      } else {
+        if (!participants) {
+          alert('Vui lòng nhập số người tham gia lớn hơn 0!');
+
+          return;
+        }
       }
 
-      const data = await AsyncStorage.getItem('taskKey');
+      const datas = await AsyncStorage.getItem('taskKey');
 
-      if (data === null) {
+      if (datas === null) {
         const taskObject = [createTaskObject()];
         await AsyncStorage.setItem('taskKey', JSON.stringify(taskObject));
+
+        ToastAndroid.show('Thêm thành công!', ToastAndroid.SHORT);
       } else {
+        const jsonDatas = JSON.parse(datas);
+
         const taskObject = createTaskObject();
-        const newData = JSON.parse(data);
 
-        newData.push(taskObject);
+        jsonDatas.push(taskObject);
 
-        await AsyncStorage.setItem('taskKey', JSON.stringify(newData));
+        await AsyncStorage.setItem('taskKey', JSON.stringify(jsonDatas));
+
+        ToastAndroid.show('Thêm thành công!', ToastAndroid.SHORT);
       }
-
-      console.log('Task saved to AsyncStorage');
     } catch (error) {
       console.error('Error saving task to AsyncStorage:', error);
     }
   };
   const getTaskFromStorage = async () => {
-    // await AsyncStorage.clear()
+    // await AsyncStorage.clear();
     try {
       const taskJSON = await AsyncStorage.getItem('taskKey');
 
@@ -115,7 +134,7 @@ const AddTask = ({navigation}) => {
   };
 
   function handleChangeStartDate(propDate) {
-    setStartedDate(propDate);
+    // setStartedDate(propDate);
   }
 
   const handleOnPressStartDate = () => {
@@ -125,9 +144,9 @@ const AddTask = ({navigation}) => {
     setOpenStartTimePicker(!openStartTimePicker);
   };
   const data = [
-    {key: '1', value: 'High'},
-    {key: '2', value: 'Medium'},
-    {key: '3', value: 'Low'},
+    {key: '0', value: 'High'},
+    {key: '1', value: 'Medium'},
+    {key: '2', value: 'Low'},
   ];
   const handleImageSelection = async () => {
     let result = await ImagesPickers.launchImageLibrary({
@@ -149,6 +168,19 @@ const AddTask = ({navigation}) => {
     const newList = selectedImages.filter(listItem => listItem !== item);
     setSelectedImages(newList);
   }
+
+  const handleInputChange = text => {
+    // Loại bỏ các ký tự không phải là số từ chuỗi
+    const sanitizedText = text.replace(/[^0-9]/g, '');
+
+    // Kiểm tra xem giá trị đã nhập có lớn hơn 0 không
+    if (sanitizedText !== '' && parseInt(sanitizedText) > 0) {
+      setParticipants(sanitizedText);
+    } else {
+      setParticipants('');
+    }
+  };
+
   return (
     <ScrollView style={styles.modalContainer}>
       <View>
@@ -281,9 +313,11 @@ const AddTask = ({navigation}) => {
           <View style={{flexDirection: 'column'}}>
             <Text style={styles.title}>Participants</Text>
             <TextInput
+              keyboardType="numeric"
               style={styles.participants}
               placeholder="10"
-              onChangeText={text => setParticipants(text)}
+              placeholderTextColor={COLORS.gray}
+              onChangeText={text => handleInputChange(text)}
             />
           </View>
           <View style={{flexDirection: 'column', alignItems: 'center'}}>
@@ -294,6 +328,7 @@ const AddTask = ({navigation}) => {
               data={data}
               save="value"
               boxStyles={styles.box}
+              dropdownStyles={{height: 120}}
             />
           </View>
           <View style={{flexDirection: 'column'}}>
@@ -328,13 +363,12 @@ const AddTask = ({navigation}) => {
           style={styles.buttonView}>
           <Text style={styles.buttonText}>Create Task</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity
+        <TouchableOpacity
           onPress={getTaskFromStorage}
           activeOpacity={0.8}
           style={styles.buttonView}>
           <Text style={styles.buttonText}>Get Task Demo</Text>
-        </TouchableOpacity> */}
-        <TouchableOpacity style={styles.buttonTest}></TouchableOpacity>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

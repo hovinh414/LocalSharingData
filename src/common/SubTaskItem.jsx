@@ -2,17 +2,18 @@ import React, {useState} from 'react';
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {COLORS, SIZES} from '../../constants';
 
-const SubTaskItem = ({task}) => {
+const SubTaskItem = ({task, onCheckBoxChange, clickable}) => {
   const [completed, setCompleted] = useState(task.isDone)
 
   const handlePress = () => {
     // Xử lý khi người dùng chạm vào văn bản hoặc hình tròn
+    onCheckBoxChange(!completed)
     setCompleted(!completed);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={handlePress} style={styles.touchable}>
+      <TouchableOpacity onPress={handlePress} style={styles.touchable} disabled={!clickable}>
         <View style={[styles.circle, completed && styles.completedCircle]}>
           {completed && <Text style={styles.checkmark}>✓</Text>}
         </View>
