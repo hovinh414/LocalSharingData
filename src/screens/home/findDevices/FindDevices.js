@@ -6,7 +6,9 @@ import DeviceCard from '../../../common/DeviceCard';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {images} from '../../../../constants';
 import {useDispatch, useSelector} from 'react-redux';
+
 import p2pService from '../../../../hook/P2PService';
+
 import {
   onConnect,
   onRemoveGroup,

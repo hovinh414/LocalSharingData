@@ -9,7 +9,7 @@ import sortTasks from '../methods/sortTasks'
 import { COLORS } from '../../../../constants'
 
 const CompletedTasks = ({navigation}) => {
-  const taskList = useSelector(state => state.P2P.taskList)
+  const taskList = useSelector(state => state.P2P.completed)
 
   const filteredTasks = filterTasks(taskList, 'Completed')
 

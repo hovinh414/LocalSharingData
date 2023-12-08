@@ -1,5 +1,5 @@
 import {
-  SafeAreaView,
+  Alert,
   View,
   Text,
   TextInput,
@@ -11,9 +11,9 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  ToastAndroid
+  ToastAndroid,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -22,16 +22,16 @@ import DocumentPicker from 'react-native-document-picker';
 import SubTaskItem from '../../common/SubTaskItem';
 import RNFS from 'react-native-fs';
 import styles from './taskDetail.style';
-import { COLORS, SIZES, images } from '../../../constants';
-import { tasks } from '../../../assets/data/tasks';
+import {COLORS, SIZES, images} from '../../../constants';
+import {tasks} from '../../../assets/data/tasks';
 import ViewVideo from '../../common/ViewVideo';
 import countCompletedSubTask from './methods/countCompletedSubTask';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 
-const TaskDetail = ({ navigation, route }) => {
-  const task = route.params;
-  console.log('task:', task)
+const TaskDetail = ({navigation, route}) => {
+  const [task, setTask] = useState(route.params);
+  const [taskArray, setTaskArray] = useState([]);
   const [files, setFiles] = useState(task.files.length === 0 ? [] : task.files);
   const [photos, setPhotos] = useState([]);
   const allItems = [...photos, ...files];
@@ -39,17 +39,16 @@ const TaskDetail = ({ navigation, route }) => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [fileData, setFileData] = useState();
-  const [note, setNote] = useState('')
-  const [countCheck, setCountCheck] = useState(0) //đếm task con hoàn thành
-  const [joined, setJoined] = useState(false)
+  const [note, setNote] = useState('');
+  const [countCheck, setCountCheck] = useState(0); //đếm task con hoàn thành
+  const [joined, setJoined] = useState(false);
 
-  const {user} = useSelector(state => state.P2P)
+  const {user} = useSelector(state => state.P2P);
+  const handleCheckBoxChange = isChecked => {
+    setCountCheck(isChecked ? countCheck + 1 : countCheck - 1);
+  };
 
-  const handleCheckBoxChange = (isChecked) => {
-    setCountCheck(isChecked ? countCheck + 1 : countCheck - 1)
-  }
-
-  const createTaskObject = (detailTasks) => {
+  const createTaskObject = detailTasks => {
     const taskObject = {
       taskId: task.taskId,
       detailTasks: detailTasks,
@@ -63,38 +62,39 @@ const TaskDetail = ({ navigation, route }) => {
       files: files,
       joinedParticipants: task.joinedParticipants,
       isDone: task.isDone,
-      note: note.trim()
+      note: note.trim(),
     };
     return taskObject;
-  }
+  };
 
   const handleSubmitTask = async () => {
-    const updatedTask = task.detailTasks.map(detail => ({...detail, isDone: true}))
+    const updatedTask = task.detailTasks.map(detail => ({
+      ...detail,
+      isDone: true,
+    }));
 
-    const taskObject = createTaskObject(updatedTask)
+    const taskObject = createTaskObject(updatedTask);
 
     try {
-      let newArray = JSON.parse(await AsyncStorage.getItem('taskKey'))
+      let newArray = JSON.parse(await AsyncStorage.getItem('taskKey'));
 
-      const indexToUpdate = newArray.findIndex(item => item.taskId === task.taskId)
+      const indexToUpdate = newArray.findIndex(
+        item => item.taskId === task.taskId,
+      );
 
-      newArray[indexToUpdate] = taskObject
+      newArray[indexToUpdate] = taskObject;
 
-      await AsyncStorage.setItem('taskKey', JSON.stringify(newArray))
+      await AsyncStorage.setItem('taskKey', JSON.stringify(newArray));
 
-      ToastAndroid.show('Cập nhật thành công!', ToastAndroid.SHORT)
-    }
-    catch (err) {
-
-    }
-  }
-
+      ToastAndroid.show('Cập nhật thành công!', ToastAndroid.SHORT);
+    } catch (err) {}
+  };
 
   const getFileImage = item => {
     switch (item.type) {
       case 'image/jpeg':
       case 'image/png':
-        return <Image source={{ uri: item.uri }} style={styles.fileImg} />;
+        return <Image source={{uri: item.uri}} style={styles.fileImg} />;
       case 'application/pdf':
         return <Image source={images.pdf} style={styles.fileImg} />;
       case 'text/plain':
@@ -120,13 +120,13 @@ const TaskDetail = ({ navigation, route }) => {
   };
   const renderFileContent = item => {
     if (item.mime === 'image/jpeg') {
-      return <Image source={{ uri: item.path }} style={styles.fileContentImg} />;
+      return <Image source={{uri: item.path}} style={styles.fileContentImg} />;
     }
 
     switch (item.type) {
       case 'image/jpeg':
       case 'image/png':
-        return <Image source={{ uri: item.uri }} style={styles.fileContentImg} />;
+        return <Image source={{uri: item.uri}} style={styles.fileContentImg} />;
       case 'video/mp4':
         return <ViewVideo uri={item.uri} />;
       case 'text/plain':
@@ -162,7 +162,7 @@ const TaskDetail = ({ navigation, route }) => {
   };
   const handleTakePhoto = () => {
     try {
-      ImagePicker.openCamera({ mediaType: 'photo' }).then(photo => {
+      ImagePicker.openCamera({mediaType: 'photo'}).then(photo => {
         const newPhoto = [...photos, photo]; // Thêm ảnh mới vào danh sách
         setPhotos(newPhoto);
         console.log(photo);
@@ -175,7 +175,7 @@ const TaskDetail = ({ navigation, route }) => {
   const handleRecordAudio = () => {
     try {
       ImagePicker.open;
-    } catch (error) { }
+    } catch (error) {}
   };
   const handleDeleteFile = index => {
     const updatedItems = [...allItems];
@@ -198,20 +198,87 @@ const TaskDetail = ({ navigation, route }) => {
 
   useEffect(() => {
     if (task.joinedParticipants.length === 0) {
-      setJoined(false)
-    }
-    else {
+      setJoined(false);
+    } else {
       for (let item of task.joinedParticipants) {
         if (item.deviceName === user.deviceName) {
-          setJoined(true)
+          setJoined(true);
         }
 
         break;
       }
     }
-  }, [task.joinedParticipants, user.deviceName])
+  }, [task.joinedParticipants, user.deviceName]);
 
   // console.log(joined)
+  let checkManager = task.joinedParticipants.some(
+    participant => participant.deviceName === user.deviceName,
+  );
+  function areAllDetailTasksDone(task) {
+    return task.detailTasks.every(detailTask => detailTask.isDone);
+  }
+
+  const isAllDetailTasksDone = areAllDetailTasksDone(task);
+  const createConfirmTask = (task, isDone) => {
+    const taskObject = {
+      taskId: task.taskId,
+      detailTasks: task.detailTasks,
+      date: task.date,
+      time: task.time,
+      title: task.title,
+      selected: task.selected,
+      description: task.description,
+      maxParticipants: task.maxParticipants,
+      images: task.images,
+      files: task.files,
+      joinedParticipants: task.joinedParticipants,
+      isDone: isDone,
+      note: task.note.trim(),
+    };
+    return taskObject;
+  };
+
+  const handleConfirmTask = async () => {
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc muốn xác nhận task này không?',
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
+
+        {
+          text: 'Xác nhận',
+          onPress: async () => {
+            const updatedTask = {
+              ...task,
+              isDone: true,
+            };
+
+            const taskObject = createConfirmTask(updatedTask, true);
+
+            try {
+              let newArray = JSON.parse(await AsyncStorage.getItem('taskKey'));
+
+              const indexToUpdate = newArray.findIndex(
+                item => item.taskId === task.taskId,
+              );
+
+              newArray[indexToUpdate] = taskObject;
+
+              await AsyncStorage.setItem('taskKey', JSON.stringify(newArray));
+
+              ToastAndroid.show('Cập nhật thành công!', ToastAndroid.SHORT);
+            } catch (err) {
+              console.error('Lỗi khi cập nhật task:', err);
+            }
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container} enabled>
@@ -223,14 +290,14 @@ const TaskDetail = ({ navigation, route }) => {
           <Image source={images.left} size={25} style={styles.backBtn} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Task Details</Text>
-        <View style={{ width: 25, height: 25 }} />
+        <View style={{width: 25, height: 25}} />
       </View>
       <ScrollView style={styles.container}>
         <View style={styles.content}>
           <View style={styles.frameContainer}>
             <View style={styles.inforContainer}>
               <Text style={styles.titleText}>{task.title}</Text>
-              <View style={{ paddingHorizontal: 10 }}>
+              <View style={{paddingHorizontal: 10}}>
                 <Text style={styles.descText}>{task.description}</Text>
                 {task.images.length !== 0 ? (
                   <FlatList
@@ -252,7 +319,9 @@ const TaskDetail = ({ navigation, route }) => {
                     size={SIZES.medium}
                     color={COLORS.red}
                   />
-                  <Text style={styles.timeText}>{task.time} - {task.date}</Text>
+                  <Text style={styles.timeText}>
+                    {task.time} - {task.date}
+                  </Text>
                 </View>
 
                 <View style={styles.memberContainer}>
@@ -261,7 +330,9 @@ const TaskDetail = ({ navigation, route }) => {
                     size={SIZES.medium}
                     color={COLORS.primary}
                   />
-                  <Text style={styles.memberText}>{task.joinedParticipants.length}/{task.maxParticipants}</Text>
+                  <Text style={styles.memberText}>
+                    {task.joinedParticipants.length}/{task.maxParticipants}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -271,14 +342,14 @@ const TaskDetail = ({ navigation, route }) => {
                 <FlatList
                   horizontal
                   data={allItems}
-                  renderItem={({ item, index }) => {
+                  renderItem={({item, index}) => {
                     if (item.mime === 'image/jpeg') {
                       return (
                         <TouchableOpacity
                           onPress={() => handleDetailItem(item)}>
                           <View>
                             <Image
-                              source={{ uri: item.path }}
+                              source={{uri: item.path}}
                               style={styles.imgItem}
                             />
                             <TouchableOpacity
@@ -327,37 +398,58 @@ const TaskDetail = ({ navigation, route }) => {
                 />
               ) : null}
 
-              <TextInput
-                placeholder="Add note..."
-                multiline
-                textAlign="left"
-                defaultValue={task.note === '' ? '' : 'Note: ' + task.note}
-                style={styles.textInput}
-                placeholderTextColor={COLORS.gray2}
-                editable={joined}
-                onChangeText={text => setNote(text)}
-              />
-
-              <TouchableOpacity onPress={() => setIsOptionModalOpen(true)} disabled={!joined}>
-                <Entypo
-                  name="attachment"
-                  size={SIZES.large}
-                  color={COLORS.secondary}
+              {task.isDone ? (
+                <Text style={styles.textInput}>{task.note}</Text>
+              ) : (
+                <TextInput
+                  placeholder="Add note..."
+                  multiline
+                  textAlign="left"
+                  defaultValue={task.note === '' ? '' : 'Note: ' + task.note}
+                  style={styles.textInput}
+                  placeholderTextColor={COLORS.gray2}
+                  editable={joined}
+                  onChangeText={text => setNote(text)}
                 />
-              </TouchableOpacity>
+              )}
+
+              {task.isDone ? (
+                <View>
+                  <Entypo
+                    name="attachment"
+                    size={SIZES.large}
+                    color={COLORS.secondary}
+                  />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => setIsOptionModalOpen(true)}
+                  disabled={!joined}>
+                  <Entypo
+                    name="attachment"
+                    size={SIZES.large}
+                    color={COLORS.secondary}
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
           <View style={styles.frameContainer}>
             <View style={styles.subContainer}>
-              <Text style={styles.titleSubText}>
-                Sub-Tasks
-              </Text>
+              <Text style={styles.titleSubText}>Sub-Tasks</Text>
 
-              <View style={{ paddingHorizontal: 10 }}>
+              <View style={{paddingHorizontal: 10}}>
                 {task.detailTasks.length !== 0 ? (
                   task.detailTasks.map((item, index) => {
-                    return <SubTaskItem key={index} task={item} onCheckBoxChange={handleCheckBoxChange} clickable={joined}/>;
+                    return (
+                      <SubTaskItem
+                        key={index}
+                        task={item}
+                        onCheckBoxChange={handleCheckBoxChange}
+                        clickable={task.isDone ? null : joined}
+                      />
+                    );
                   })
                 ) : (
                   <Text> No subtasks available</Text>
@@ -369,11 +461,17 @@ const TaskDetail = ({ navigation, route }) => {
       </ScrollView>
 
       <View style={styles.footer}>
-        {countCheck === task.detailTasks.length
-          ? <TouchableOpacity style={styles.submitBtn} onPress={handleSubmitTask}>
+        {countCheck === task.detailTasks.length ? (
+          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmitTask}>
             <Text style={styles.btnText}>SUBMIT</Text>
           </TouchableOpacity>
-          : null}
+        ) : isAllDetailTasksDone && checkManager && !task.isDone ? (
+          <TouchableOpacity
+            style={styles.submitBtn}
+            onPress={handleConfirmTask}>
+            <Text style={styles.btnText}>CONFIRM TASK</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <Modal
@@ -418,7 +516,7 @@ const TaskDetail = ({ navigation, route }) => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalItem, { borderBottomWidth: 0 }]}
+                style={[styles.modalItem, {borderBottomWidth: 0}]}
                 activeOpacity={1}
                 onPress={() => handleRecordAudio()}>
                 <View style={styles.iconContainer}>
