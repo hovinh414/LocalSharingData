@@ -7,30 +7,13 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Image,
-  PermissionsAndroid,
 } from 'react-native';
 import {images, COLORS} from '../../../constants';
-import {
-  connect,
-  sendMessage,
-  receiveMessage,
-  getConnectionInfo,
-  receiveFile,
-  sendFile,
-} from 'react-native-wifi-p2p';
 import styles from './chatDetail.style';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as ImagesPickers from 'react-native-image-picker';
-import {GiftedChat} from 'react-native-gifted-chat';
-import NetInfo from '@react-native-community/netinfo';
-import TcpSocket from 'react-native-tcp-socket';
-// import arp from '@network-utils/arp-lookup';
-import {
-  onCreateGroup,
-  onGetConnectionInfo,
-  onRemoveGroup,
-} from '../../../hook/FunctionsP2P';
+import {GiftedChat, InputToolbar} from 'react-native-gifted-chat';
 import ImagePicker from 'react-native-image-crop-picker';
 import {
   BottomSheetModal,
@@ -39,30 +22,24 @@ import {
 } from '@gorhom/bottom-sheet';
 import {GetStoragePermissions} from '../../../hook/GetPermissions';
 import DocumentPicker from 'react-native-document-picker';
+import p2pService from '../../../hook/P2PService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
-
-const PORT = 6000;
-const SERVER_IP = '10.152.32.209';
+import {useSelector} from 'react-redux';
 
 const ChatDetail = ({navigation, route}) => {
   // Server variables
   const device = route.params;
-  const {isOwner} = route.params;
-  const receiveInterval = useRef(null);
-  const connectionInterval = useRef(null);
-  const [serverStarted, setServerStarted] = useState(false);
-  const [clientStarted, setClientStarted] = useState(false);
-  const [ipAddress, setIpAddress] = useState();
+  const user = useSelector(state => state.P2P.user);
+  const isOwner = user.isOwner;
 
-  let server = useRef();
-  let client = useRef();
-  let socketRef = useRef(null);
+  console.log('route: ', route);
 
   // ---------------------------
   // Messages, images, files variables
   const messageRef = useRef('');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(device.messages);
   const [selectedImages, setSelectedImages] = useState([]);
   const [photos, setPhotos] = useState([]); // ảnh từ take photo
   const [videos, setVideos] = useState([]); // video từ record video
@@ -95,435 +72,56 @@ const ChatDetail = ({navigation, route}) => {
     }
   };
 
-  useEffect(() => {
-    // Lắng nghe sự thay đổi kết nối mạng
-    const unsubscribe = NetInfo.addEventListener(state => {
-      console.log('Connection type', state.type);
-      console.log('Is connected?', state.isConnected);
-    });
-
-    // Lấy địa chỉ IP thiết bị
-    const getIpAddress = async () => {
-      const state = await NetInfo.fetch();
-      console.log(['DEVICES IP'], state.details.ipAddress);
-      setIpAddress(state.details.ipAddress);
-
-      handleConnect(); // Bắt đầu xử lý kết nối
+  const createTextMessageObject = text => {
+    const newMessage = {
+      _id: Math.random().toString(),
+      text: text,
+      createdAt: new Date(),
+      user: {
+        _id: 1, // Tin nhắn của phía người nhắn
+      },
     };
 
-    // Tạo kết nối P2P
-    connectionInterval.current = setInterval(() => {
-      onGetConnectionInfo();
-    }, 10000);
-
-    // Function to handle creating a server
-    const handleCreateServer = () => {
-      if (serverStarted) {
-        console.log(
-          '[INFO] Server is already created. Reusing the existing server.',
-        );
-        return;
-      }
-
-      console.log('[SOCKET] Creating socket at the server side');
-      server.current = TcpSocket.createServer(socket => {
-        console.log(
-          'Client connected:',
-          socket.remoteAddress,
-          socket.remotePort,
-        );
-
-        socketRef.current = socket;
-
-        console.log(socketRef.current);
-
-        // socket.write({type: 'text', data: 'hello from server'});
-
-        socket.on('error', error =>
-          console.log('An error ocurred with client socket ', error),
-        );
-
-        socket.on('close', error => {
-          console.log('Closed connection with ', socket.address());
-        });
-      });
-      setServerStarted(true);
-
-      server.current.listen({port: PORT, host: ipAddress}, () => {
-        console.log('Server is up and running on', PORT, ipAddress);
-
-        receiveInterval.current = setInterval(() => {
-          onReceiveMessages();
-          onReceiveImages();
-          onReceiveFiles();
-        }, 100);
-      });
-
-      server.current.on('error', error => {
-        console.log('An error ocurred with the server', error);
-        setServerStarted(false); // Đặt trạng thái là chưa tạo server nếu có lỗi
-      });
-
-      server.current.on('close', () => {
-        console.log('Server closed connection');
-        setServerStarted(false);
-      });
-    };
-
-    // Function to handle creating a client
-    const handleCreateClient = () => {
-      // Create socket
-      client.current = TcpSocket.createConnection(
-        {port: PORT, host: SERVER_IP},
-        () => {
-          console.log('Connected to server');
-          client.current.write('Hello server from client!');
-        },
-      );
-
-      client.current.on('data', async data => {
-        const receivedData = await JSON.parse(data.toString());
-        console.log(receivedData);
-        let newMessage;
-
-        // Kiểm tra loại dữ liệu
-
-        // Xử lý tin nhắn văn bản
-        if (receivedData.type === 'text') {
-          console.log('Received text from client:', receivedData.data);
-
-          const receivedText = receivedData.data.toString();
-          newMessage = {
-            _id: Math.random().toString(),
-            text: receivedText,
-            createdAt: new Date(),
-            user: {
-              _id: 2,
-            },
-          };
-          // Xử lý tin nhắn hình ảnh
-        } else if (receivedData.type === 'image') {
-          console.log('Received image from client:', receivedData.data);
-          const receivedImage = await receivedData.data.uri;
-          newMessage = {
-            _id: Math.random().toString(),
-            image: `${receivedImage}`,
-            createdAt: new Date(),
-            user: {
-              _id: 2, // Tin nhắn của phía người nhắn
-            },
-          };
-          // Xứ lý tin nhắn file
-        } else if (receivedData.type.startsWith('file/')) {
-          console.log('Received file from client:', receivedData.data);
-          const receivedFile = await receivedData.data.name;
-          console.log(receivedFile);
-          newMessage = {
-            _id: Math.random().toString(),
-            text: `${receivedFile}`,
-            createdAt: new Date(),
-            user: {
-              _id: 2, // Tin nhắn của phía người nhắn
-            },
-          };
-        }
-
-        setMessages(previousMessages =>
-          GiftedChat.append(previousMessages, [newMessage]),
-        );
-      });
-
-      client.current.on('error', error => {
-        console.log('An error occurred with the client socket', error);
-      });
-
-      client.current.on('close', () => {
-        console.log('Client closed connection');
-        setClientStarted(false);
-      });
-
-      setClientStarted(true);
-    };
-
-    const handleConnect = async () => {
-      if (isOwner) {
-        // SERVER SIDE
-        console.log('[INFO] Creating the group...');
-        onCreateGroup();
-
-        if (!serverStarted) {
-          handleCreateServer();
-          console.log('123', ipAddress);
-        }
-      } else {
-        // CLIENT SIDE
-        // const clientIp = await arp.toIP(item.deviceAddress);
-        // Connect to the group created by the server
-        connect(device.deviceAddress)
-          .then(() => {
-            console.log('[INFO] Client connected to the group');
-          })
-          .catch(err =>
-            console.log(
-              '[FATAL] Unable to connect with the server group: ',
-              err,
-            ),
-          );
-
-        if (!clientStarted) {
-          handleCreateClient();
-        }
-
-        setTimeout(() => {
-          getConnectionInfo().then(info => {
-            console.log('[GET CONNECTION INFO]', info);
-          });
-        }, 2000);
-
-        console.log('[SENDING] Connection Message to the server');
-
-        setTimeout(() => {
-          console.log('Sending Message...');
-          sendMessage('[INFO] Connection got established!')
-            .then(metaInfo =>
-              console.log('[INFO] Message from client -> server', metaInfo),
-            )
-            .catch(err =>
-              console.log(
-                '[ERROR] Error sending message from client -> server: ',
-                err,
-              ),
-            );
-        }, 5000);
-      }
-    };
-
-    getIpAddress();
-
-    return () => {
-      unsubscribe();
-      clearInterval(receiveInterval.current);
-      clearInterval(connectionInterval.current);
-
-      if (server) {
-        server.current.close();
-      }
-    };
-  }, []);
-
-  // ---------------------------
-  const onReceiveMessages = () => {
-    // Server use this function to receive message from client
-    receiveMessage()
-      .then(text => {
-        const newMessage = {
-          _id: Math.random().toString(),
-          text: text,
-          createAt: new Date(),
-          user: {
-            _id: 2, // Tin nhắn của phía người nhận
-          },
-        };
-        setMessages(previousMessages =>
-          GiftedChat.append(previousMessages, [newMessage]),
-        );
-      })
-      .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
+    messageRef.current.clear();
+    // Hiển thị tin nhắn trên UI
+    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    // Lưu tin nhắn trong storage
+    updateMessagesCallback(newMessage);
   };
-  const onSendMessages = useCallback(
-    (text = []) => {
-      if (!text) {
-        return;
-      }
 
-      const newMessage = {
-        _id: Math.random().toString(),
-        text: text,
-        createdAt: new Date(),
-        user: {
-          _id: 1, // Tin nhắn của phía người nhắn
-        },
-      };
+  const updateMessagesCallback = newMessage => {
+    // Update the messages in the current chat in the Chat component
+    const updatedChatList = p2pService.chatList.map(chat =>
+      chat.chatId === device.chatId
+        ? {...chat, messages: [newMessage, ...chat.messages]}
+        : chat,
+    );
 
-      // Thêm tin nhắn mới vào danh sách tin nhắn
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, [newMessage]),
-      );
-
-      // Xóa nội dung tin nhắn sau khi gửi
-      setMessage('');
-      messageRef.current.clear();
-
-      if (isOwner && socketRef.current) {
-        const newData = {
-          type: 'text',
-          data: text.toString(),
-        };
-        socketRef.current.write(JSON.stringify(newData));
-      } else if (!isOwner) {
-        // only client can use sendMessage function
-        sendMessage(newMessage.text)
-          .then(metaInfo =>
-            console.log('[INFO] Send client message successfully', metaInfo),
-          )
-          .catch(err =>
-            console.log('[FATAL] Unable to send client message: ', err),
-          );
-      }
-    },
-    [isOwner],
-  );
-  const onReceiveImages = () => {
-    receiveFile()
-      .then(image => {
-        const newMessage = {
-          _id: Math.random().toString(),
-          image: image,
-          createAt: new Date(),
-          user: {
-            _id: 2, // Tin nhắn của phía người nhận
-          },
-        };
-        setMessages(previousMessages =>
-          GiftedChat.append(previousMessages, [newMessage]),
-        );
-      })
-      .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
+    p2pService.updateChatHistory(updatedChatList);
   };
-  const onSendImages = useCallback(
-    async image => {
-      if (!image) {
-        return;
-      }
-      console.log(image);
 
-      const newMessage = {
-        _id: Math.random().toString(),
-        image: image.uri,
-        createdAt: new Date(),
-        user: {
-          _id: 1, // Tin nhắn của phía người nhắn
-        },
-      };
-
-      // Thêm tin nhắn mới vào danh sách tin nhắn
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, [newMessage]),
-      );
-
-      setSelectedImages([]);
-      messageRef.current.clear();
-      if (isOwner && socketRef.current) {
-        const newData = {
-          type: 'image',
-          data: image,
-        };
-        console.log(socketRef.current);
-
-        socketRef.current.write(JSON.stringify(newData));
-      } else if (!isOwner) {
-        console.log(image);
-
-        sendMessage(image.fileName);
-
-        const uri = await image.originalPath.toString();
-
-        console.log(uri);
-        // only client can use sendMessage function
-        sendFile(uri)
-          .then(metaInfo =>
-            console.log('[INFO] Send client image successfully', metaInfo),
-          )
-          .catch(err =>
-            console.log('[FATAL] Unable to send client image: ', err),
-          );
-      }
-    },
-    [isOwner],
-  );
-  const onReceiveFiles = () => {
-    receiveFile('/')
-      .then(file => {
-        console.log(file);
-        const newMessage = {
-          _id: Math.random().toString(),
-          text: '[FILE]: ' + file.uri,
-          createAt: new Date(),
-          user: {
-            _id: 2, // Tin nhắn của phía người nhận
-          },
-        };
-
-        setMessages(previousMessages =>
-          GiftedChat.append(previousMessages, [newMessage]),
-        );
-      })
-      .catch(err => console.log('[FATAL] Unable to receive file: ', err));
-  };
-  const onSendFiles = useCallback(
-    (file = []) => {
-      if (!file) {
-        return;
-      }
-
-      const newMessage = {
-        _id: Math.random().toString(),
-        text: file.name,
-        createdAt: new Date(),
-        user: {
-          _id: 1, // Tin nhắn của phía người nhắn
-        },
-      };
-
-      // Thêm tin nhắn mới vào danh sách tin nhắn
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, [newMessage]),
-      );
-
-      // Xóa nội dung tin nhắn sau khi gửi
-      setMessage('');
-      messageRef.current.clear();
-      console.log(file);
-
-      setFiles([]);
-
-      if (isOwner && socketRef.current) {
-        const newData = {
-          type: 'file/' + file.type,
-          data: file,
-        };
-        socketRef.current.write(JSON.stringify(newData));
-      } else if (!isOwner) {
-        // only client can use sendMessage function
-        sendFile(file.uri)
-          .then(metaInfo =>
-            console.log('[INFO] Send client file successfully', metaInfo),
-          )
-          .catch(err =>
-            console.log('[FATAL] Unable to send client file: ', err),
-          );
-      }
-    },
-    [isOwner],
-  );
   const handleSendMessage = (text, image, file) => {
     console.log(text, image, file);
     if (text === '') {
       if (image && !file) {
-        onSendImages(image);
+        p2pService.onSendImage(image);
+        // onSendImages(image);
         console.log('chỉ send ảnh');
       } else if (!image && file) {
-        onSendFiles(file);
+        p2pService.onSendFiles(file);
       }
     } else {
       if (image && !file) {
-        onSendMessages(text);
-        onSendImages(image);
+        p2pService.onSendMessage(text);
+        createTextMessageObject(text);
+
+        p2pService.onSendImage(image);
       } else if (!image && file) {
-        onSendImages(text);
-        onSendFiles(file);
+        p2pService.onSendImage(text);
+        p2pService.onSendFile(file);
       } else if (!image && !file) {
-        onSendMessages(text);
+        p2pService.onSendMessage(text);
+        createTextMessageObject(text);
       }
     }
   };
@@ -592,7 +190,7 @@ const ChatDetail = ({navigation, route}) => {
         console.log(result);
         setPhotos(result);
 
-        onSendImages(result);
+        p2pService.onSendImages(result);
       });
     } catch (err) {
       console.log(err);
@@ -660,92 +258,96 @@ const ChatDetail = ({navigation, route}) => {
 
   const renderComposer = props => (
     <View style={styles.bottomContainer}>
-      <View style={styles.inputContainer}>
-        <View
-          style={{
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}>
-          <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
-            <FlatList
-              showsHorizontalScrollIndicator={false}
-              data={[...selectedImages, ...files]} /// chỗ này show list ảnh
-              horizontal={true}
-              renderItem={({item, index}) => {
-                return (
-                  <View style={styles.viewImage} key={index}>
-                    {getFileImage(item)}
-
-                    <TouchableOpacity
-                      onPress={() => removeItems(item)}
-                      style={styles.btnRemoveImage}>
-                      <MaterialIcons
-                        name="delete"
-                        size={20}
-                        color={COLORS.black}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                );
-                // console.log(item)
-              }}
-            />
-          </View>
-
+      {isOwner ? (
+        <View style={styles.inputContainer}>
           <View
             style={{
-              flexDirection: 'row',
+              flexDirection: 'column',
               alignItems: 'center',
             }}>
-            <TextInput
-              style={styles.input}
-              ref={messageRef}
-              placeholder="Type your message..."
-              onChangeText={text => setMessage(text)}
-              {...props}
-            />
+            <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
+              <FlatList
+                showsHorizontalScrollIndicator={false}
+                data={[...selectedImages, ...files]} /// chỗ này show list ảnh
+                horizontal={true}
+                renderItem={({item, index}) => {
+                  return (
+                    <View style={styles.viewImage} key={index}>
+                      {getFileImage(item)}
 
-            {message || selectedImages.length !== 0 || files.length !== 0 ? (
-              <TouchableOpacity
-                onPress={() =>
-                  handleSendMessage(message, selectedImages[0], files[0])
-                }>
-                <Image
-                  source={images.send}
-                  style={[styles.imgBtn, {marginHorizontal: 5}]}
-                />
-              </TouchableOpacity>
-            ) : (
-              <View
-                style={{
-                  flexDirection: 'row',
-                }}>
-                <TouchableOpacity onPress={() => handleImageSelection()}>
+                      <TouchableOpacity
+                        onPress={() => removeItems(item)}
+                        style={styles.btnRemoveImage}>
+                        <MaterialIcons
+                          name="delete"
+                          size={20}
+                          color={COLORS.black}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                  // console.log(item)
+                }}
+              />
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TextInput
+                style={styles.input}
+                ref={messageRef}
+                placeholder="Type your message..."
+                onChangeText={text => setMessage(text)}
+                {...props}
+              />
+
+              {message || selectedImages.length !== 0 || files.length !== 0 ? (
+                <TouchableOpacity
+                  onPress={() =>
+                    handleSendMessage(message, selectedImages[0], files[0])
+                  }>
                   <Image
-                    source={images.image}
-                    size={25}
+                    source={images.send}
                     style={[styles.imgBtn, {marginHorizontal: 5}]}
                   />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => pickDocument()}>
-                  <Image
-                    source={images.attach}
-                    size={25}
-                    style={[styles.imgBtn, {marginHorizontal: 5}]}
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                  }}>
+                  <TouchableOpacity onPress={() => handleImageSelection()}>
+                    <Image
+                      source={images.image}
+                      size={25}
+                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => pickDocument()}>
+                    <Image
+                      source={images.attach}
+                      size={25}
+                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           </View>
         </View>
-      </View>
+      ) : null}
     </View>
   );
   const renderActions = props => (
     <View style={styles.cameraContainer}>
-      <TouchableOpacity onPress={handleShowCameraBottomSheet}>
-        <Image source={images.camera} style={styles.cameraImg} />
-      </TouchableOpacity>
+      {isOwner ? (
+        <TouchableOpacity onPress={handleShowCameraBottomSheet}>
+          <Image source={images.camera} style={styles.cameraImg} />
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 
@@ -756,7 +358,6 @@ const ChatDetail = ({navigation, route}) => {
           <TouchableOpacity
             onPress={() => {
               navigation.goBack();
-              onRemoveGroup();
             }}>
             <Image source={images.left} size={25} style={styles.imgBtn} />
           </TouchableOpacity>

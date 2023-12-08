@@ -1,38 +1,58 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {View, Text} from 'react-native';
-import DeviceInfo from 'react-native-device-info';
-import {useDispatch, useSelector} from 'react-redux';
 import styles from './welcome.style';
-import {images} from '../../../../constants';
-import {setUser} from '../../../redux/reducers';
+import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
 
-const Welcome = () => {
-  const [deviceName, setDeviceName] = useState('');
-  const dispatch = useDispatch();
+const Welcome = ({user}) => {
+  const [role, setRole] = useState('');
+  const [connection, setConnection] = useState('');
+
+  const checkRole = useCallback(() => {
+    if (user.isOwner === undefined) {
+      setRole('Undefined');
+    } else if (user.isOwner) {
+      setRole('Admin');
+    } else {
+      setRole('Employee');
+    }
+  }, [user.isOwner]);
+
+  const checkConnection = useCallback(() => {
+    if (user.connection.groupFormed) {
+      setConnection('Connected');
+    } else {
+      setConnection('Disconnected');
+    }
+  }, [user.connection.groupFormed]);
 
   useEffect(() => {
-    async function fetchData() {
-      // Lấy deviceName từ DeviceInfo và cập nhật state
-      const name = await DeviceInfo.getDeviceName();
-      setDeviceName(name);
-
-      const user = {
-        img: images.profile,
-        deviceName: name,
-        available: true,
-      };
-
-      dispatch(setUser(user));
-    }
-
-    fetchData();
-  }, []);
+    checkRole();
+    checkConnection();
+  }, [checkRole, checkConnection]);
 
   return (
     <View>
       <View style={styles.container}>
-        <Text style={styles.userName}>Hello {deviceName}</Text>
-        <Text style={styles.welcomeMessage}>Find your connect</Text>
+        <View>
+          <Text style={styles.userName}>Hello {user.deviceName}</Text>
+          <Text style={styles.welcomeMessage}>Find your connect</Text>
+        </View>
+
+        <View
+          style={{
+            alignItems: 'flex-end',
+            marginTop: 10,
+            gap: 5,
+          }}>
+          <Text style={styles.connectionText}>
+            Connection Status:
+            <Text style={styles.statusConnectText(connection)}>
+              {' '}
+              {connection}
+            </Text>
+          </Text>
+          <Text style={styles.roleText}>Role: {role}</Text>
+        </View>
       </View>
     </View>
   );

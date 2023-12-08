@@ -1,16 +1,25 @@
 import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {COLORS, FONT, SIZES} from '../../constants';
 
 const ChatCard = ({navigation, item}) => {
+  const [latestMessage, setLatestMessage] = useState('');
+
+  const handlePress = () => {
+    navigation.navigate('Chat Detail', item);
+  };
+
+  useEffect(() => {
+    if (item.messages.length > 0) {
+      setLatestMessage(item.messages[0]);
+    }
+
+    return () => {};
+  }, [item.messages, navigation]);
+
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => {
-        const itemWithIsOwner = {...item, isOwner: true};
-        navigation.navigate('Chat Detail', itemWithIsOwner);
-      }}>
+    <TouchableOpacity style={styles.container} onPress={() => handlePress()}>
       <View style={styles.imgContainer}>
         <Image source={item.img} resizeMode="cover" style={styles.img} />
       </View>
@@ -24,7 +33,7 @@ const ChatCard = ({navigation, item}) => {
             color={item.available ? COLORS.primary : COLORS.red}
           />
         </View>
-        <Text style={styles.message}>{item.message}</Text>
+        <Text style={styles.message}>{latestMessage.text}</Text>
       </View>
     </TouchableOpacity>
   );

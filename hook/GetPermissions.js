@@ -4,7 +4,7 @@ import {PermissionsAndroid, Platform} from 'react-native';
 export const GetPermissions = async () => {
   try {
     const permissions = [
-      PermissionsAndroid.PERMISSIONS.ACCESS_MEDIA_LOCATION,
+      // PermissionsAndroid.PERMISSIONS.ACCESS_MEDIA_LOCATION,
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
       PermissionsAndroid.PERMISSIONS.NEARBY_WIFI_DEVICES,
@@ -16,10 +16,10 @@ export const GetPermissions = async () => {
     });
 
     if (
-      (granted[PermissionsAndroid.PERMISSIONS.ACCESS_MEDIA_LOCATION] ===
+      // granted[PermissionsAndroid.PERMISSIONS.ACCESS_MEDIA_LOCATION] ===
+      // PermissionsAndroid.RESULTS.GRANTED &&
+      (granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
         PermissionsAndroid.RESULTS.GRANTED &&
-        granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
         granted[PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION] ===
           PermissionsAndroid.RESULTS.GRANTED) ||
       granted[PermissionsAndroid.PERMISSIONS.NEARBY_WIFI_DEVICES] ===

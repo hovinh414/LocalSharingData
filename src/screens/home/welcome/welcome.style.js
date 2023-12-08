@@ -17,5 +17,18 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     marginTop: 2,
   },
+  connectionText: {
+    fontFamily: FONT.regular,
+    fontSize: SIZES.medium,
+    color: COLORS.dark,
+  },
+  statusConnectText: check => ({
+    color: check === 'Connected' ? COLORS.green : COLORS.red,
+  }),
+  roleText: {
+    fontFamily: FONT.bold,
+    fontSize: SIZES.medium,
+    color: COLORS.dark,
+  },
 });
 export default styles;
