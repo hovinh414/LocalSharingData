@@ -26,6 +26,7 @@ const TaskCard = ({navigation, task}) => {
   // const [tempTask, setTempTask] = useState(task);
   const joinedPeople = task.joinedParticipants.length
   const user = useSelector(state => state.P2P.user);
+  
   const handleNavigate = () => {
     // console.log("tempTask:", tempTask)
     navigation.navigate('Task Detail', task);
@@ -72,17 +73,7 @@ const TaskCard = ({navigation, task}) => {
             });
 
             await AsyncStorage.setItem('taskKey', JSON.stringify(newArray));
-
-            // setJoinedPeople(joinedPeople + 1);
-            // setJoined(!joined);
-
             ToastAndroid.show('Join task thành công!', ToastAndroid.SHORT);
-
-            // setTempTask(newArray[indexToUpdate]);
-
-            
-
-            // console.log('newArray[indexToUpdate]', newArray[indexToUpdate])
           },
         },
       ],

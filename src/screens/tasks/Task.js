@@ -9,7 +9,7 @@ import rightIcon from '../../../assets/images/right-chevron.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import TaskTopTabNavigator from '../../../navigators/TaskTopTabNavigator';
 import {useDispatch, useSelector} from 'react-redux';
-import {setTaskList, setTodoTask} from '../../redux/reducers';
+import {setCompletedTask, setTaskList, setTodoTask} from '../../redux/reducers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -21,10 +21,14 @@ const Task = ({navigation}) => {
   const dispatch = useDispatch();
   const getDataFromStorage = async () => {
     const storageData = await AsyncStorage.getItem('taskKey');
-
+    console.log(storageData);
     if (storageData !== null) {
       const data = JSON.parse(storageData);
-
+      const completedTask = data.filter(
+        task =>
+          task.date === moment(date).format('DD/MM/YYYY') &&
+          task.isDone === true,
+      );
       const todoTasks = data.filter(
         task =>
           task.date === moment(date).format('DD/MM/YYYY') &&
@@ -43,9 +47,11 @@ const Task = ({navigation}) => {
 
       dispatch(setTodoTask(todoTasks));
       dispatch(setTaskList(regularTasks));
+      dispatch(setCompletedTask(completedTask));
     } else {
       dispatch(setTaskList([]));
       dispatch(setTodoTask([]));
+      dispatch(setCompletedTask([]));
     }
   };
 

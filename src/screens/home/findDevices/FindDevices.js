@@ -14,6 +14,7 @@ import DeviceCard from '../../../common/DeviceCard';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {images} from '../../../../constants';
 import {useDispatch, useSelector} from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   onConnect,
   onCreateGroup,
