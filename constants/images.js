@@ -16,7 +16,9 @@ import attach from '../assets/images/attach-file.png';
 import hieu from '../assets/images/Hieu.jpg';
 import left from '../assets/images/left.png';
 import profile from '../assets/images/profile.png';
-import add from '../assets/images/new-task.png';
+import task from '../assets/images/task.png';
+import check from '../assets/images/check.png';
+import nocheck from '../assets/images/nocheck.png';
 export default {
   file,
   remove,
@@ -36,5 +38,7 @@ export default {
   hieu,
   left,
   profile,
-  add
+  task,
+  check,
+  nocheck,
 };

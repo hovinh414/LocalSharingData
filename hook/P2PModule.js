@@ -113,6 +113,8 @@ export const createClient = () => {
           _id: 2, // Tin nhắn của phía người nhắn
         },
       };
+    } else if (receivedData.type === 'chat'){
+      console.log('Received chat from server:', receivedData.data);
     }
   });
 

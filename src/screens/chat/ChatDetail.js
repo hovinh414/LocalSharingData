@@ -26,15 +26,15 @@ import p2pService from '../../../hook/P2PService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
 import {useSelector} from 'react-redux';
+import ChooseTask from '../../common/ChooseTask';
+import TaskCardSend from '../../common/TaskCardSend';
+import TaskCard from '../../common/TaskCard';
 
 const ChatDetail = ({navigation, route}) => {
   // Server variables
   const device = route.params;
   const user = useSelector(state => state.P2P.user);
   const isOwner = user.isOwner;
-
-  console.log('route: ', route);
-
   // ---------------------------
   // Messages, images, files variables
   const messageRef = useRef('');
@@ -44,7 +44,9 @@ const ChatDetail = ({navigation, route}) => {
   const [photos, setPhotos] = useState([]); // ảnh từ take photo
   const [videos, setVideos] = useState([]); // video từ record video
   const [files, setFiles] = useState([]); // chọn file từ attach
-
+  const [showChooseTask, setShowChooseTask] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [taskSends, setTaskSends] = useState([]);
   // ---------------------------
   // Bottomsheet variables
   const cameraBottomSheetModalRef = useRef(null);
@@ -101,6 +103,8 @@ const ChatDetail = ({navigation, route}) => {
   };
 
   const handleSendMessage = (text, image, file) => {
+    setSelectedTasks([]);
+    setTaskSends([...taskSends, ...selectedTasks]);
     console.log(text, image, file);
     if (text === '') {
       if (image && !file) {
@@ -139,6 +143,9 @@ const ChatDetail = ({navigation, route}) => {
     else if (item.type) {
       const newFiles = files.filter(listItem => listItem !== item);
       setFiles(newFiles);
+    } else if (selectedTasks) {
+      const newTasks = selectedTasks.filter(listItem => listItem !== item);
+      setSelectedTasks(newTasks);
     }
     // const newPhoto = photo.filter(listItem => listItem !== item);
     // setPhoto(newPhoto);
@@ -255,9 +262,19 @@ const ChatDetail = ({navigation, route}) => {
       }
     }
   };
+  // Lấy list selected Task từ Modal
 
+  const handleSelectTasks = tasks => {
+    // Xử lý giá trị selectedTasks ở đây
+    setSelectedTasks([...selectedTasks, ...tasks]);
+  };
   const renderComposer = props => (
     <View style={styles.bottomContainer}>
+      <ChooseTask
+        visible={showChooseTask}
+        onRequestClose={() => setShowChooseTask(false)}
+        onSelectTasks={handleSelectTasks} // Gửi hàm callback vào ChooseTask
+      />
       {isOwner ? (
         <View style={styles.inputContainer}>
           <View
@@ -289,6 +306,29 @@ const ChatDetail = ({navigation, route}) => {
                   // console.log(item)
                 }}
               />
+              <FlatList
+                data={selectedTasks}
+                renderItem={({item, index}) => {
+                  return (
+                    <View>
+                      <TouchableOpacity
+                        onPress={() => removeItems(item)}
+                        style={styles.btnRemoveImage}>
+                        <MaterialIcons
+                          name="delete"
+                          size={20}
+                          color={COLORS.black}
+                        />
+                      </TouchableOpacity>
+                      <TaskCardSend
+                        task={item}
+                        key={index}
+                        navigation={navigation}
+                      />
+                    </View>
+                  );
+                }}
+              />
             </View>
 
             <View
@@ -304,7 +344,115 @@ const ChatDetail = ({navigation, route}) => {
                 {...props}
               />
 
-              {message || selectedImages.length !== 0 || files.length !== 0 ? (
+              {message ||
+              selectedImages.length !== 0 ||
+              files.length !== 0 ||
+              selectedTasks.length !== 0 ? (
+                <TouchableOpacity
+                  onPress={() =>
+                    handleSendMessage(message, selectedImages[0], files[0])
+                  }>
+                  <Image
+                    source={images.send}
+                    style={[styles.imgBtn, {marginHorizontal: 5}]}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                  }}>
+                  <TouchableOpacity onPress={() => setShowChooseTask(true)}>
+                    <Image
+                      source={images.task}
+                      size={25}
+                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleImageSelection()}>
+                    <Image
+                      source={images.image}
+                      size={23}
+                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => pickDocument()}>
+                    <Image
+                      source={images.attach}
+                      size={25}
+                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+      ) : device.check ? (
+        <View style={styles.inputContainer}>
+          <View
+            style={{
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+            <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
+              <FlatList
+                showsHorizontalScrollIndicator={false}
+                data={[...selectedImages, ...files]} /// chỗ này show list ảnh
+                horizontal={true}
+                renderItem={({item, index}) => {
+                  return (
+                    <View style={styles.viewImage} key={index}>
+                      {getFileImage(item)}
+
+                      <TouchableOpacity
+                        onPress={() => removeItems(item)}
+                        style={styles.btnRemoveImage}>
+                        <MaterialIcons
+                          name="delete"
+                          size={20}
+                          color={COLORS.black}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                  // console.log(item)
+                }}
+              />
+              <FlatList
+                data={selectedTasks}
+                horizontal={true}
+                renderItem={({item, index}) => {
+                  return (
+                    <View>
+                      <TaskCardSend
+                        task={item}
+                        key={index}
+                        navigation={navigation}
+                      />
+                    </View>
+                  );
+                }}
+              />
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TextInput
+                style={styles.input}
+                ref={messageRef}
+                placeholder="Type your message..."
+                onChangeText={text => setMessage(text)}
+                {...props}
+              />
+
+              {message ||
+              selectedImages.length !== 0 ||
+              files.length !== 0 ||
+              selectedTasks.length !== 0 ? (
                 <TouchableOpacity
                   onPress={() =>
                     handleSendMessage(message, selectedImages[0], files[0])
@@ -347,6 +495,10 @@ const ChatDetail = ({navigation, route}) => {
         <TouchableOpacity onPress={handleShowCameraBottomSheet}>
           <Image source={images.camera} style={styles.cameraImg} />
         </TouchableOpacity>
+      ) : device.check ? (
+        <TouchableOpacity onPress={handleShowCameraBottomSheet}>
+          <Image source={images.camera} style={styles.cameraImg} />
+        </TouchableOpacity>
       ) : null}
     </View>
   );
@@ -367,7 +519,22 @@ const ChatDetail = ({navigation, route}) => {
           />
           <Text style={styles.deviceNameText}>{device.deviceName}</Text>
         </View>
-
+        <View>
+          <FlatList
+            data={taskSends}
+            renderItem={({item, index}) => {
+              return (
+                <View>
+                  <TaskCard
+                    task={item}
+                    key={index}
+                    navigation={navigation}
+                  />
+                </View>
+              );
+            }}
+          />
+        </View>
         <GiftedChat
           messages={messages}
           // onSend={text => onSendMessage(text)}

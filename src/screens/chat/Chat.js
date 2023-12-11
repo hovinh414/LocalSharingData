@@ -47,6 +47,7 @@ const Chat = ({navigation}) => {
       const group = await onGetGroupInfo();
       const item = createChatObject(group);
       p2pService.addChatToChatList(item);
+      p2pService.onSendMessage(item);
       setChatList(p2pService.chatList);
       navigation.navigate('Chat Detail', item);
     } else {
