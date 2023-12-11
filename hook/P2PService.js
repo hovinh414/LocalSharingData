@@ -20,12 +20,14 @@ let defaultChatList = [
     chatId: 1,
     img: images.hieu,
     deviceName: 'Hieu',
+    deviceAddress: '',
     messages: [],
   },
   {
     chatId: 2,
     img: images.profile,
     deviceName: 'Lâm Alile',
+    deviceAddress: '',
     messages: [],
   },
 ];
