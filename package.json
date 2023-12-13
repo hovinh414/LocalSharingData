@@ -40,6 +40,7 @@
     "react-native-image-crop-picker": "^0.40.1",
     "react-native-image-picker": "^7.0.2",
     "react-native-media-console": "^2.1.0",
+    "react-native-modal": "^13.0.1",
     "react-native-modern-datepicker": "^1.0.0-beta.91",
     "react-native-pager-view": "^6.2.2",
     "react-native-progress": "^5.0.1",

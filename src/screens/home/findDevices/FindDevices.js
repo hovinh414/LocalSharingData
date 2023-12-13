@@ -31,10 +31,13 @@ const FindDevices = ({navigation, user, setIsOptionModalOpen}) => {
       deviceName: data.deviceName,
       deviceAddress: data.deviceAddress,
       messages: [],
+      check : true,
     };
   };
 
   const handleConnect = data => {
+    p2pService.initialize(false);
+    const item = createChatObject(data);
     const itemWithIsOwner = {...user, isOwner: false};
     const item = createChatObject(data);
     dispatch(updateUser(itemWithIsOwner));
@@ -42,6 +45,7 @@ const FindDevices = ({navigation, user, setIsOptionModalOpen}) => {
     p2pService.initialize(false);
     onConnect(navigation, item);
     p2pService.addChatToChatList(item);
+    onConnect(navigation, item);
   };
 
   return (

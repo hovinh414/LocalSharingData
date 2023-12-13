@@ -14,6 +14,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
+
   imgBtn: {
     width: 25,
     height: 25,
@@ -118,6 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#C5C7C7',
     borderRadius: 12, // Bo tròn góc
     padding: 5,
+    zIndex: 4,
   },
   viewFile: {
     marginBottom: 20,
