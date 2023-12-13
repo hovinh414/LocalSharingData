@@ -37,7 +37,6 @@ const FindDevices = ({navigation, user, setIsOptionModalOpen}) => {
 
   const handleConnect = data => {
     p2pService.initialize(false);
-    const item = createChatObject(data);
     const itemWithIsOwner = {...user, isOwner: false};
     const item = createChatObject(data);
     dispatch(updateUser(itemWithIsOwner));

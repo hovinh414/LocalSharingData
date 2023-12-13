@@ -29,6 +29,7 @@ import {useSelector} from 'react-redux';
 import ChooseTask from '../../common/ChooseTask';
 import TaskCardSend from '../../common/TaskCardSend';
 import TaskCard from '../../common/TaskCard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatDetail = ({navigation, route}) => {
   // Server variables
