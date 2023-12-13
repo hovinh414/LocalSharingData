@@ -2,12 +2,16 @@ import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {COLORS, FONT, SIZES} from '../../constants';
+import { useDispatch } from 'react-redux';
+import { setChatId } from '../redux/reducers';
 
 const ChatCard = ({navigation, item}) => {
   const [latestMessage, setLatestMessage] = useState('');
+  const dispatch = useDispatch()
 
   const handlePress = () => {
     navigation.navigate('Chat Detail', item);
+    dispatch(setChatId(item.chatId))
   };
 
   useEffect(() => {

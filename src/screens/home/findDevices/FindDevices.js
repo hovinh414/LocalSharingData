@@ -6,15 +6,13 @@ import DeviceCard from '../../../common/DeviceCard';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {images} from '../../../../constants';
 import {useDispatch, useSelector} from 'react-redux';
-
 import p2pService from '../../../../hook/P2PService';
-
 import {
   onConnect,
   onRemoveGroup,
   onGetAvailableDevices,
 } from '../../../../hook/FunctionsP2P';
-import {updateUser} from '../../../redux/reducers';
+import {updateUser, setChatId} from '../../../redux/reducers';
 
 const FindDevices = ({navigation, user, setIsOptionModalOpen}) => {
   const devices = useSelector(state => state.P2P.devices);
@@ -26,10 +24,24 @@ const FindDevices = ({navigation, user, setIsOptionModalOpen}) => {
     setIsOptionModalOpen(true);
   };
 
+  const createChatObject = data => {
+    return {
+      chatId: Math.random().toString(),
+      img: images.profile,
+      deviceName: data.deviceName,
+      deviceAddress: data.deviceAddress,
+      messages: [],
+    };
+  };
+
   const handleConnect = data => {
     const itemWithIsOwner = {...user, isOwner: false};
+    const item = createChatObject(data);
     dispatch(updateUser(itemWithIsOwner));
-    onConnect(navigation, data);
+    dispatch(setChatId(item.chatId));
+    p2pService.initialize(false);
+    onConnect(navigation, item);
+    p2pService.addChatToChatList(item);
   };
 
   return (
