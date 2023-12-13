@@ -14,9 +14,12 @@ import {images, COLORS} from '../../../constants';
 import {onGetGroupInfo} from '../../../hook/FunctionsP2P';
 import {ToastAndroid} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { setChatId } from '../../redux/reducers';
 
 const Chat = ({navigation}) => {
   const [chatList, setChatList] = useState([]);
+  const dispatch = useDispatch()
 
   useEffect(() => {
     // Get the initial chatList from P2PService when the component is created
@@ -49,6 +52,7 @@ const Chat = ({navigation}) => {
       p2pService.addChatToChatList(item);
       p2pService.onSendMessage(item);
       setChatList(p2pService.chatList);
+      dispatch(setChatId(item.chatId))
       navigation.navigate('Chat Detail', item);
     } else {
       ToastAndroid.show('Bạn không có quyền này!!', ToastAndroid.SHORT);

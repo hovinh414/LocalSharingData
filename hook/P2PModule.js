@@ -6,18 +6,22 @@ import {
   receiveMessage,
   receiveFile,
 } from 'react-native-wifi-p2p';
-import {getP2PServiceInstance} from './P2PService';
+import p2pService, {getP2PServiceInstance} from './P2PService';
 import {PORT, SERVER_IP} from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import {useSelector} from 'react-redux'
 
 let server;
 let client;
 let socketRef;
 let receiveInterval;
 
+
 export const createServer = ipAddress => {
   if (server) {
     return server;
   }
+
 
   server = TcpSocket.createServer(socket => {
     console.log('Client connected:', socket.remoteAddress, socket.remotePort);
@@ -73,6 +77,8 @@ export const createClient = () => {
     console.log(receivedData);
     let newMessage;
 
+    const {chatId} = useSelector(state => state.P2P)
+
     // Kiểm tra loại dữ liệu
 
     // Xử lý tin nhắn văn bản
@@ -116,6 +122,8 @@ export const createClient = () => {
     } else if (receivedData.type === 'chat'){
       console.log('Received chat from server:', receivedData.data);
     }
+
+    p2pService.messages.push(newMessage)
   });
 
   client.on('error', error => {
@@ -173,9 +181,11 @@ const serverReceiveMessage = () => {
           _id: 2, // Tin nhắn của phía người nhận
         },
       };
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, [newMessage]),
-      );
+
+      p2pService.messages.push(newMessage)
+      // setMessages(previousMessages =>
+      //   GiftedChat.append(previousMessages, [newMessage]),
+      // );
     })
     .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
 };
@@ -190,9 +200,11 @@ const serverReceiveImage = () => {
           _id: 2, // Tin nhắn của phía người nhận
         },
       };
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, [newMessage]),
-      );
+
+      p2pService.messages.push(newMessage)
+      // setMessages(previousMessages =>
+      //   GiftedChat.append(previousMessages, [newMessage]),
+      // );
     })
     .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
 };
@@ -209,9 +221,10 @@ const serverReceiveFile = () => {
         },
       };
 
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, [newMessage]),
-      );
+      p2pService.messages.push(newMessage)
+      // setMessages(previousMessages =>
+      //   GiftedChat.append(previousMessages, [newMessage]),
+      // );
     })
     .catch(err => console.log('[FATAL] Unable to receive file: ', err));
 };

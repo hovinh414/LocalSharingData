@@ -115,7 +115,7 @@ const AddTask = ({navigation}) => {
   const getTaskFromStorage = async () => {
     // await AsyncStorage.clear();
     try {
-      const taskJSON = await AsyncStorage.getItem('taskKey');
+      const taskJSON = await AsyncStorage.getItem('chatHistory');
 
       if (taskJSON) {
         const taskObject = JSON.parse(taskJSON);

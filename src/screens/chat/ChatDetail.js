@@ -7,13 +7,14 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Image,
+  AppState
 } from 'react-native';
 import {images, COLORS} from '../../../constants';
 import styles from './chatDetail.style';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as ImagesPickers from 'react-native-image-picker';
-import {GiftedChat, InputToolbar} from 'react-native-gifted-chat';
+import {GiftedChat} from 'react-native-gifted-chat';
 import ImagePicker from 'react-native-image-crop-picker';
 import {
   BottomSheetModal,
@@ -23,7 +24,6 @@ import {
 import {GetStoragePermissions} from '../../../hook/GetPermissions';
 import DocumentPicker from 'react-native-document-picker';
 import p2pService from '../../../hook/P2PService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
 import {useSelector} from 'react-redux';
 import ChooseTask from '../../common/ChooseTask';
@@ -35,6 +35,11 @@ const ChatDetail = ({navigation, route}) => {
   const device = route.params;
   const user = useSelector(state => state.P2P.user);
   const isOwner = user.isOwner;
+
+  const {chatId} = useSelector(state => state.P2P)
+
+  // console.log('route: ', route);
+
   // ---------------------------
   // Messages, images, files variables
   const messageRef = useRef('');
@@ -85,6 +90,7 @@ const ChatDetail = ({navigation, route}) => {
     };
 
     messageRef.current.clear();
+    setMessage('')
     // Hiển thị tin nhắn trên UI
     setMessages(prevMessages => [newMessage, ...prevMessages]);
     // Lưu tin nhắn trong storage
@@ -502,6 +508,29 @@ const ChatDetail = ({navigation, route}) => {
       ) : null}
     </View>
   );
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', async () => {
+      const chatData = JSON.parse(await AsyncStorage.getItem('chatHistory'))
+
+      const indexToUpdate = chatData.findIndex(
+        item => item.chatId === chatId
+      )
+  
+      chatData[indexToUpdate].messages = [...chatData[indexToUpdate].messages, p2pService.messages]
+  
+      await AsyncStorage.setItem('chatHistory', JSON.stringify(chatData))
+
+      console.log('back')
+    })
+
+
+    return () => {
+      // AppState.removeEventListener('change', handleAppStateChange)
+
+      unsubscribe()
+    }
+  }, [navigation])
 
   return (
     <BottomSheetModalProvider>

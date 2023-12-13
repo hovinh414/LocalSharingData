@@ -17,6 +17,7 @@ const initialState = {
   subscriptionOnThisDeviceChanged: {},
   darkMode: false,
   taskList: [],
+  chatId: '',
 };
 
 const p2pSlice = createSlice({
@@ -59,6 +60,9 @@ const p2pSlice = createSlice({
     setCompletedTask: (state, action) => {
       state.completed = action.payload;
     },
+    setChatId: (state, action) => {
+      state.chatId = action.payload;
+    }
   },
 });
 
@@ -73,6 +77,7 @@ export const {
   setTaskList,
   setTodoTask,
   setCompletedTask,
+  setChatId
 } = p2pSlice.actions;
 
 export default p2pSlice.reducer;

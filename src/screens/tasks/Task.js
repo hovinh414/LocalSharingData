@@ -21,6 +21,7 @@ const Task = ({navigation}) => {
   const dispatch = useDispatch();
   const getDataFromStorage = async () => {
     const storageData = await AsyncStorage.getItem('taskKey');
+
     if (storageData !== null) {
       const data = JSON.parse(storageData);
       const completedTask = data.filter(
