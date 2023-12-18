@@ -7,7 +7,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Image,
-  AppState
 } from 'react-native';
 import {images, COLORS} from '../../../constants';
 import styles from './chatDetail.style';
@@ -33,19 +32,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatDetail = ({navigation, route}) => {
   // Server variables
-  const device = route.params;
+  const device = route.params.item;
   const user = useSelector(state => state.P2P.user);
   const isOwner = user.isOwner;
+  const flag = route.params.check
+
+  console.log(device)
 
   const {chatId} = useSelector(state => state.P2P)
 
   // console.log('route: ', route);
 
+  
+
   // ---------------------------
   // Messages, images, files variables
   const messageRef = useRef('');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState(device.messages);
+  const [messages, setMessages] = useState(p2pService.messages);
   const [selectedImages, setSelectedImages] = useState([]);
   const [photos, setPhotos] = useState([]); // ảnh từ take photo
   const [videos, setVideos] = useState([]); // video từ record video
@@ -53,6 +57,10 @@ const ChatDetail = ({navigation, route}) => {
   const [showChooseTask, setShowChooseTask] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskSends, setTaskSends] = useState([]);
+
+  // console.log("selectedTasks:", selectedTasks)
+
+  // console.log(p2pService.messages)
   // ---------------------------
   // Bottomsheet variables
   const cameraBottomSheetModalRef = useRef(null);
@@ -98,6 +106,48 @@ const ChatDetail = ({navigation, route}) => {
     updateMessagesCallback(newMessage);
   };
 
+  const createImageMessageObject = image => {
+    const newMessage = {
+      _id: Math.random().toString(),
+      image: image.uri,
+      createAt: new Date(),
+      user: {
+        _id: 1,
+      },
+    };
+
+    setSelectedImages([])
+    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    updateMessagesCallback(newMessage)
+  }
+  const createFileMessageObject = file => {
+    const newMessage = {
+      _id: Math.random().toString(),
+      text: file.name,
+      createAt: new Date(),
+      user: {
+        _id: 1,
+      },
+    };
+
+    setFiles([])
+    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    updateMessagesCallback(newMessage)
+  }
+  const createTaskMessageObject = task => {
+    const newMessage = {
+      _id: Math.random().toString(),
+      text: JSON.stringify(task),
+      createAt: new Date(),
+      user: {
+        _id: 1,
+      },
+    };
+
+    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    updateMessagesCallback(newMessage)
+  }
+
   const updateMessagesCallback = newMessage => {
     // Update the messages in the current chat in the Chat component
     const updatedChatList = p2pService.chatList.map(chat =>
@@ -106,31 +156,49 @@ const ChatDetail = ({navigation, route}) => {
         : chat,
     );
 
+    // console.log('updateChat:', updatedChatList)
+
     p2pService.updateChatHistory(updatedChatList);
   };
 
-  const handleSendMessage = (text, image, file) => {
+  const handleSendMessage = (text, image, file, task) => {
     setSelectedTasks([]);
     setTaskSends([...taskSends, ...selectedTasks]);
-    console.log(text, image, file);
+    console.log('task:', task);
+    // console.log(text, image, file);
     if (text === '') {
-      if (image && !file) {
+      if (image && !file && !task) {
         p2pService.onSendImage(image);
+        createImageMessageObject(image)
         // onSendImages(image);
         console.log('chỉ send ảnh');
-      } else if (!image && file) {
-        p2pService.onSendFiles(file);
+      } else if (!image && file && !task) {
+        p2pService.onSendFile(file);
+        createFileMessageObject(file)
+      } else if (!image && !file && task) {
+        p2pService.onSendTask(task)
+        createTaskMessageObject(task)
       }
     } else {
-      if (image && !file) {
+      if (image && !file && !task) {
         p2pService.onSendMessage(text);
         createTextMessageObject(text);
 
         p2pService.onSendImage(image);
-      } else if (!image && file) {
-        p2pService.onSendImage(text);
+        createImageMessageObject(image)
+      } else if (!image && file && !task) {
+        p2pService.onSendMessage(text);
+        createTextMessageObject(text);
+
         p2pService.onSendFile(file);
-      } else if (!image && !file) {
+        createFileMessageObject(file)
+      } else if (!image && !file && task) {
+        p2pService.onSendMessage(text);
+        createTextMessageObject(text);
+
+        p2pService.onSendTask(task);
+        createTaskMessageObject(task);
+      } else if (!image && !file && !task) {
         p2pService.onSendMessage(text);
         createTextMessageObject(text);
       }
@@ -357,7 +425,7 @@ const ChatDetail = ({navigation, route}) => {
               selectedTasks.length !== 0 ? (
                 <TouchableOpacity
                   onPress={() =>
-                    handleSendMessage(message, selectedImages[0], files[0])
+                    handleSendMessage(message, selectedImages[0], files[0], selectedTasks[0])
                   }>
                   <Image
                     source={images.send}
@@ -462,7 +530,7 @@ const ChatDetail = ({navigation, route}) => {
               selectedTasks.length !== 0 ? (
                 <TouchableOpacity
                   onPress={() =>
-                    handleSendMessage(message, selectedImages[0], files[0])
+                    handleSendMessage(message, selectedImages[0], files[0], selectedTasks[0])
                   }>
                   <Image
                     source={images.send}
@@ -510,19 +578,29 @@ const ChatDetail = ({navigation, route}) => {
     </View>
   );
 
+  // useEffect(() => {
+  //   setMessages(p2pService.messages)
+  // }, [])
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', async () => {
-      const chatData = JSON.parse(await AsyncStorage.getItem('chatHistory'))
+      if (flag) {
+        const chatData = JSON.parse(await AsyncStorage.getItem('chatHistory'))  
 
       const indexToUpdate = chatData.findIndex(
         item => item.chatId === chatId
       )
   
-      chatData[indexToUpdate].messages = [...chatData[indexToUpdate].messages, p2pService.messages]
+      chatData[indexToUpdate].messages = [...chatData[indexToUpdate].messages, ...p2pService.messages]
+
+      // console.log('chatData:', chatData)
   
       await AsyncStorage.setItem('chatHistory', JSON.stringify(chatData))
 
+      p2pService.messages = []
+
       console.log('back')
+      }
     })
 
 

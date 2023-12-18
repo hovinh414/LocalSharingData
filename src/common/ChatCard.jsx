@@ -4,13 +4,15 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {COLORS, FONT, SIZES} from '../../constants';
 import { useDispatch } from 'react-redux';
 import { setChatId } from '../redux/reducers';
+import p2pService from '../../hook/P2PService';
 
 const ChatCard = ({navigation, item}) => {
   const [latestMessage, setLatestMessage] = useState('');
   const dispatch = useDispatch()
 
   const handlePress = () => {
-    navigation.navigate('Chat Detail', item);
+    navigation.navigate('Chat Detail', {item: item, check: false});
+    // p2pService.messages = item.messages
     dispatch(setChatId(item.chatId))
   };
 

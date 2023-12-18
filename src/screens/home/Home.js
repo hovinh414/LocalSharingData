@@ -101,7 +101,7 @@ const Home = ({navigation}) => {
           setInitedWifiP2P(true);
           await fetchData();
           console.log('User after initial update:', user);
-          connectionInterval.current = setInterval(updateConnectionInfo, 2000);
+          connectionInterval.current = setInterval(updateConnectionInfo, 10000);
         }
       }
     }

@@ -46,6 +46,7 @@ export const createServer = ipAddress => {
       serverReceiveMessage();
       serverReceiveImage();
       serverReceiveFile();
+      serverReceiveTask();
     }, 100);
   });
 
@@ -76,8 +77,6 @@ export const createClient = () => {
     const receivedData = await JSON.parse(data.toString());
     console.log(receivedData);
     let newMessage;
-
-    const {chatId} = useSelector(state => state.P2P)
 
     // Kiểm tra loại dữ liệu
 
@@ -119,8 +118,23 @@ export const createClient = () => {
           _id: 2, // Tin nhắn của phía người nhắn
         },
       };
-    } else if (receivedData.type === 'chat'){
-      console.log('Received chat from server:', receivedData.data);
+    } else if (receivedData.type === 'task') {
+      console.log('Received task from client:', receivedData.data);
+      const receivedTask = await receivedData.data;
+      
+      const taskDatas = JSON.parse(await AsyncStorage.getItem('taskKey'));
+      taskDatas.push(receivedTask);
+
+      await AsyncStorage.setItem('taskKey', JSON.stringify(taskDatas));
+
+      newMessage = {
+        _id: Math.random().toString(),
+        text: `Task: ${JSON.stringify(receivedTask)}`,
+        createdAt: new Date(),
+        user: {
+          _id: 2, // Tin nhắn của phía người nhắn
+        },
+      };
     }
 
     p2pService.messages.push(newMessage)
@@ -169,10 +183,21 @@ export const serverSendFile = file => {
     console.log('SocketRef has not been initialized');
   }
 };
+export const serverSendTask = task => {
+  if (socketRef) {
+    const newData = {
+      type: 'task',
+      data: task,
+    };
+    socketRef.write(JSON.stringify(newData));
+  } else {
+    console.log('SocketRef has not been initialized');
+  }
+};
 const serverReceiveMessage = () => {
   // Server use this function to receive message from client
   receiveMessage()
-    .then(text => {
+    .then(async text => {
       const newMessage = {
         _id: Math.random().toString(),
         text: text,
@@ -181,6 +206,11 @@ const serverReceiveMessage = () => {
           _id: 2, // Tin nhắn của phía người nhận
         },
       };
+
+      const taskDatas = JSON.parse(await AsyncStorage.getItem('taskKey'));
+      taskDatas.push(JSON.parse(text));
+
+      await AsyncStorage.setItem('taskKey', JSON.stringify(taskDatas));
 
       p2pService.messages.push(newMessage)
       // setMessages(previousMessages =>
@@ -195,6 +225,25 @@ const serverReceiveImage = () => {
       const newMessage = {
         _id: Math.random().toString(),
         image: image,
+        createAt: new Date(),
+        user: {
+          _id: 2, // Tin nhắn của phía người nhận
+        },
+      };
+
+      p2pService.messages.push(newMessage)
+      // setMessages(previousMessages =>
+      //   GiftedChat.append(previousMessages, [newMessage]),
+      // );
+    })
+    .catch(err => console.log('[FATAL] Unable to receive messages: ', err));
+};
+const serverReceiveTask = () => {
+  receiveMessage()
+    .then(text => {
+      const newMessage = {
+        _id: Math.random().toString(),
+        text: text,
         createAt: new Date(),
         user: {
           _id: 2, // Tin nhắn của phía người nhận
@@ -255,6 +304,13 @@ export const clientSendFile = file => {
       console.log('[INFO] Send client file successfully', metaInfo),
     )
     .catch(err => console.log('[FATAL] Unable to send client file: ', err));
+};
+export const clientSendTask = task => {
+  sendMessage(JSON.stringify(task))
+    .then(metaInfo =>
+      console.log('[INFO] Send client message successfully', metaInfo),
+    )
+    .catch(err => console.log('[FATAL] Unable to send client message: ', err));
 };
 
 export const cleanUp = () => {

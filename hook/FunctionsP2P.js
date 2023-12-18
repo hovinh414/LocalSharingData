@@ -38,7 +38,7 @@ export const onConnect = (navigation, device) => {
     .then(() => console.log('Successfully connected'))
     .catch(err => console.error('Something gone wrong. Details: ', err));
 
-  navigation.navigate('Chat Detail', device);
+  navigation.navigate('Chat Detail', {item: device, check: true});
 };
 
 export const onCancelConnect = () => {

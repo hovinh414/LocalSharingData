@@ -9,6 +9,8 @@ import {
   clientSendImage,
   clientSendFile,
   cleanUp,
+  serverSendTask,
+  clientSendTask
 } from './P2PModule';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -139,15 +141,8 @@ class P2PService {
     if (!image) {
       return;
     }
-
-    const newMessage = {
-      _id: Math.random().toString(),
-      image: image.uri,
-      createdAt: new Date(),
-      user: {
-        _id: 1, // Tin nhắn của phía người nhắn
-      },
-    };
+    
+    console.log('image:', image)
 
     if (this.isServer) {
       serverSendImage(image);
@@ -161,19 +156,40 @@ class P2PService {
       return;
     }
 
-    const newMessage = {
-      _id: Math.random().toString(),
-      text: file.name,
-      createdAt: new Date(),
-      user: {
-        _id: 1, // Tin nhắn của phía người nhắn
-      },
-    };
+    // const newMessage = {
+    //   _id: Math.random().toString(),
+    //   text: file.name,
+    //   createdAt: new Date(),
+    //   user: {
+    //     _id: 1, // Tin nhắn của phía người nhắn
+    //   },
+    // };
 
     if (this.isServer) {
       serverSendFile(file);
     } else {
       clientSendFile(file);
+    }
+  };
+
+  onSendTask = async task => {
+    if (!task) {
+      return;
+    }
+
+    // const newMessage = {
+    //   _id: Math.random().toString(),
+    //   text: file.name,
+    //   createdAt: new Date(),
+    //   user: {
+    //     _id: 1, // Tin nhắn của phía người nhắn
+    //   },
+    // };
+
+    if (this.isServer) {
+      serverSendTask(task);
+    } else {
+      clientSendTask(task);
     }
   };
 
