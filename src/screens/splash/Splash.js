@@ -6,7 +6,7 @@ const wait = time => new Promise(resolve => setTimeout(resolve, time));
 
 const navigateToHome = async navigation => {
   await wait(2000);
-  navigation.navigate('BottomTabsNavigator');
+  navigation.replace('BottomTabsNavigator');
 };
 
 const Splash = ({ navigation }) => {

@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo, useRef, useEffect} from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,29 +8,29 @@ import {
   KeyboardAvoidingView,
   Image,
 } from 'react-native';
-import {images, COLORS} from '../../../constants';
+import { images, COLORS } from '../../../constants';
 import styles from './chatDetail.style';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as ImagesPickers from 'react-native-image-picker';
-import {GiftedChat} from 'react-native-gifted-chat';
+import { GiftedChat } from 'react-native-gifted-chat';
 import ImagePicker from 'react-native-image-crop-picker';
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
-import {GetStoragePermissions} from '../../../hook/GetPermissions';
+import { GetStoragePermissions } from '../../../hook/GetPermissions';
 import DocumentPicker from 'react-native-document-picker';
 import p2pService from '../../../hook/P2PService';
 import RNFS from 'react-native-fs';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import ChooseTask from '../../common/ChooseTask';
 import TaskCardSend from '../../common/TaskCardSend';
 import TaskCard from '../../common/TaskCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ChatDetail = ({navigation, route}) => {
+const ChatDetail = ({ navigation, route }) => {
   // Server variables
   const device = route.params.item;
   const user = useSelector(state => state.P2P.user);
@@ -39,11 +39,11 @@ const ChatDetail = ({navigation, route}) => {
 
   console.log(device)
 
-  const {chatId} = useSelector(state => state.P2P)
+  const { chatId } = useSelector(state => state.P2P)
 
   // console.log('route: ', route);
 
-  
+
 
   // ---------------------------
   // Messages, images, files variables
@@ -57,6 +57,10 @@ const ChatDetail = ({navigation, route}) => {
   const [showChooseTask, setShowChooseTask] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [taskSends, setTaskSends] = useState([]);
+
+  useEffect(() => {
+    setMessage(p2pService.messages)
+  }, [p2pService.messages])
 
   // console.log("selectedTasks:", selectedTasks)
 
@@ -101,7 +105,8 @@ const ChatDetail = ({navigation, route}) => {
     messageRef.current.clear();
     setMessage('')
     // Hiển thị tin nhắn trên UI
-    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    p2pService.messages.push(newMessage)
+    // setMessages(prevMessages => [newMessage, ...prevMessages]);
     // Lưu tin nhắn trong storage
     updateMessagesCallback(newMessage);
   };
@@ -117,7 +122,8 @@ const ChatDetail = ({navigation, route}) => {
     };
 
     setSelectedImages([])
-    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    p2pService.messages.push(newMessage)
+    // setMessages(prevMessages => [newMessage, ...prevMessages]);
     updateMessagesCallback(newMessage)
   }
   const createFileMessageObject = file => {
@@ -131,7 +137,8 @@ const ChatDetail = ({navigation, route}) => {
     };
 
     setFiles([])
-    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    p2pService.messages.push(newMessage)
+    // setMessages(prevMessages => [newMessage, ...prevMessages]);
     updateMessagesCallback(newMessage)
   }
   const createTaskMessageObject = task => {
@@ -144,7 +151,8 @@ const ChatDetail = ({navigation, route}) => {
       },
     };
 
-    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    p2pService.messages.push(newMessage)
+    // setMessages(prevMessages => [newMessage, ...prevMessages]);
     updateMessagesCallback(newMessage)
   }
 
@@ -152,7 +160,7 @@ const ChatDetail = ({navigation, route}) => {
     // Update the messages in the current chat in the Chat component
     const updatedChatList = p2pService.chatList.map(chat =>
       chat.chatId === device.chatId
-        ? {...chat, messages: [newMessage, ...chat.messages]}
+        ? { ...chat, messages: [newMessage, ...chat.messages] }
         : chat,
     );
 
@@ -201,9 +209,12 @@ const ChatDetail = ({navigation, route}) => {
       } else if (!image && !file && !task) {
         p2pService.onSendMessage(text);
         createTextMessageObject(text);
+        console.log('chỉ gửi tin nhắn');
       }
     }
   };
+
+  console.log('p2pservice:', p2pService.messages, user.isOwner)
 
   function removeItems(item) {
     if (item.type && item.type.startsWith('image/')) {
@@ -244,7 +255,7 @@ const ChatDetail = ({navigation, route}) => {
     switch (item.type) {
       case 'image/jpeg':
       case 'image/png':
-        return <Image source={{uri: item.uri}} style={styles.image} />;
+        return <Image source={{ uri: item.uri }} style={styles.image} />;
       case 'application/pdf':
         return <Image source={images.pdf} style={styles.image} />;
       case 'text/plain':
@@ -268,7 +279,7 @@ const ChatDetail = ({navigation, route}) => {
   const takePhoto = () => {
     cameraBottomSheetModalRef.current?.close();
     try {
-      ImagePicker.openCamera({mediaType: 'photo'}).then(result => {
+      ImagePicker.openCamera({ mediaType: 'photo' }).then(result => {
         console.log(result);
         setPhotos(result);
 
@@ -281,7 +292,7 @@ const ChatDetail = ({navigation, route}) => {
   const recordVideo = () => {
     cameraBottomSheetModalRef.current?.close();
     try {
-      ImagePicker.openCamera({mediaType: 'video'}).then(result => {
+      ImagePicker.openCamera({ mediaType: 'video' }).then(result => {
         console.log(result);
       });
     } catch (err) {
@@ -357,12 +368,12 @@ const ChatDetail = ({navigation, route}) => {
               flexDirection: 'column',
               alignItems: 'center',
             }}>
-            <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
               <FlatList
                 showsHorizontalScrollIndicator={false}
                 data={[...selectedImages, ...files]} /// chỗ này show list ảnh
                 horizontal={true}
-                renderItem={({item, index}) => {
+                renderItem={({ item, index }) => {
                   return (
                     <View style={styles.viewImage} key={index}>
                       {getFileImage(item)}
@@ -383,7 +394,7 @@ const ChatDetail = ({navigation, route}) => {
               />
               <FlatList
                 data={selectedTasks}
-                renderItem={({item, index}) => {
+                renderItem={({ item, index }) => {
                   return (
                     <View>
                       <TouchableOpacity
@@ -420,16 +431,16 @@ const ChatDetail = ({navigation, route}) => {
               />
 
               {message ||
-              selectedImages.length !== 0 ||
-              files.length !== 0 ||
-              selectedTasks.length !== 0 ? (
+                selectedImages.length !== 0 ||
+                files.length !== 0 ||
+                selectedTasks.length !== 0 ? (
                 <TouchableOpacity
                   onPress={() =>
                     handleSendMessage(message, selectedImages[0], files[0], selectedTasks[0])
                   }>
                   <Image
                     source={images.send}
-                    style={[styles.imgBtn, {marginHorizontal: 5}]}
+                    style={[styles.imgBtn, { marginHorizontal: 5 }]}
                   />
                 </TouchableOpacity>
               ) : (
@@ -441,21 +452,21 @@ const ChatDetail = ({navigation, route}) => {
                     <Image
                       source={images.task}
                       size={25}
-                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                      style={[styles.imgBtn, { marginHorizontal: 5 }]}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleImageSelection()}>
                     <Image
                       source={images.image}
                       size={23}
-                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                      style={[styles.imgBtn, { marginHorizontal: 5 }]}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => pickDocument()}>
                     <Image
                       source={images.attach}
                       size={25}
-                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                      style={[styles.imgBtn, { marginHorizontal: 5 }]}
                     />
                   </TouchableOpacity>
                 </View>
@@ -470,12 +481,12 @@ const ChatDetail = ({navigation, route}) => {
               flexDirection: 'column',
               alignItems: 'center',
             }}>
-            <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
               <FlatList
                 showsHorizontalScrollIndicator={false}
                 data={[...selectedImages, ...files]} /// chỗ này show list ảnh
                 horizontal={true}
-                renderItem={({item, index}) => {
+                renderItem={({ item, index }) => {
                   return (
                     <View style={styles.viewImage} key={index}>
                       {getFileImage(item)}
@@ -497,7 +508,7 @@ const ChatDetail = ({navigation, route}) => {
               <FlatList
                 data={selectedTasks}
                 horizontal={true}
-                renderItem={({item, index}) => {
+                renderItem={({ item, index }) => {
                   return (
                     <View>
                       <TaskCardSend
@@ -525,16 +536,16 @@ const ChatDetail = ({navigation, route}) => {
               />
 
               {message ||
-              selectedImages.length !== 0 ||
-              files.length !== 0 ||
-              selectedTasks.length !== 0 ? (
+                selectedImages.length !== 0 ||
+                files.length !== 0 ||
+                selectedTasks.length !== 0 ? (
                 <TouchableOpacity
                   onPress={() =>
                     handleSendMessage(message, selectedImages[0], files[0], selectedTasks[0])
                   }>
                   <Image
                     source={images.send}
-                    style={[styles.imgBtn, {marginHorizontal: 5}]}
+                    style={[styles.imgBtn, { marginHorizontal: 5 }]}
                   />
                 </TouchableOpacity>
               ) : (
@@ -542,18 +553,25 @@ const ChatDetail = ({navigation, route}) => {
                   style={{
                     flexDirection: 'row',
                   }}>
+                  <TouchableOpacity onPress={() => setShowChooseTask(true)}>
+                    <Image
+                      source={images.task}
+                      size={25}
+                      style={[styles.imgBtn, { marginHorizontal: 5 }]}
+                    />
+                  </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleImageSelection()}>
                     <Image
                       source={images.image}
                       size={25}
-                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                      style={[styles.imgBtn, { marginHorizontal: 5 }]}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => pickDocument()}>
                     <Image
                       source={images.attach}
                       size={25}
-                      style={[styles.imgBtn, {marginHorizontal: 5}]}
+                      style={[styles.imgBtn, { marginHorizontal: 5 }]}
                     />
                   </TouchableOpacity>
                 </View>
@@ -585,21 +603,21 @@ const ChatDetail = ({navigation, route}) => {
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', async () => {
       if (flag) {
-        const chatData = JSON.parse(await AsyncStorage.getItem('chatHistory'))  
+        const chatData = JSON.parse(await AsyncStorage.getItem('chatHistory'))
 
-      const indexToUpdate = chatData.findIndex(
-        item => item.chatId === chatId
-      )
-  
-      chatData[indexToUpdate].messages = [...chatData[indexToUpdate].messages, ...p2pService.messages]
+        const indexToUpdate = chatData.findIndex(
+          item => item.chatId === chatId
+        )
 
-      // console.log('chatData:', chatData)
-  
-      await AsyncStorage.setItem('chatHistory', JSON.stringify(chatData))
+        chatData[indexToUpdate].messages = [...chatData[indexToUpdate].messages, ...p2pService.messages]
 
-      p2pService.messages = []
+        // console.log('chatData:', chatData)
 
-      console.log('back')
+        await AsyncStorage.setItem('chatHistory', JSON.stringify(chatData))
+
+        p2pService.messages = []
+
+        console.log('back')
       }
     })
 
@@ -630,7 +648,7 @@ const ChatDetail = ({navigation, route}) => {
         <View>
           <FlatList
             data={taskSends}
-            renderItem={({item, index}) => {
+            renderItem={({ item, index }) => {
               return (
                 <View>
                   <TaskCard
@@ -649,6 +667,7 @@ const ChatDetail = ({navigation, route}) => {
           user={{
             _id: 1,
           }}
+          inverted={false}
           messagesContainerStyle={styles.messagesContainer}
           renderComposer={renderComposer}
           renderActions={renderActions}

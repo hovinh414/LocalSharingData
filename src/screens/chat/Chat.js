@@ -53,7 +53,7 @@ const Chat = ({navigation}) => {
       p2pService.onSendMessage(item);
       setChatList(p2pService.chatList);
       dispatch(setChatId(item.chatId))
-      // p2pService.messages = item.messages
+      p2pService.messages = item.messages
       navigation.navigate('Chat Detail', {item: item, check: true});
     } else {
       ToastAndroid.show('Bạn không có quyền này!!', ToastAndroid.SHORT);

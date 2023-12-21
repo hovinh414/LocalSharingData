@@ -93,6 +93,7 @@ export const createClient = () => {
           _id: 2,
         },
       };
+      p2pService.messages.push(newMessage)
       // Xử lý tin nhắn hình ảnh
     } else if (receivedData.type === 'image') {
       console.log('Received image from client:', receivedData.data);
@@ -105,6 +106,8 @@ export const createClient = () => {
           _id: 2, // Tin nhắn của phía người nhắn
         },
       };
+      p2pService.messages.push(newMessage)
+
       // Xứ lý tin nhắn file
     } else if (receivedData.type.startsWith('file/')) {
       console.log('Received file from client:', receivedData.data);
@@ -118,26 +121,37 @@ export const createClient = () => {
           _id: 2, // Tin nhắn của phía người nhắn
         },
       };
+      p2pService.messages.push(newMessage)
+
     } else if (receivedData.type === 'task') {
       console.log('Received task from client:', receivedData.data);
       const receivedTask = await receivedData.data;
-      
-      const taskDatas = JSON.parse(await AsyncStorage.getItem('taskKey'));
-      taskDatas.push(receivedTask);
 
-      await AsyncStorage.setItem('taskKey', JSON.stringify(taskDatas));
-
+      const taskTitle = receivedTask.title.toString()
+    
       newMessage = {
         _id: Math.random().toString(),
-        text: `Task: ${JSON.stringify(receivedTask)}`,
+        text: `Bạn đã nhận task: ${taskTitle}`,
         createdAt: new Date(),
         user: {
           _id: 2, // Tin nhắn của phía người nhắn
         },
       };
+      p2pService.messages.push(newMessage)
+
+      const taskDatas = JSON.parse(await AsyncStorage.getItem('taskKey'));
+      
+      if (taskDatas === null) {
+        await AsyncStorage.setItem('taskKey', JSON.stringify([receivedTask]));
+      }
+      else {
+        taskDatas.push(receivedData.data);
+
+        await AsyncStorage.setItem('taskKey', JSON.stringify(taskDatas));
+      }
+
     }
 
-    p2pService.messages.push(newMessage)
   });
 
   client.on('error', error => {
@@ -197,20 +211,15 @@ export const serverSendTask = task => {
 const serverReceiveMessage = () => {
   // Server use this function to receive message from client
   receiveMessage()
-    .then(async text => {
+    .then(text => {
       const newMessage = {
         _id: Math.random().toString(),
-        text: text,
+        text: text.toString(),
         createAt: new Date(),
         user: {
           _id: 2, // Tin nhắn của phía người nhận
         },
       };
-
-      const taskDatas = JSON.parse(await AsyncStorage.getItem('taskKey'));
-      taskDatas.push(JSON.parse(text));
-
-      await AsyncStorage.setItem('taskKey', JSON.stringify(taskDatas));
 
       p2pService.messages.push(newMessage)
       // setMessages(previousMessages =>
@@ -240,15 +249,30 @@ const serverReceiveImage = () => {
 };
 const serverReceiveTask = () => {
   receiveMessage()
-    .then(text => {
+    .then(async text => {
+      const taskTitle = text.title.toString();
+
       const newMessage = {
         _id: Math.random().toString(),
-        text: text,
+        text: `Bạn đã nhận task: ${taskTitle}`,
         createAt: new Date(),
         user: {
           _id: 2, // Tin nhắn của phía người nhận
         },
       };
+      
+      const taskDatas = JSON.parse(await AsyncStorage.getItem('taskKey'));
+      
+      if (taskDatas === null) {
+        const task = JSON.parse(text)
+        await AsyncStorage.setItem('taskKey', JSON.stringify([task]));
+      }
+      else {
+        const task = JSON.parse(text)
+        taskDatas.push(task);
+
+        await AsyncStorage.setItem('taskKey', JSON.stringify(taskDatas));
+      }
 
       p2pService.messages.push(newMessage)
       // setMessages(previousMessages =>
@@ -306,6 +330,7 @@ export const clientSendFile = file => {
     .catch(err => console.log('[FATAL] Unable to send client file: ', err));
 };
 export const clientSendTask = task => {
+  
   sendMessage(JSON.stringify(task))
     .then(metaInfo =>
       console.log('[INFO] Send client message successfully', metaInfo),

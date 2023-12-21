@@ -41,8 +41,6 @@ const FindDevices = ({navigation, user, setIsOptionModalOpen}) => {
     const item = createChatObject(data);
     dispatch(updateUser(itemWithIsOwner));
     dispatch(setChatId(item.chatId));
-    p2pService.initialize(false);
-    onConnect(navigation, item);
     p2pService.addChatToChatList(item);
     onConnect(navigation, item);
   };

@@ -12,7 +12,7 @@ const ChatCard = ({navigation, item}) => {
 
   const handlePress = () => {
     navigation.navigate('Chat Detail', {item: item, check: false});
-    // p2pService.messages = item.messages
+    p2pService.messages = item.messages
     dispatch(setChatId(item.chatId))
   };
 
